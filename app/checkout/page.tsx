@@ -34,6 +34,14 @@ const paymentDetails: Record<PaymentMethod, { title: string; detail: string; not
   card: { title: "Debit / Credit Card", detail: "Bank: [YOUR BANK NAME]\nAccount Title: [YOUR NAME]\nIBAN: [YOUR IBAN]", note: "Transfer via your bank app using IBAN and upload confirmation." },
 };
 
+const trustBadges = [
+  { icon: "🔒", title: "SSL Secured", desc: "Your data is encrypted" },
+  { icon: "🧔", title: "Ustaad Ji Verified", desc: "Every device checked" },
+  { icon: "🛡️", title: "7-Day Warranty", desc: "Full refund guarantee" },
+  { icon: "📍", title: "Physical Store", desc: "Wah Cantt, Pakistan" },
+  { icon: "🚚", title: "Free Delivery", desc: "All Pakistan" },
+];
+
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const phoneId = searchParams.get("phone");
@@ -45,7 +53,6 @@ function CheckoutContent() {
   const [step, setStep] = useState<"details" | "payment" | "success">("details");
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
   const [form, setForm] = useState({ name: "", phone: "", email: "", city: "", address: "", notes: "" });
 
   useEffect(() => {
@@ -63,7 +70,6 @@ function CheckoutContent() {
   }, [isCartCheckout]);
 
   const finalPrice = isCartCheckout ? total : (phone?.discount_price ?? phone?.price ?? 0);
-  const itemCount = isCartCheckout ? count : (phone ? 1 : 0);
 
   const handleDetailsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +80,6 @@ function CheckoutContent() {
   const handleOrderSubmit = async () => {
     if (!selectedPayment) return;
     setSubmitting(true);
-
     if (isCartCheckout && items.length > 0) {
       for (const item of items) {
         await supabase.from("orders").insert({
@@ -95,7 +100,6 @@ function CheckoutContent() {
         delivery_status: "pending", delivery_city: form.city,
       });
     }
-
     setSubmitting(false);
     setStep("success");
   };
@@ -106,6 +110,24 @@ function CheckoutContent() {
 
   return (
     <div className="min-h-screen bg-black text-white pt-20">
+
+      {/* Trust Bar */}
+      <div className="border-b border-white/5 bg-white/[0.02]">
+        <div className="mx-auto max-w-6xl px-6 py-3">
+          <div className="flex items-center justify-between gap-4 overflow-x-auto">
+            {trustBadges.map((badge) => (
+              <div key={badge.title} className="flex shrink-0 items-center gap-2">
+                <span className="text-lg">{badge.icon}</span>
+                <div>
+                  <p className="text-xs font-semibold text-white">{badge.title}</p>
+                  <p className="text-[10px] text-white/40">{badge.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <main className="mx-auto max-w-4xl px-6 py-12">
 
         {/* Success */}
@@ -117,7 +139,7 @@ function CheckoutContent() {
             <div className="rounded-2xl border border-amber-300/20 bg-amber-300/5 px-6 py-4 text-sm text-amber-200">
               🧔 Ustaad Ji ka wada — 7-din warranty ke saath aapka phone verified hai.
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap justify-center">
               <a href={`https://wa.me/923001234567?text=Assalam o Alaikum! Maine order place kiya hai. Payment screenshot bhej raha/rahi hoon.`}
                 target="_blank" rel="noopener noreferrer"
                 className="rounded-2xl bg-green-500 px-6 py-3 text-sm font-bold text-white hover:bg-green-400 transition">
@@ -183,6 +205,8 @@ function CheckoutContent() {
                   <button type="submit" className="w-full rounded-2xl bg-blue-500 py-4 text-sm font-bold text-white transition hover:bg-blue-400">
                     Continue to Payment →
                   </button>
+                  {/* Inline trust note */}
+                  <p className="text-center text-xs text-white/25">🔒 SSL Secured • Your information is safe with us</p>
                 </form>
               )}
 
@@ -220,15 +244,15 @@ function CheckoutContent() {
                       {submitting ? "Placing Order..." : "Place Order ✓"}
                     </button>
                   </div>
+                  <p className="text-center text-xs text-white/25">🔒 SSL Secured • 🛡️ 7-Day Warranty • 📍 Physical Store Wah Cantt</p>
                 </div>
               )}
             </div>
 
             {/* Order Summary */}
-            <div className="lg:sticky lg:top-24 h-fit">
+            <div className="lg:sticky lg:top-24 h-fit space-y-4">
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
                 <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-white/30">Order Summary</p>
-
                 {isCartCheckout && items.length > 0 ? (
                   <div className="space-y-3">
                     {items.map(item => (
@@ -243,9 +267,9 @@ function CheckoutContent() {
                         <p className="text-sm font-bold text-white shrink-0">Rs. {(item.discount_price ?? item.price).toLocaleString()}</p>
                       </div>
                     ))}
-                    <div className="border-t border-white/10 pt-3 mt-3">
+                    <div className="border-t border-white/10 pt-3 mt-3 space-y-1">
                       <div className="flex justify-between"><span className="text-sm text-white/50">Delivery</span><span className="text-sm font-bold text-green-400">Free</span></div>
-                      <div className="flex justify-between mt-2"><span className="font-bold text-white">Total ({count} items)</span><span className="font-extrabold text-white">Rs. {total.toLocaleString()}</span></div>
+                      <div className="flex justify-between"><span className="font-bold text-white">Total ({count} items)</span><span className="font-extrabold text-white">Rs. {total.toLocaleString()}</span></div>
                     </div>
                   </div>
                 ) : phone ? (
@@ -264,9 +288,24 @@ function CheckoutContent() {
                 ) : (
                   <p className="text-sm text-white/40">No items selected</p>
                 )}
-
                 <div className="mt-4 rounded-xl border border-amber-300/20 bg-amber-300/5 p-3">
                   <p className="text-xs text-amber-200">🧔 Ustaad Ji Verified • 7-Day Warranty</p>
+                </div>
+              </div>
+
+              {/* Trust Badges Card */}
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+                <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-white/30">Why Trust Us</p>
+                <div className="space-y-3">
+                  {trustBadges.map((badge) => (
+                    <div key={badge.title} className="flex items-center gap-3">
+                      <span className="text-lg">{badge.icon}</span>
+                      <div>
+                        <p className="text-xs font-bold text-white">{badge.title}</p>
+                        <p className="text-[10px] text-white/40">{badge.desc}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
