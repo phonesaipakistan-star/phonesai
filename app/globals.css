@@ -1,0 +1,89 @@
+@import "tailwindcss";
+ 
+:root {
+  --background: #000000;
+  --foreground: #ffffff;
+}
+ 
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-inter-mono);
+}
+ 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+ 
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+}
+ 
+.hero-gradient {
+  background:
+    radial-gradient(circle at 16% 20%, rgba(59, 130, 246, 0.2), transparent 42%),
+    radial-gradient(circle at 84% 18%, rgba(251, 191, 36, 0.16), transparent 38%),
+    radial-gradient(circle at 56% 82%, rgba(14, 165, 233, 0.14), transparent 44%),
+    linear-gradient(125deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.8));
+  background-size: 170% 170%;
+  animation: heroShift 14s ease-in-out infinite;
+}
+ 
+.hero-dots::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.2) 1.15px, transparent 1.15px);
+  background-size: 16px 16px;
+  opacity: 0.4;
+  pointer-events: none;
+}
+ 
+@keyframes heroShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+ 
+.hero-phone-halo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 0;
+  width: min(88%, 440px);
+  height: min(78vh, 620px);
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 72% 68% at 50% 48%,
+    rgba(251, 191, 36, 0.42) 0%,
+    rgba(245, 158, 11, 0.2) 38%,
+    rgba(251, 146, 60, 0.08) 58%,
+    transparent 74%
+  );
+  filter: blur(40px);
+  pointer-events: none;
+}
+ 
+@keyframes scaleReveal {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
