@@ -20,7 +20,6 @@ export default function AIShopkeeper({ isOpen, onOpenChange }: AIShopkeeperProps
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [started, setStarted] = useState(false);
-  const [pendingCartItem, setPendingCartItem] = useState<CartItem | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -50,20 +49,9 @@ export default function AIShopkeeper({ isOpen, onOpenChange }: AIShopkeeperProps
       const data = await res.json();
       if (data.reply) setMessages([{ role: "assistant", content: data.reply }]);
     } catch {
-      setMessages([{ role: "assistant", content: "Assalam-o-Alaikum Janab! Main Ustaad Ji hoon — kya dhundh rahe hain aap?" }]);
+      setMessages([{ role: "assistant", content: "Assalam-o-Alaikum Janab. PhonesAI mein khush amdeed. Bataiye — kya dhundh rahe hain aap?" }]);
     }
     setLoading(false);
-  };
-
-  // Extract phone details from AI response to show cart button
-  const extractCartItem = (reply: string, inventory: CartItem[]): CartItem | null => {
-    for (const phone of inventory) {
-      if (reply.toLowerCase().includes(phone.model.toLowerCase()) &&
-          reply.toLowerCase().includes(phone.storage.toLowerCase())) {
-        return phone;
-      }
-    }
-    return null;
   };
 
   const sendMessage = async () => {
@@ -74,9 +62,6 @@ export default function AIShopkeeper({ isOpen, onOpenChange }: AIShopkeeperProps
     setInput("");
     setLoading(true);
 
-    // Check if user is saying yes/interested
-    const positiveIntent = /\b(yes|haan|ha|theek|okay|ok|lena|chahiye|add|cart|le lo|pasand|wahi|yahi|same|perfect|done|confirm)\b/i.test(input.trim());
-
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -85,25 +70,23 @@ export default function AIShopkeeper({ isOpen, onOpenChange }: AIShopkeeperProps
       });
       const data = await res.json();
       if (data.reply) {
-        const assistantMsg: Message = { role: "assistant", content: data.reply };
-
-        // If user expressed positive intent and pending item exists, attach it
-        if (positiveIntent && pendingCartItem) {
-          assistantMsg.cartItem = pendingCartItem;
-        }
-
-        setMessages((prev) => [...prev, assistantMsg]);
-
-        // Try to extract mentioned phone for future cart offer
-        if (data.inventory) {
-          const found = extractCartItem(data.reply, data.inventory);
-          if (found) setPendingCartItem(found);
-        }
+        setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
       }
     } catch {
-      setMessages((prev) => [...prev, { role: "assistant", content: "Maaf kijiye, abhi technical masla aa gaya." }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: "Maaf kijiye, abhi technical masla aa gaya. Thodi der mein try karein." }]);
     }
     setLoading(false);
+  };
+
+  // Render message content — handle <b> tags from AI
+  const renderContent = (content: string) => {
+    const parts = content.split(/(<b>.*?<\/b>)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith("<b>") && part.endsWith("</b>")) {
+        return <strong key={i}>{part.slice(3, -4)}</strong>;
+      }
+      return <span key={i}>{part}</span>;
+    });
   };
 
   if (!isOpen) return null;
@@ -121,7 +104,7 @@ export default function AIShopkeeper({ isOpen, onOpenChange }: AIShopkeeperProps
               <p className="text-sm font-bold text-white">Ustaad Ji</p>
               <div className="flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
-                <p className="text-xs text-white/50">25 Saal Ka Tajurba • PhonesAI</p>
+                <p className="text-xs text-white/50">Ek Decade Se Zyada Ka Tajurba • PhonesAI</p>
               </div>
             </div>
           </div>
@@ -146,13 +129,16 @@ export default function AIShopkeeper({ isOpen, onOpenChange }: AIShopkeeperProps
                     ? "rounded-tr-sm bg-blue-500/20 text-white border border-blue-400/20"
                     : "rounded-tl-sm bg-white/5 text-white/85 border border-white/10"
                 }`}>
-                  {msg.content.split("\n").map((line, j) => (
-                    <span key={j}>{line}{j < msg.content.split("\n").length - 1 && <br />}</span>
-                  ))}
+                  {msg.role === "assistant"
+                    ? renderContent(msg.content)
+                    : msg.content.split("\n").map((line, j) => (
+                        <span key={j}>{line}{j < msg.content.split("\n").length - 1 && <br />}</span>
+                      ))
+                  }
                 </div>
               </div>
 
-              {/* Add to Cart button after assistant message */}
+              {/* Add to Cart button */}
               {msg.role === "assistant" && msg.cartItem && (
                 <div className="ml-9 mt-2 flex items-center gap-2">
                   {isInCart(msg.cartItem.id) ? (
@@ -162,18 +148,10 @@ export default function AIShopkeeper({ isOpen, onOpenChange }: AIShopkeeperProps
                     </div>
                   ) : (
                     <button
-                      onClick={() => {
-                        addItem(msg.cartItem!);
-                        window.dispatchEvent(new CustomEvent("cartUpdated"));
-                      }}
+                      onClick={() => addItem(msg.cartItem!)}
                       className="flex items-center gap-2 rounded-xl border border-blue-400/30 bg-blue-500/15 px-4 py-2 text-xs font-semibold text-blue-200 transition hover:bg-blue-500/25"
                     >
-                      <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5" stroke="currentColor" strokeWidth="2">
-                        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" strokeLinecap="round"/>
-                        <line x1="3" y1="6" x2="21" y2="6"/>
-                        <path d="M16 10a4 4 0 01-8 0"/>
-                      </svg>
-                      Add {msg.cartItem.model} to Cart
+                      🛒 Add {msg.cartItem.model} to Cart
                     </button>
                   )}
                 </div>
@@ -199,11 +177,14 @@ export default function AIShopkeeper({ isOpen, onOpenChange }: AIShopkeeperProps
         {/* Input */}
         <div className="shrink-0 border-t border-white/10 px-4 py-4">
           <div className="flex gap-2">
-            <input ref={inputRef} value={input}
+            <input
+              ref={inputRef}
+              value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
               placeholder="Apna sawaal likhein..."
-              className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none focus:border-blue-400/40" />
+              className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none focus:border-blue-400/40"
+            />
             <button onClick={sendMessage} disabled={loading || !input.trim()}
               className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 text-white transition hover:bg-blue-400 disabled:opacity-40">
               <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2">

@@ -228,7 +228,7 @@ function ShopContent() {
                       <button
                         onClick={() => toggleCompare(phone)}
                         disabled={!isInCompare && compareList.length >= 2}
-                        className={`rounded-xl border px-2.5 py-2 text-xs transition hidden sm:block ${isInCompare ? "border-blue-400/60 bg-blue-500/20 text-blue-200" : compareList.length >= 2 ? "border-white/5 text-white/20 cursor-not-allowed" : "border-white/10 text-white/40 hover:text-white/70"}`}
+                        className={`rounded-xl border px-2.5 py-2 text-xs transition ${isInCompare ? "border-blue-400/60 bg-blue-500/20 text-blue-200" : compareList.length >= 2 ? "border-white/5 text-white/20 cursor-not-allowed" : "border-white/10 text-white/40 hover:text-white/70"}`}
                       >⇄</button>
                       <a href={`/shop/${phone.id}`} className="rounded-xl border border-white/10 px-3 py-2 text-xs text-white/40 transition hover:text-white">
                         View
