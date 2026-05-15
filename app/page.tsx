@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 const openUstaadJi = () => {
@@ -131,10 +131,7 @@ export default function Home() {
   const avgRating = reviews.length > 0
     ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
     : null;
-
-  // Mobile: 1 card, Desktop: 3 cards
-  const CARDS_PER_VIEW = typeof window !== "undefined" && window.innerWidth < 768 ? 1 : 3;
-  const maxSlide = Math.max(0, reviews.length - CARDS_PER_VIEW);
+  const maxSlide = Math.max(0, reviews.length - 1);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -142,24 +139,24 @@ export default function Home() {
       {/* Email Popup */}
       {showEmailPopup && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm px-4 pb-4 sm:pb-0">
-          <div className="relative w-full max-w-md rounded-3xl border border-white/20 bg-[#0d0d0d] p-6 sm:p-8 shadow-2xl">
-            <button onClick={handleDismiss} className="absolute right-4 top-4 text-white/30 transition hover:text-white text-lg">✕</button>
+          <div className="relative w-full max-w-md rounded-3xl border border-white/20 bg-[#0d0d0d] p-6 shadow-2xl">
+            <button onClick={handleDismiss} className="absolute right-4 top-4 text-white/30 hover:text-white text-lg">✕</button>
             {!submitted ? (
               <>
                 <div className="mb-5 text-center">
                   <p className="text-2xl mb-2">🎁</p>
-                  <h2 className="text-xl font-extrabold text-white sm:text-2xl">Get 5% Off Your First Order</h2>
-                  <p className="mt-2 text-sm text-white/50 leading-relaxed">Apna email dein aur pehli purchase pe 5% discount pao.</p>
+                  <h2 className="text-xl font-extrabold text-white">Get 5% Off Your First Order</h2>
+                  <p className="mt-2 text-sm text-white/50">Apna email dein aur pehli purchase pe 5% discount pao.</p>
                 </div>
                 <form onSubmit={handleEmailSubmit} className="space-y-3">
                   <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
                     placeholder="aapka@email.com"
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/25 outline-none focus:border-blue-400/50" />
-                  <button type="submit" className="w-full rounded-xl bg-blue-500 py-3 text-sm font-bold text-white transition hover:bg-blue-400">
+                  <button type="submit" className="w-full rounded-xl bg-blue-500 py-3 text-sm font-bold text-white hover:bg-blue-400">
                     Claim My 5% Discount →
                   </button>
                 </form>
-                <button onClick={handleDismiss} className="mt-3 w-full text-center text-xs text-white/25 transition hover:text-white/50">
+                <button onClick={handleDismiss} className="mt-3 w-full text-center text-xs text-white/25 hover:text-white/50">
                   No thanks, I'll pay full price
                 </button>
               </>
@@ -175,70 +172,90 @@ export default function Home() {
       )}
 
       <main className="w-full pb-20">
-        {/* Hero */}
-        <section className="hero-gradient hero-dots relative left-1/2 w-screen -translate-x-1/2 px-4 pt-16 pb-8 sm:px-10 sm:pt-24 sm:pb-16">
-          <div className="mx-auto w-full max-w-7xl">
 
-            {/* Mobile: stacked layout | Desktop: side by side */}
-            <div className="grid lg:grid-cols-2 lg:min-h-[calc(100vh-80px)] lg:items-center gap-6 lg:gap-10">
+        {/* ── HERO ── */}
+        <section className="hero-gradient hero-dots relative left-1/2 w-screen -translate-x-1/2 overflow-hidden">
+          {/*
+            Layout strategy:
+            Mobile portrait  → text top, image bottom, stacked
+            Mobile landscape → side by side, compact
+            Desktop          → side by side, fixed 560px height
+          */}
+          <div className="mx-auto w-full max-w-7xl px-4 sm:px-8">
 
-              {/* Text */}
-              <div className="relative z-10 flex items-center">
-                <div className="w-full">
-                  <p className="mb-4 inline-block rounded-full border border-amber-300/40 bg-amber-300/10 px-3 py-1 text-xs font-medium tracking-[0.15em] text-amber-200">
-                    NOW WITH AI SHOPKEEPER
-                  </p>
-                  <div className="relative inline-block">
-                    <span className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-blue-500/35 via-cyan-400/20 to-amber-300/25 blur-2xl" />
-                    <h1 className="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text font-extrabold tracking-[-0.02em] text-transparent text-5xl sm:text-7xl lg:text-8xl">
-                      PhonesAI
-                    </h1>
-                  </div>
-                  <div className="mt-4 block w-fit rounded-full border border-blue-300/40 bg-blue-400/15 px-3 py-1 text-xs font-semibold text-blue-200">
-                    5G Ready
-                  </div>
-                  <p className="mt-4 text-lg font-light leading-tight text-white sm:text-2xl lg:text-4xl">
-                    Premium Shopping, Reinvented.
-                  </p>
-                  <div className="mt-6 flex flex-wrap gap-3">
-                    <button type="button" onClick={openUstaadJi}
-                      className="inline-flex items-center justify-center rounded-full border border-blue-300/60 bg-gradient-to-r from-blue-500/35 to-cyan-400/30 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_0_35px_rgba(59,130,246,0.55)] transition duration-300 hover:scale-[1.03]">
-                      Talk to AI Shopkeeper
-                    </button>
-                    <a href="/shop" className="inline-flex items-center justify-center rounded-full border border-white/20 px-6 py-2.5 text-sm font-semibold text-white/70 transition duration-300 hover:border-white/40 hover:text-white">
-                      Browse All →
-                    </a>
-                  </div>
+            {/* Side-by-side on sm+ | stacked on mobile */}
+            <div className="flex flex-col pt-20 pb-8 sm:flex-row sm:items-center sm:pt-24 sm:pb-12 sm:gap-8 lg:gap-12 lg:pt-28 lg:pb-16">
+
+              {/* ── Text column ── */}
+              <div className="flex-1 z-10">
+                <p className="mb-4 inline-block rounded-full border border-amber-300/40 bg-amber-300/10 px-3 py-1 text-xs font-medium tracking-[0.15em] text-amber-200">
+                  NOW WITH AI SHOPKEEPER
+                </p>
+                <div className="relative inline-block">
+                  <span className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-blue-500/35 via-cyan-400/20 to-amber-300/25 blur-2xl" />
+                  <h1 className="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text font-extrabold tracking-[-0.02em] text-transparent
+                    text-5xl sm:text-6xl lg:text-7xl xl:text-8xl">
+                    PhonesAI
+                  </h1>
+                </div>
+                <div className="mt-4 inline-block rounded-full border border-blue-300/40 bg-blue-400/15 px-3 py-1 text-xs font-semibold text-blue-200">
+                  5G Ready
+                </div>
+                <p className="mt-3 text-lg font-light leading-snug text-white sm:text-xl lg:text-3xl">
+                  Premium Shopping, Reinvented.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button type="button" onClick={openUstaadJi}
+                    className="inline-flex items-center justify-center rounded-full border border-blue-300/60 bg-gradient-to-r from-blue-500/35 to-cyan-400/30 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_0_35px_rgba(59,130,246,0.55)] transition hover:scale-[1.03]">
+                    Talk to AI Shopkeeper
+                  </button>
+                  <a href="/shop" className="inline-flex items-center justify-center rounded-full border border-white/20 px-6 py-2.5 text-sm font-semibold text-white/70 transition hover:border-white/40 hover:text-white">
+                    Browse All →
+                  </a>
                 </div>
               </div>
 
-              {/* iPhone image — hidden on small mobile, visible from sm */}
-              <div className="hidden sm:flex relative items-center justify-center overflow-hidden lg:justify-end h-[40vh] sm:h-[50vh] lg:h-full lg:min-h-[calc(100vh-80px)] [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]">
-                <img src="/iphone17.png" alt="iPhone 17 Pro"
-                  className="h-full w-auto max-w-full object-contain animate-[scaleReveal_1.4s_cubic-bezier(0.16,1,0.3,1)_forwards] [filter:brightness(0.9)_saturate(0.95)]" />
+              {/* ── Image column ── */}
+              {/*
+                Mobile portrait: below text, centered, 220px tall
+                Mobile landscape (sm): right side, 280px tall
+                Desktop (lg): right side, 420px tall, constrained so it doesn't dominate
+              */}
+              <div className="relative flex justify-center sm:justify-end mt-6 sm:mt-0 sm:flex-shrink-0
+                h-52 w-full
+                sm:h-72 sm:w-64
+                lg:h-[420px] lg:w-[380px]
+                xl:h-[480px] xl:w-[420px]
+                [mask-image:linear-gradient(to_bottom,black_50%,transparent_100%)]">
+                <img
+                  src="/iphone17.png"
+                  alt="iPhone 17 Pro"
+                  className="h-full w-auto object-contain object-bottom animate-[scaleReveal_1.4s_cubic-bezier(0.16,1,0.3,1)_forwards] [filter:brightness(0.9)_saturate(0.95)]"
+                />
               </div>
+
             </div>
           </div>
         </section>
 
         <div className="mx-auto h-px w-full max-w-6xl bg-gradient-to-r from-transparent via-blue-400/70 to-transparent shadow-[0_0_20px_rgba(59,130,246,0.55)]" />
 
-        {/* Category Cards — 2 col on mobile, 4 on desktop */}
+        {/* Category Cards */}
         <section className="mx-auto mt-8 grid w-full max-w-6xl gap-3 px-4 grid-cols-2 sm:gap-4 sm:px-6 lg:grid-cols-4 lg:px-6">
           {categories.map((category) => (
             <a key={category.name} href={category.link}
               className={`group rounded-2xl border border-white/15 bg-gradient-to-br ${category.color} p-4 sm:p-6 transition duration-300 hover:-translate-y-1 hover:border-white/30`}>
               <div className="mb-3 text-white/70 transition group-hover:text-white">{category.icon}</div>
-              <h2 className="text-sm font-bold text-white sm:text-lg">{category.name}</h2>
+              <h2 className="text-sm font-bold text-white sm:text-base">{category.name}</h2>
               <p className="mt-1 text-xs leading-5 text-white/60 hidden sm:block">{category.description}</p>
-              <p className="mt-2 text-xs font-semibold text-blue-300 transition group-hover:text-blue-200">Shop Now →</p>
+              <p className="mt-2 text-xs font-semibold text-blue-300 group-hover:text-blue-200">Shop Now →</p>
             </a>
           ))}
         </section>
 
         {/* Trust Strip */}
         <section className="mx-auto mt-8 max-w-6xl px-4 sm:px-6">
-          <div className="grid gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-5 grid-cols-3 sm:p-8">
+          <div className="grid grid-cols-3 gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-8">
             <div className="text-center">
               <p className="text-xl sm:text-2xl">🧔</p>
               <p className="mt-1 text-xs font-bold text-white sm:text-sm">Ustaad Ji Verified</p>
@@ -275,14 +292,13 @@ export default function Home() {
               {reviews.length > 1 && (
                 <div className="flex gap-2">
                   <button onClick={() => setCurrentSlide(s => Math.max(0, s - 1))} disabled={currentSlide === 0}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/50 transition hover:text-white disabled:opacity-25 text-sm">←</button>
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/50 disabled:opacity-25 text-sm">←</button>
                   <button onClick={() => setCurrentSlide(s => Math.min(maxSlide, s + 1))} disabled={currentSlide >= maxSlide}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/50 transition hover:text-white disabled:opacity-25 text-sm">→</button>
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/50 disabled:opacity-25 text-sm">→</button>
                 </div>
               )}
             </div>
 
-            {/* Mobile: 1 card, Desktop: 3 cards */}
             <div className="overflow-hidden">
               <div className="flex gap-3 transition-transform duration-500 ease-in-out sm:gap-4"
                 style={{ transform: `translateX(calc(-${currentSlide} * (100% + 12px)))` }}>
