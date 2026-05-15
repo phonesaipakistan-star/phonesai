@@ -85,12 +85,9 @@ function ShopContent() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: phoneData } = await supabase
-        .from("phones").select("*").eq("in_stock", true)
-        .order("featured", { ascending: false })
-        .order("created_at", { ascending: false });
-      const { data: accessoryData } = await supabase
-        .from("accessories").select("*").eq("in_stock", true)
+      const { data: phoneData } = await supabase.from("phones").select("*").eq("in_stock", true)
+        .order("featured", { ascending: false }).order("created_at", { ascending: false });
+      const { data: accessoryData } = await supabase.from("accessories").select("*").eq("in_stock", true)
         .order("featured", { ascending: false });
       if (phoneData) setPhones(phoneData);
       if (accessoryData) setAccessories(accessoryData);
@@ -124,20 +121,21 @@ function ShopContent() {
   const categories = getCategoriesForBrand(activeBrand);
 
   return (
-    <div className="min-h-screen bg-black text-white pt-20">
-      <main className="mx-auto max-w-6xl px-6 py-12 pb-32">
-        <div className="mb-10">
-          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+    <div className="min-h-screen bg-black text-white pt-16 sm:pt-20">
+      <main className="mx-auto max-w-6xl px-4 py-6 pb-32 sm:px-6 sm:py-10">
+
+        <div className="mb-6">
+          <h1 className="text-2xl font-extrabold tracking-tight text-white sm:text-4xl">
             {activeBrand === "All" ? "All Products" : activeBrand === "Accessories" ? "Accessories" : activeBrand === "iPad" ? "iPads" : `${activeBrand} Phones`}
           </h1>
-          <p className="mt-3 text-white/50">Verified, asli, aur 7-din warranty ke saath — har piece Ustaad Ji approved.</p>
+          <p className="mt-1 text-sm text-white/50">Verified, asli, aur 7-din warranty ke saath.</p>
         </div>
 
-        {/* Brand Filter */}
-        <div className="mb-4 flex flex-wrap gap-3">
+        {/* Brand Filter — scrollable on mobile */}
+        <div className="mb-3 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {brands.map((brand) => (
             <button key={brand} onClick={() => setActiveBrand(brand)}
-              className={`rounded-full border px-5 py-2 text-sm font-medium transition ${activeBrand === brand ? "border-white/40 bg-white/10 text-white" : "border-white/10 bg-transparent text-white/50 hover:border-white/30 hover:text-white/80"}`}>
+              className={`shrink-0 rounded-full border px-4 py-1.5 text-xs font-medium transition sm:px-5 sm:py-2 sm:text-sm ${activeBrand === brand ? "border-white/40 bg-white/10 text-white" : "border-white/10 bg-transparent text-white/50 hover:text-white/80"}`}>
               {brand === "All" ? "All Products" : brand}
             </button>
           ))}
@@ -145,19 +143,13 @@ function ShopContent() {
 
         {/* Category Filter */}
         {categories.length > 0 && (
-          <div className="mb-8 flex flex-wrap gap-2">
+          <div className="mb-5 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             {categories.map((cat) => (
               <button key={cat} onClick={() => setActiveCategory(cat)}
-                className={`rounded-full border px-4 py-1.5 text-xs font-medium transition ${activeCategory === cat ? "border-blue-400/60 bg-blue-500/20 text-blue-200" : "border-white/10 bg-transparent text-white/40 hover:border-white/20 hover:text-white/60"}`}>
+                className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition ${activeCategory === cat ? "border-blue-400/60 bg-blue-500/20 text-blue-200" : "border-white/10 text-white/40 hover:text-white/60"}`}>
                 {cat === "All" ? "All Categories" : cat}
               </button>
             ))}
-          </div>
-        )}
-
-        {activeBrand !== "Accessories" && (
-          <div className="mb-6 rounded-xl border border-blue-400/20 bg-blue-500/5 px-4 py-3">
-            <p className="text-xs text-blue-300/70">💡 Click "Compare" on any two phones to compare them side by side</p>
           </div>
         )}
 
@@ -170,87 +162,74 @@ function ShopContent() {
           </div>
         )}
 
-        {/* Phone Grid */}
+        {/* Phone Grid — 1 col mobile, 2 col sm, 3 col lg */}
         {filteredPhones.length > 0 && (
           <>
-            {activeBrand === "All" && <h2 className="mb-4 text-lg font-bold text-white/60">Phones & Tablets</h2>}
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {activeBrand === "All" && <h2 className="mb-4 text-sm font-bold text-white/50 uppercase tracking-widest">Phones & Tablets</h2>}
+            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-6">
               {filteredPhones.map((phone) => {
                 const isInCompare = compareList.find((p) => p.id === phone.id);
                 const inCart = isInCart(phone.id);
                 return (
-                  <div key={phone.id} className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition duration-300 hover:-translate-y-1 hover:border-white/25 hover:shadow-[0_0_40px_rgba(59,130,246,0.15)]">
-                    <a href={`/shop/${phone.id}`} className="flex flex-col flex-1">
-                      <div className="relative flex h-52 items-center justify-center overflow-hidden bg-white/5">
+                  <div key={phone.id} className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition duration-300 hover:border-white/20">
+                    <a href={`/shop/${phone.id}`} className="flex gap-3 p-3 sm:flex-col sm:gap-0 sm:p-0">
+                      {/* Mobile: horizontal layout | Desktop: vertical */}
+                      <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/5 bg-white/[0.03] sm:h-44 sm:w-full sm:rounded-none sm:rounded-t-2xl">
                         {phone.images && phone.images.length > 0 ? (
-                          <img src={phone.images[0]} alt={phone.model} className="h-full w-full object-contain p-4 transition duration-500 group-hover:scale-105" />
+                          <img src={phone.images[0]} alt={phone.model} className="h-full w-full object-contain p-2 sm:p-4" />
                         ) : (
-                          <div className="flex flex-col items-center gap-2 text-white/20">
-                            <svg viewBox="0 0 24 24" fill="none" className="h-12 w-12" stroke="currentColor" strokeWidth="1">
-                              <rect x="7" y="2.5" width="10" height="19" rx="2.4" />
-                              <path d="M10 5.5H14" strokeLinecap="round" />
-                              <circle cx="12" cy="18.5" r="1" fill="currentColor" />
-                            </svg>
-                          </div>
+                          <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-white/10 sm:h-12 sm:w-12" stroke="currentColor" strokeWidth="1">
+                            <rect x="7" y="2.5" width="10" height="19" rx="2.4" />
+                            <path d="M10 5.5H14" strokeLinecap="round" />
+                            <circle cx="12" cy="18.5" r="1" fill="currentColor" />
+                          </svg>
                         )}
                         {phone.badge && (
-                          <span className={`absolute left-3 top-3 rounded-full border px-2.5 py-0.5 text-xs font-medium ${badgeColors[phone.badge] ?? "bg-white/10 text-white/60 border-white/20"}`}>{phone.badge}</span>
+                          <span className={`absolute left-2 top-2 rounded-full border px-2 py-0.5 text-[10px] font-medium ${badgeColors[phone.badge] ?? "bg-white/10 text-white/60 border-white/20"}`}>{phone.badge}</span>
                         )}
                         {phone.free_case && phone.condition === "Used" && (
-                          <span className="absolute right-3 top-3 rounded-full border border-green-500/30 bg-green-500/20 px-2.5 py-0.5 text-xs font-medium text-green-300">Free Case 🎁</span>
+                          <span className="absolute right-2 top-2 rounded-full border border-green-500/30 bg-green-500/20 px-2 py-0.5 text-[10px] text-green-300">Free Case</span>
                         )}
                       </div>
-                      <div className="flex flex-1 flex-col p-5">
-                        <div className="mb-3 flex flex-wrap items-center gap-2">
-                          <span className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${categoryColors[phone.category] ?? "bg-white/10 text-white/60 border-white/20"}`}>{phone.category}</span>
-                          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs text-white/50">{phone.condition}</span>
-                          {phone.five_g && <span className="rounded-full border border-blue-400/20 bg-blue-400/10 px-2.5 py-0.5 text-xs text-blue-300">5G</span>}
+
+                      {/* Info */}
+                      <div className="flex flex-1 flex-col justify-center sm:p-4">
+                        <div className="flex flex-wrap gap-1 mb-1.5">
+                          <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${categoryColors[phone.category] ?? "bg-white/10 text-white/60 border-white/20"}`}>{phone.category}</span>
+                          {phone.five_g && <span className="rounded-full border border-blue-400/20 bg-blue-400/10 px-2 py-0.5 text-[10px] text-blue-300">5G</span>}
                         </div>
-                        <h2 className="text-lg font-bold leading-tight text-white">{phone.model}</h2>
-                        <p className="mt-1 text-sm text-white/50">{phone.storage} • {phone.color}</p>
-                        <div className="mt-3 flex gap-4 text-xs text-white/40">
-                          {phone.battery_health && <span>🔋 {phone.battery_health}%</span>}
-                          {phone.physical_condition && <span>✨ {phone.physical_condition}</span>}
-                          {phone.face_id && <span>🔒 Face ID</span>}
+                        <h2 className="text-sm font-bold text-white leading-tight sm:text-base">{phone.model}</h2>
+                        <p className="text-xs text-white/40 mt-0.5">{phone.storage} • {phone.color}</p>
+                        <div className="mt-1 flex gap-3 text-xs text-white/40">
+                          {phone.battery_health && <span>🔋{phone.battery_health}%</span>}
+                          {phone.face_id && <span>🔒FaceID</span>}
                         </div>
-                        <div className="mt-4">
+                        <div className="mt-2">
                           {phone.discount_price ? (
                             <>
-                              <p className="text-xs text-white/30 line-through">Rs. {phone.price.toLocaleString()}</p>
-                              <p className="text-xl font-extrabold text-white">Rs. {phone.discount_price.toLocaleString()}</p>
+                              <p className="text-[10px] text-white/30 line-through">Rs. {phone.price.toLocaleString()}</p>
+                              <p className="text-base font-extrabold text-white sm:text-lg">Rs. {phone.discount_price.toLocaleString()}</p>
                             </>
                           ) : (
-                            <p className="text-xl font-extrabold text-white">Rs. {phone.price.toLocaleString()}</p>
+                            <p className="text-base font-extrabold text-white sm:text-lg">Rs. {phone.price.toLocaleString()}</p>
                           )}
                         </div>
                       </div>
                     </a>
 
                     {/* Action Buttons */}
-                    <div className="px-5 pb-4 flex gap-2">
+                    <div className="px-3 pb-3 flex gap-2 sm:px-4 sm:pb-4">
                       <button
-                        onClick={() => addItem({
-                          id: phone.id, model: phone.model, storage: phone.storage,
-                          color: phone.color, category: phone.category, brand: phone.brand,
-                          condition: phone.condition, price: phone.price,
-                          discount_price: phone.discount_price,
-                          image: phone.images?.[0] ?? null, free_case: phone.free_case,
-                        })}
-                        className={`flex-1 rounded-xl py-2.5 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}
+                        onClick={() => addItem({ id: phone.id, model: phone.model, storage: phone.storage, color: phone.color, category: phone.category, brand: phone.brand, condition: phone.condition, price: phone.price, discount_price: phone.discount_price, image: phone.images?.[0] ?? null, free_case: phone.free_case })}
+                        className={`flex-1 rounded-xl py-2 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}
                       >
                         {inCart ? "✓ In Cart" : "Add to Cart"}
                       </button>
                       <button
                         onClick={() => toggleCompare(phone)}
                         disabled={!isInCompare && compareList.length >= 2}
-                        className={`rounded-xl border px-3 py-2 text-xs font-semibold transition ${
-                          isInCompare ? "border-blue-400/60 bg-blue-500/20 text-blue-200"
-                            : compareList.length >= 2 ? "border-white/5 text-white/20 cursor-not-allowed"
-                            : "border-white/10 text-white/40 hover:border-white/30 hover:text-white/70"
-                        }`}
-                      >
-                        ⇄
-                      </button>
+                        className={`rounded-xl border px-2.5 py-2 text-xs transition hidden sm:block ${isInCompare ? "border-blue-400/60 bg-blue-500/20 text-blue-200" : compareList.length >= 2 ? "border-white/5 text-white/20 cursor-not-allowed" : "border-white/10 text-white/40 hover:text-white/70"}`}
+                      >⇄</button>
                       <a href={`/shop/${phone.id}`} className="rounded-xl border border-white/10 px-3 py-2 text-xs text-white/40 transition hover:text-white">
                         View
                       </a>
@@ -264,45 +243,31 @@ function ShopContent() {
 
         {/* Accessories Grid */}
         {filteredAccessories.length > 0 && (
-          <div className={filteredPhones.length > 0 ? "mt-12" : ""}>
+          <div className={filteredPhones.length > 0 ? "mt-10" : ""}>
             {(activeBrand === "All" || activeBrand === "Accessories") && (
-              <h2 className="mb-4 text-lg font-bold text-white/60">Accessories</h2>
+              <h2 className="mb-4 text-sm font-bold text-white/50 uppercase tracking-widest">Accessories</h2>
             )}
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
               {filteredAccessories.map((acc) => {
                 const inCart = isInCart(acc.id);
                 return (
-                  <div key={acc.id} className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition duration-300 hover:-translate-y-1 hover:border-white/25">
-                    <div className="relative flex h-40 items-center justify-center overflow-hidden bg-white/5">
+                  <div key={acc.id} className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+                    <div className="flex h-28 items-center justify-center overflow-hidden bg-white/5 sm:h-36">
                       {acc.images && acc.images.length > 0 ? (
-                        <img src={acc.images[0]} alt={acc.name} className="h-full w-full object-contain p-4" />
+                        <img src={acc.images[0]} alt={acc.name} className="h-full w-full object-contain p-3" />
                       ) : (
-                        <div className="text-4xl">
+                        <div className="text-3xl">
                           {acc.category === "Charger" ? "🔌" : acc.category === "Cable" ? "🔋" : acc.category === "Case" ? "📱" : "🛡️"}
                         </div>
                       )}
-                      {acc.is_original && (
-                        <span className="absolute left-3 top-3 rounded-full border border-amber-500/30 bg-amber-500/20 px-2.5 py-0.5 text-xs font-medium text-amber-300">Original ✓</span>
-                      )}
                     </div>
-                    <div className="flex flex-1 flex-col p-5">
-                      <div className="mb-2 flex gap-2">
-                        <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs text-white/50">{acc.brand}</span>
-                        <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs text-white/50">{acc.category}</span>
-                      </div>
-                      <h2 className="text-lg font-bold leading-tight text-white">{acc.name}</h2>
-                      {acc.description && <p className="mt-1 text-sm text-white/50 line-clamp-2">{acc.description}</p>}
-                      <p className="mt-3 text-xl font-extrabold text-white">Rs. {acc.price.toLocaleString()}</p>
-                    </div>
-                    <div className="px-5 pb-4">
+                    <div className="flex flex-1 flex-col p-3">
+                      <p className="text-xs font-bold text-white leading-tight">{acc.name}</p>
+                      <p className="text-xs text-white/40 mt-0.5">{acc.brand}</p>
+                      <p className="mt-2 text-sm font-extrabold text-white">Rs. {acc.price.toLocaleString()}</p>
                       <button
-                        onClick={() => addItem({
-                          id: acc.id, model: acc.name, storage: "", color: "",
-                          category: acc.category, brand: acc.brand, condition: acc.condition,
-                          price: acc.price, discount_price: acc.discount_price,
-                          image: acc.images?.[0] ?? null, free_case: false,
-                        })}
-                        className={`w-full rounded-xl py-2.5 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}
+                        onClick={() => addItem({ id: acc.id, model: acc.name, storage: "", color: "", category: acc.category, brand: acc.brand, condition: acc.condition, price: acc.price, discount_price: acc.discount_price, image: acc.images?.[0] ?? null, free_case: false })}
+                        className={`mt-2 w-full rounded-xl py-2 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}
                       >
                         {inCart ? "✓ In Cart" : "Add to Cart"}
                       </button>
@@ -326,11 +291,7 @@ function ShopContent() {
 
 export default function ShopPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <p className="text-white/40 animate-pulse">Loading...</p>
-      </div>
-    }>
+    <Suspense fallback={<div className="min-h-screen bg-black text-white flex items-center justify-center"><p className="text-white/40 animate-pulse">Loading...</p></div>}>
       <ShopContent />
     </Suspense>
   );
