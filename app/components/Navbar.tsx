@@ -28,21 +28,18 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close menu on route change
-  useEffect(() => {
-    setMenuOpen(false);
-  }, []);
-
   return (
     <>
       {/* Navbar */}
       <header className={`fixed top-0 left-0 right-0 z-30 border-b border-white/15 bg-black/90 backdrop-blur-xl transition-transform duration-300 ${navVisible ? "translate-y-0" : "-translate-y-full"}`}>
         <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
 
-          {/* Logo */}
+          {/* Logo + Wordmark */}
           <a href="/" className="flex items-center gap-2" onClick={() => setMenuOpen(false)}>
             <img src="/logo.png" alt="PhonesAI" className="h-8 w-auto sm:h-9" />
-            <span className="text-base font-semibold tracking-wide text-white sm:text-lg">PhonesAI</span>
+            <span className="text-base font-semibold tracking-wide sm:text-lg">
+              <span className="text-white">Phones</span><span className="text-blue-500">AI</span>
+            </span>
           </a>
 
           {/* Desktop Links */}
@@ -51,7 +48,6 @@ export default function Navbar() {
             <a href="/shop" className="transition hover:text-white">Shop</a>
             <button onClick={openUstaadJi} className="transition hover:text-white">Ustaad Ji</button>
             <a href="https://wa.me/923001234567" target="_blank" rel="noopener noreferrer" className="transition hover:text-white">Contact</a>
-            {/* Cart Button */}
             <button onClick={() => setCartOpen(true)}
               className="relative flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm text-white/80 transition hover:border-white/40 hover:text-white">
               <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="1.8">
@@ -66,9 +62,8 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* Mobile Right — Cart + Hamburger */}
+          {/* Mobile: Cart + Hamburger */}
           <div className="flex md:hidden items-center gap-2">
-            {/* Mobile Cart */}
             <button onClick={() => setCartOpen(true)}
               className="relative flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/70">
               <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="1.8">
@@ -80,8 +75,6 @@ export default function Navbar() {
                 <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[9px] font-bold text-white">{count}</span>
               )}
             </button>
-
-            {/* Hamburger */}
             <button onClick={() => setMenuOpen(!menuOpen)}
               className="flex h-9 w-9 flex-col items-center justify-center gap-1.5 rounded-full border border-white/15">
               <span className={`h-0.5 w-4 rounded-full bg-white transition-all duration-200 ${menuOpen ? "translate-y-2 rotate-45" : ""}`} />
@@ -91,7 +84,7 @@ export default function Navbar() {
           </div>
         </nav>
 
-        {/* Mobile Menu Dropdown */}
+        {/* Mobile Menu */}
         {menuOpen && (
           <div className="md:hidden border-t border-white/10 bg-black/95 px-4 py-4 space-y-1">
             <a href="/" onClick={() => setMenuOpen(false)}
@@ -128,7 +121,6 @@ export default function Navbar() {
 
       {/* Cart Drawer */}
       <div className={`fixed top-0 right-0 z-50 h-full w-full max-w-md flex flex-col bg-[#0a0a0a] border-l border-white/10 shadow-2xl transition-transform duration-300 ${cartOpen ? "translate-x-0" : "translate-x-full"}`}>
-        {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-4 shrink-0">
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-bold text-white">Your Cart</h2>
@@ -140,7 +132,6 @@ export default function Navbar() {
             className="flex h-8 w-8 items-center justify-center rounded-full border border-white/15 text-white/50 transition hover:text-white">✕</button>
         </div>
 
-        {/* Items */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-20">
@@ -174,7 +165,6 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Footer */}
         {items.length > 0 && (
           <div className="shrink-0 border-t border-white/10 px-5 py-4 space-y-3">
             <div className="flex items-center justify-between">

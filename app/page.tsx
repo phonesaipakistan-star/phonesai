@@ -173,14 +173,14 @@ export default function Home() {
 
       <main className="w-full pb-20">
 
-        {/* ── HERO ── */}
+        {/* HERO */}
         <section className="hero-gradient hero-dots relative left-1/2 w-screen -translate-x-1/2 overflow-hidden pt-20">
-          <div className="mx-auto w-full max-w-7xl px-4 pb-8 sm:px-8 sm:pb-12 lg:pb-16">
+          <div className="mx-auto w-full max-w-7xl px-4 pb-8 sm:px-8 sm:pb-12 lg:pb-0">
 
-            <div className="grid grid-cols-1 items-center gap-8 sm:grid-cols-2 sm:items-end sm:gap-6 lg:grid-cols-2 lg:gap-12">
+            <div className="grid grid-cols-1 items-center gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-2 lg:min-h-[600px]">
 
-              {/* ── Text column ── */}
-              <div className="z-10 flex w-full flex-col gap-4 sm:gap-5">
+              {/* Text column */}
+              <div className="z-10 flex w-full flex-col gap-4 sm:gap-5 py-8 lg:py-16">
                 <p className="block w-fit rounded-full border border-amber-300/40 bg-amber-300/10 px-3 py-1 text-xs font-medium tracking-[0.15em] text-amber-200">
                   NOW WITH AI SHOPKEEPER
                 </p>
@@ -207,14 +207,19 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="block w-full lg:flex lg:justify-end lg:items-end">
-                <div className="relative mx-auto flex h-64 max-h-64 w-full max-w-[280px] justify-center [mask-image:linear-gradient(to_bottom,black_55%,transparent_100%)] sm:mx-0 sm:ml-auto sm:max-h-72 sm:max-w-[240px] lg:max-h-[480px] lg:w-full lg:max-w-none lg:justify-end">
+              {/* Image column */}
+              <div className="relative flex items-end justify-center sm:justify-end
+                h-64 sm:h-80 lg:h-full lg:min-h-[600px]
+                [mask-image:linear-gradient(to_bottom,black_70%,transparent_100%)]">
                 <img
                   src="/iphone17.png"
                   alt="iPhone 17 Pro"
-                  className="h-full max-h-64 w-auto object-contain object-bottom animate-[scaleReveal_1.4s_cubic-bezier(0.16,1,0.3,1)_forwards] [filter:brightness(0.9)_saturate(0.95)] sm:max-h-72 lg:max-h-[480px]"
+                  className="h-full w-auto max-h-64 object-contain object-bottom
+                    animate-[scaleReveal_1.4s_cubic-bezier(0.16,1,0.3,1)_forwards]
+                    [filter:brightness(0.9)_saturate(0.95)]
+                    sm:max-h-80
+                    lg:max-h-[580px]"
                 />
-                </div>
               </div>
 
             </div>
