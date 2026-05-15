@@ -174,37 +174,29 @@ export default function Home() {
       <main className="w-full pb-20">
 
         {/* ── HERO ── */}
-        <section className="hero-gradient hero-dots relative left-1/2 w-screen -translate-x-1/2 overflow-hidden">
-          {/*
-            Layout strategy:
-            Mobile portrait  → text top, image bottom, stacked
-            Mobile landscape → side by side, compact
-            Desktop          → side by side, fixed 560px height
-          */}
-          <div className="mx-auto w-full max-w-7xl px-4 sm:px-8">
+        <section className="hero-gradient hero-dots relative left-1/2 w-screen -translate-x-1/2 overflow-hidden pt-20">
+          <div className="mx-auto w-full max-w-7xl px-4 pb-8 sm:px-8 sm:pb-12 lg:pb-16">
 
-            {/* Side-by-side on sm+ | stacked on mobile */}
-            <div className="flex flex-col pt-20 pb-8 sm:flex-row sm:items-center sm:pt-24 sm:pb-12 sm:gap-8 lg:gap-12 lg:pt-28 lg:pb-16">
+            <div className="grid grid-cols-1 items-center gap-8 sm:grid-cols-2 sm:items-end sm:gap-6 lg:grid-cols-2 lg:gap-12">
 
               {/* ── Text column ── */}
-              <div className="flex-1 z-10">
-                <p className="mb-4 inline-block rounded-full border border-amber-300/40 bg-amber-300/10 px-3 py-1 text-xs font-medium tracking-[0.15em] text-amber-200">
+              <div className="z-10 flex w-full flex-col gap-4 sm:gap-5">
+                <p className="block w-fit rounded-full border border-amber-300/40 bg-amber-300/10 px-3 py-1 text-xs font-medium tracking-[0.15em] text-amber-200">
                   NOW WITH AI SHOPKEEPER
                 </p>
-                <div className="relative inline-block">
+                <div className="relative block">
                   <span className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-blue-500/35 via-cyan-400/20 to-amber-300/25 blur-2xl" />
-                  <h1 className="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text font-extrabold tracking-[-0.02em] text-transparent
-                    text-5xl sm:text-6xl lg:text-7xl xl:text-8xl">
+                  <h1 className="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-5xl font-extrabold tracking-[-0.02em] text-transparent sm:text-6xl lg:text-7xl xl:text-8xl">
                     PhonesAI
                   </h1>
                 </div>
-                <div className="mt-4 inline-block rounded-full border border-blue-300/40 bg-blue-400/15 px-3 py-1 text-xs font-semibold text-blue-200">
+                <p className="block w-fit rounded-full border border-blue-300/40 bg-blue-400/15 px-3 py-1 text-xs font-semibold text-blue-200">
                   5G Ready
-                </div>
-                <p className="mt-3 text-lg font-light leading-snug text-white sm:text-xl lg:text-3xl">
+                </p>
+                <p className="text-lg font-light leading-snug text-white sm:text-xl lg:text-3xl">
                   Premium Shopping, Reinvented.
                 </p>
-                <div className="mt-6 flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-3">
                   <button type="button" onClick={openUstaadJi}
                     className="inline-flex items-center justify-center rounded-full border border-blue-300/60 bg-gradient-to-r from-blue-500/35 to-cyan-400/30 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_0_35px_rgba(59,130,246,0.55)] transition hover:scale-[1.03]">
                     Talk to AI Shopkeeper
@@ -215,23 +207,14 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* ── Image column ── */}
-              {/*
-                Mobile portrait: below text, centered, 220px tall
-                Mobile landscape (sm): right side, 280px tall
-                Desktop (lg): right side, 420px tall, constrained so it doesn't dominate
-              */}
-              <div className="relative flex justify-center sm:justify-end mt-6 sm:mt-0 sm:flex-shrink-0
-                h-52 w-full
-                sm:h-72 sm:w-64
-                lg:h-[420px] lg:w-[380px]
-                xl:h-[480px] xl:w-[420px]
-                [mask-image:linear-gradient(to_bottom,black_50%,transparent_100%)]">
+              <div className="block w-full lg:flex lg:justify-end lg:items-end">
+                <div className="relative mx-auto flex h-64 max-h-64 w-full max-w-[280px] justify-center [mask-image:linear-gradient(to_bottom,black_55%,transparent_100%)] sm:mx-0 sm:ml-auto sm:max-h-72 sm:max-w-[240px] lg:max-h-[480px] lg:w-full lg:max-w-none lg:justify-end">
                 <img
                   src="/iphone17.png"
                   alt="iPhone 17 Pro"
-                  className="h-full w-auto object-contain object-bottom animate-[scaleReveal_1.4s_cubic-bezier(0.16,1,0.3,1)_forwards] [filter:brightness(0.9)_saturate(0.95)]"
+                  className="h-full max-h-64 w-auto object-contain object-bottom animate-[scaleReveal_1.4s_cubic-bezier(0.16,1,0.3,1)_forwards] [filter:brightness(0.9)_saturate(0.95)] sm:max-h-72 lg:max-h-[480px]"
                 />
+                </div>
               </div>
 
             </div>
