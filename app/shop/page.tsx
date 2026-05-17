@@ -131,7 +131,7 @@ function ShopContent() {
           <p className="mt-1 text-sm text-white/50">Verified, asli, aur 7-din warranty ke saath.</p>
         </div>
 
-        {/* Brand Filter — scrollable on mobile */}
+        {/* Brand Filter */}
         <div className="mb-3 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {brands.map((brand) => (
             <button key={brand} onClick={() => setActiveBrand(brand)}
@@ -162,7 +162,7 @@ function ShopContent() {
           </div>
         )}
 
-        {/* Phone Grid — 1 col mobile, 2 col sm, 3 col lg */}
+        {/* Phone Grid */}
         {filteredPhones.length > 0 && (
           <>
             {activeBrand === "All" && <h2 className="mb-4 text-sm font-bold text-white/50 uppercase tracking-widest">Phones & Tablets</h2>}
@@ -173,7 +173,6 @@ function ShopContent() {
                 return (
                   <div key={phone.id} className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition duration-300 hover:border-white/20">
                     <a href={`/shop/${phone.id}`} className="flex gap-3 p-3 sm:flex-col sm:gap-0 sm:p-0">
-                      {/* Mobile: horizontal layout | Desktop: vertical */}
                       <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/5 bg-white/[0.03] sm:h-44 sm:w-full sm:rounded-none sm:rounded-t-2xl">
                         {phone.images && phone.images.length > 0 ? (
                           <img src={phone.images[0]} alt={phone.model} className="h-full w-full object-contain p-2 sm:p-4" />
@@ -192,7 +191,6 @@ function ShopContent() {
                         )}
                       </div>
 
-                      {/* Info */}
                       <div className="flex flex-1 flex-col justify-center sm:p-4">
                         <div className="flex flex-wrap gap-1 mb-1.5">
                           <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${categoryColors[phone.category] ?? "bg-white/10 text-white/60 border-white/20"}`}>{phone.category}</span>
@@ -217,8 +215,8 @@ function ShopContent() {
                       </div>
                     </a>
 
-                    {/* Action Buttons */}
-                    <div className="px-3 pb-3 flex gap-2 sm:px-4 sm:pb-4">
+                    {/* Action Buttons — pb-20 on mobile so Ustaad Ji float doesn't overlap */}
+                    <div className="px-3 pb-20 flex gap-2 sm:px-4 sm:pb-4">
                       <button
                         onClick={() => addItem({ id: phone.id, model: phone.model, storage: phone.storage, color: phone.color, category: phone.category, brand: phone.brand, condition: phone.condition, price: phone.price, discount_price: phone.discount_price, image: phone.images?.[0] ?? null, free_case: phone.free_case })}
                         className={`flex-1 rounded-xl py-2 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}
