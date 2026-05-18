@@ -140,7 +140,7 @@ export default function ProductPage() {
           <p className="text-base mb-1">🎁</p>
           <p className="text-xs font-bold text-white sm:text-sm">5% Off First Order!</p>
           <p className="mt-1 text-[10px] text-white/50 leading-relaxed sm:text-xs">Email register karein aur pehli purchase pe 5% bachayein.</p>
-          <button onClick={() => { setShowDiscountBanner(false); localStorage.setItem("phonesai_discount_banner_dismissed", "true"); window.dispatchEvent(new CustomEvent("openUstaadJi")); }}
+          <button onClick={() => { setShowDiscountBanner(false); localStorage.setItem("phonesai_discount_banner_dismissed", "true"); window.dispatchEvent(new CustomEvent("openEmailPopup")); }}
             className="mt-2 w-full rounded-xl bg-blue-500/20 border border-blue-400/30 py-1.5 text-[10px] font-semibold text-blue-200 transition hover:bg-blue-500/30 sm:py-2 sm:text-xs">
             Claim Discount →
           </button>

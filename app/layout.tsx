@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import GlobalShopkeeper from "./components/GlobalShopkeeper";
+import EmailPopup from "./components/EmailPopup";
 import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
 import { CartProvider } from "./components/CartContext";
@@ -43,6 +44,7 @@ export default function RootLayout({
           {children}
           <Footer />
           <GlobalShopkeeper />
+          <EmailPopup />
         </CartProvider>
       </body>
     </html>
