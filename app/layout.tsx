@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/react";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import GlobalShopkeeper from "./components/GlobalShopkeeper";
@@ -46,6 +47,7 @@ export default function RootLayout({
           <GlobalShopkeeper />
           <EmailPopup />
         </CartProvider>
+        <Analytics />
       </body>
     </html>
   );
