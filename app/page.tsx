@@ -204,7 +204,7 @@ export default function Home() {
             <div className="mb-6 flex items-end justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-widest text-white/30">Customer Reviews</p>
-                <h2 className="mt-1 text-2xl font-extrabold text-white sm:text-3xl">Real Reviews.</h2>
+                <h2 className="mt-1 text-2xl font-extrabold text-white sm:text-3xl">Real Reviews</h2>
                 {avgRating && (
                   <div className="mt-2 flex items-center gap-2">
                     <StarRating rating={Math.round(parseFloat(avgRating))} />
