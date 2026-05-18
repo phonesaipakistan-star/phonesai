@@ -29,14 +29,14 @@ export default function Footer() {
           <div>
             <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-white/30">Info</p>
             <ul className="space-y-2.5 text-sm text-white/50">
-              <li><a href="#" className="transition hover:text-white">About PhonesAI</a></li>
-              <li><a href="#" className="transition hover:text-white">7-Day Warranty Policy</a></li>
+              <li><a href="/about" className="transition hover:text-white">About PhonesAI</a></li>
+              <li><a href="/warranty" className="transition hover:text-white">7-Day Warranty Policy</a></li>
               <li>
                 <a href="https://taxcalculator.pk/pta-tax" target="_blank" rel="noopener noreferrer" className="transition hover:text-white">
                   PTA Tax Calculator
                 </a>
               </li>
-              <li><a href="#" className="transition hover:text-white">Contact Us</a></li>
+              <li><a href="/contact" className="transition hover:text-white">Contact Us</a></li>
             </ul>
           </div>
 
