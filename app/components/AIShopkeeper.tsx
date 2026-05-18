@@ -23,6 +23,10 @@ export default function AIShopkeeper({ isOpen, onOpenChange }: AIShopkeeperProps
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const MAX_MESSAGES = 10;
+  const userMessageCount = messages.filter(m => m.role === "user").length;
+  const limitReached = userMessageCount >= MAX_MESSAGES;
+
   useEffect(() => {
     if (isOpen && !started) {
       setStarted(true);
@@ -55,6 +59,14 @@ export default function AIShopkeeper({ isOpen, onOpenChange }: AIShopkeeperProps
   };
 
   const sendMessage = async () => {
+    if (limitReached) {
+      setMessages(prev => [...prev, {
+        role: "assistant",
+        content: 'Janab, meri taraf se itni guftagu kaafi hai. Aage ki baat seedha Boss se karein — <b>WhatsApp pe message karein</b> aur deal pakki kar lein!',
+        cartItem: undefined
+      }]);
+      return;
+    }
     if (!input.trim() || loading) return;
     const userMessage: Message = { role: "user", content: input.trim() };
     const newMessages = [...messages, userMessage];
@@ -219,6 +231,13 @@ export default function AIShopkeeper({ isOpen, onOpenChange }: AIShopkeeperProps
 
         {/* Input */}
         <div className="shrink-0 border-t border-white/10 px-4 py-4">
+          {limitReached && (
+            <div className="mb-2 rounded-xl border border-amber-300/20 bg-amber-300/5 px-4 py-2 text-center">
+              <p className="text-xs text-amber-200">Chat limit reached</p>
+              <a href="https://wa.me/923001234567?text=Ustaad Ji ne bheja hai" target="_blank" rel="noopener noreferrer"
+                className="text-xs text-blue-400 hover:underline">WhatsApp Boss to continue →</a>
+            </div>
+          )}
           <div className="flex gap-2">
             <input
               ref={inputRef}
@@ -226,9 +245,10 @@ export default function AIShopkeeper({ isOpen, onOpenChange }: AIShopkeeperProps
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
               placeholder="Apna sawaal likhein..."
-              className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none focus:border-blue-400/40"
+              disabled={loading || limitReached}
+              className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none focus:border-blue-400/40 disabled:opacity-40"
             />
-            <button onClick={sendMessage} disabled={loading || !input.trim()}
+            <button onClick={sendMessage} disabled={loading || !input.trim() || limitReached}
               className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 text-white transition hover:bg-blue-400 disabled:opacity-40">
               <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2">
                 <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" strokeLinecap="round" strokeLinejoin="round" />
