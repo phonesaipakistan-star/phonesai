@@ -18,7 +18,7 @@ export default function GlobalShopkeeper() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 left-4 sm:right-6 sm:left-auto z-40 flex items-center gap-2 rounded-full border border-blue-300/60 bg-gradient-to-r from-blue-500/40 to-cyan-400/35 px-5 py-3 text-sm font-semibold text-white shadow-[0_0_28px_rgba(56,189,248,0.55)] backdrop-blur-lg transition hover:scale-[1.03]"
+          className="fixed bottom-6 sm:bottom-6 left-4 sm:right-6 sm:left-auto z-40 flex items-center gap-2 rounded-full border border-blue-300/60 bg-gradient-to-r from-blue-500/40 to-cyan-400/35 px-5 py-3 text-sm font-semibold text-white shadow-[0_0_28px_rgba(56,189,248,0.55)] backdrop-blur-lg transition hover:scale-[1.03]"
         >
           <span>🤖</span>
           <span>Ustaad Ji</span>

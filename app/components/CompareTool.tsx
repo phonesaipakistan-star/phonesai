@@ -50,7 +50,7 @@ export default function CompareTool({ selectedPhones, onRemove, onClear }: Compa
   return (
     <>
       {/* Floating Bar */}
-      <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2 w-full max-w-lg px-4">
+      <div className="fixed bottom-24 left-1/2 z-40 -translate-x-1/2 w-full max-w-lg px-4">
         <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/20 bg-black/90 backdrop-blur-xl px-4 py-3 shadow-[0_0_40px_rgba(59,130,246,0.3)]">
           <div className="flex items-center gap-3 min-w-0">
             {selectedPhones.map((phone) => (
@@ -163,12 +163,12 @@ export default function CompareTool({ selectedPhones, onRemove, onClear }: Compa
                 </button>
                 <a href={`/checkout?phone=${a.id}`}
                   className="rounded-2xl bg-blue-500 py-3 text-sm font-bold text-white text-center transition hover:bg-blue-400">
-                  Checkout {a.model.split(" ").slice(-2).join(" ")} →
+                  Checkout {a.model} →
                 </a>
               </div>
               <a href={`/checkout?phone=${b.id}`}
-                className="mt-3 block w-full rounded-2xl border border-white/15 py-3 text-sm font-semibold text-white/60 text-center transition hover:text-white">
-                Checkout {b.model.split(" ").slice(-2).join(" ")} →
+                className="mt-3 block w-full rounded-2xl border border-white/20 bg-white/5 py-3 text-sm font-bold text-white text-center transition hover:bg-white/10">
+                Checkout {b.model} →
               </a>
             </div>
           </div>
