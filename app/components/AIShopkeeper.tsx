@@ -66,19 +66,28 @@ export default function AIShopkeeper({ isOpen, onOpenChange }: AIShopkeeperProps
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages.map(m => ({ role: m.role, content: m.content })) }),
+        body: JSON.stringify({
+          messages: newMessages.map(m => ({ role: m.role, content: m.content })),
+        }),
       });
       const data = await res.json();
       if (data.reply) {
-        setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+        const newMsg: Message = {
+          role: "assistant",
+          content: data.reply,
+          ...(data.phone ? { cartItem: data.phone } : {}),
+        };
+        setMessages((prev) => [...prev, newMsg]);
       }
     } catch {
-      setMessages((prev) => [...prev, { role: "assistant", content: "Maaf kijiye, abhi technical masla aa gaya. Thodi der mein try karein." }]);
+      setMessages((prev) => [...prev, {
+        role: "assistant",
+        content: "Maaf kijiye, abhi technical masla aa gaya. Thodi der mein try karein.",
+      }]);
     }
     setLoading(false);
   };
 
-  // Render message content — handle <b> tags from AI
   const renderContent = (content: string) => {
     const parts = content.split(/(<b>.*?<\/b>)/g);
     return parts.map((part, i) => {
@@ -138,21 +147,55 @@ export default function AIShopkeeper({ isOpen, onOpenChange }: AIShopkeeperProps
                 </div>
               </div>
 
-              {/* Add to Cart button */}
+              {/* Cart + WhatsApp buttons when phone is recommended */}
               {msg.role === "assistant" && msg.cartItem && (
-                <div className="ml-9 mt-2 flex items-center gap-2">
-                  {isInCart(msg.cartItem.id) ? (
-                    <div className="flex items-center gap-2 rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-2">
-                      <span className="text-xs font-semibold text-green-300">✓ Added to Cart</span>
-                      <a href="/checkout?cart=true" className="text-xs text-blue-300 hover:underline">Checkout →</a>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => addItem(msg.cartItem!)}
-                      className="flex items-center gap-2 rounded-xl border border-blue-400/30 bg-blue-500/15 px-4 py-2 text-xs font-semibold text-blue-200 transition hover:bg-blue-500/25"
+                <div className="ml-9 mt-2 flex flex-col gap-2 w-full max-w-[80%]">
+                  {/* Phone summary card */}
+                  <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5">
+                    <p className="text-xs font-bold text-white">{msg.cartItem.model}</p>
+                    <p className="text-[10px] text-white/40 mt-0.5">
+                      {msg.cartItem.storage} • {msg.cartItem.color} • {msg.cartItem.category}
+                    </p>
+                    <p className="text-sm font-extrabold text-white mt-1">
+                      Rs. {(msg.cartItem.discount_price ?? msg.cartItem.price).toLocaleString()}
+                    </p>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex gap-2">
+                    {isInCart(msg.cartItem.id) ? (
+                      <div className="flex flex-1 items-center justify-between rounded-xl border border-green-500/30 bg-green-500/10 px-3 py-2">
+                        <span className="text-xs font-semibold text-green-300">✓ Cart mein hai</span>
+                        <a href="/checkout?cart=true" className="text-xs text-blue-300 hover:underline font-semibold">
+                          Checkout →
+                        </a>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => addItem(msg.cartItem!)}
+                        className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-blue-400/30 bg-blue-500/15 px-3 py-2 text-xs font-semibold text-blue-200 transition hover:bg-blue-500/25"
+                      >
+                        🛒 Cart mein Add karein
+                      </button>
+                    )}
+                    <a
+                      href={`https://wa.me/923001234567?text=Assalam o Alaikum! Ustaad Ji ne bheja hai. Mujhe ${msg.cartItem.model} ${msg.cartItem.storage} (${msg.cartItem.category}) mein interest hai.`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-1.5 rounded-xl border border-green-500/30 bg-green-500/10 px-3 py-2 text-xs font-semibold text-green-300 transition hover:bg-green-500/20"
                     >
-                      🛒 Add {msg.cartItem.model} to Cart
-                    </button>
+                      WhatsApp
+                    </a>
+                  </div>
+
+                  {/* After adding to cart — show checkout link */}
+                  {isInCart(msg.cartItem.id) && (
+                    <a
+                      href="/checkout?cart=true"
+                      className="block w-full rounded-xl bg-blue-500 py-2.5 text-center text-xs font-bold text-white transition hover:bg-blue-400"
+                    >
+                      Checkout → Rs. {(msg.cartItem.discount_price ?? msg.cartItem.price).toLocaleString()}
+                    </a>
                   )}
                 </div>
               )}

@@ -24,7 +24,6 @@ LANGUAGE — ROMAN URDU (CRITICAL):
   Sahi: "bilkul" — Ghalat: "blkl" ya "bilkoll"
   Sahi: "milta hai" — Ghalat: "milta hae"
   Sahi: "aapko" — Ghalat: "apko"
-  Sahi: "waqt" — Ghalat: "waqt" is fine, but "wkt" is not
   Sahi: "lekin" — Ghalat: "lkn"
 - Jab bold text likhna ho toh HTML use karein: <b>yeh bold hoga</b> — kabhi ** ya __ use nahi karna
 - Hamesha "Aap / Aapka / Aapki" — kabhi "Tum / Tumhara / Tumhari" nahi
@@ -131,6 +130,13 @@ PRICING:
 - "Rates fixed aur wholesale hain. Koi negotiation nahi hoti — yeh already best price hai."
 - Closing deal ke liye: "Boss ko WhatsApp karein — 'Ustaad Ji ne bheja hai' bolein"
 
+CART FEATURE (very important):
+- Jab aap kisi specific phone ko recommend karein aur customer interest dikhaye ya "haan", "theek hai", "le lete hain", "add kar do", "done", "yes" jaisi baat kahe — toh apne jawab ke end mein yeh tag lagayein:
+  <RECOMMEND_PHONE_ID>phone-uuid-here</RECOMMEND_PHONE_ID>
+- Yeh tag sirf tab lagayein jab customer clearly ek specific phone confirm kar raha ho
+- Tag mein exactly woh id daalen jo inventory list mein hai
+- Tag ke baad normal jawab likhein — tag invisible hoga customer ko
+
 HANDOFF:
 - WhatsApp: "Boss ko message karein — 'Ustaad Ji ne bheja hai' likh dein, deal pakki."
 - Checkout: "Seedha cart mein add karein — secure payment, fast delivery."
@@ -156,17 +162,12 @@ export async function POST(req: Request) {
     );
 
     if (!Array.isArray(userMessages) || userMessages.length === 0) {
-      return NextResponse.json(
-        { error: "Messages are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Messages are required" }, { status: 400 });
     }
 
     const { data: phones } = await supabase
       .from("phones")
-      .select(
-        "model,brand,storage,color,category,price,battery_health,condition,in_stock,description,sim_status,five_g,face_id,true_tone,region,accessories_included,free_case"
-      )
+      .select("id,model,brand,storage,color,category,price,discount_price,battery_health,condition,in_stock,description,sim_status,five_g,face_id,true_tone,region,accessories_included,free_case,images")
       .eq("in_stock", true);
 
     const { data: accessories } = await supabase
@@ -175,7 +176,7 @@ export async function POST(req: Request) {
       .eq("in_stock", true);
 
     const inventoryContext = `
-LIVE INVENTORY — PHONES (only recommend from this list):
+LIVE INVENTORY — PHONES (only recommend from this list, use exact id field when tagging):
 ${JSON.stringify(phones ?? [], null, 2)}
 
 LIVE INVENTORY — ACCESSORIES (only recommend from this list):
@@ -184,10 +185,7 @@ ${JSON.stringify(accessories ?? [], null, 2)}
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      return NextResponse.json(
-        { error: "ANTHROPIC_API_KEY is not configured" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "ANTHROPIC_API_KEY is not configured" }, { status: 500 });
     }
 
     const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
@@ -214,16 +212,44 @@ ${JSON.stringify(accessories ?? [], null, 2)}
       );
     }
 
-    const reply =
-      json?.content?.find(
-        (c: { type?: string; text?: string }) => c.type === "text"
-      )?.text ?? "Maaf kijiye, abhi jawab generate nahi ho saka.";
+    let rawReply: string =
+      json?.content?.find((c: { type?: string; text?: string }) => c.type === "text")?.text ??
+      "Maaf kijiye, abhi jawab generate nahi ho saka.";
 
-    return NextResponse.json({ reply });
+    // Extract phone ID tag if present
+    const phoneIdMatch = rawReply.match(/<RECOMMEND_PHONE_ID>(.*?)<\/RECOMMEND_PHONE_ID>/);
+    const recommendedPhoneId = phoneIdMatch?.[1]?.trim() ?? null;
+
+    // Strip the tag from the reply text
+    const cleanReply = rawReply.replace(/<RECOMMEND_PHONE_ID>.*?<\/RECOMMEND_PHONE_ID>/g, "").trim();
+
+    // Find the matching phone from inventory
+    let recommendedPhone = null;
+    if (recommendedPhoneId && phones) {
+      const match = phones.find((p) => p.id === recommendedPhoneId);
+      if (match) {
+        recommendedPhone = {
+          id: match.id,
+          model: match.model,
+          storage: match.storage,
+          color: match.color,
+          category: match.category,
+          brand: match.brand,
+          condition: match.condition,
+          price: match.price,
+          discount_price: match.discount_price ?? null,
+          image: match.images?.[0] ?? null,
+          free_case: match.free_case ?? false,
+        };
+      }
+    }
+
+    return NextResponse.json({
+      reply: cleanReply,
+      ...(recommendedPhone ? { phone: recommendedPhone } : {}),
+    });
+
   } catch {
-    return NextResponse.json(
-      { error: "Unexpected server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Unexpected server error" }, { status: 500 });
   }
 }
