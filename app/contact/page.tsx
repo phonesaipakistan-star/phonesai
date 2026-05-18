@@ -1,3 +1,9 @@
+export const metadata = {
+  title: "Contact PhonesAI | WhatsApp & Store Location Wah Cantt",
+  description:
+    "Contact PhonesAI — WhatsApp, physical store in Wah Cantt, Punjab. Islamabad aur Rawalpindi se qareeb. Mon-Sat 10am-8pm.",
+};
+
 export default function ContactPage() {
   return (
     <div className="min-h-screen bg-black text-white pt-24 pb-20">

@@ -1,4 +1,10 @@
-﻿export default function AboutPage() {
+﻿export const metadata = {
+  title: "About PhonesAI | Wah Cantt Phone Store",
+  description:
+    "PhonesAI — Pakistan ka trusted premium phone store based in Wah Cantt. Ek decade se zyada ka tajurba. Verified iPhones, Samsung, iPads with 7-day warranty.",
+};
+
+export default function AboutPage() {
   return (
     <div className="min-h-screen bg-black text-white pt-24 pb-20">
       <div className="mx-auto max-w-3xl px-6">

@@ -1,3 +1,9 @@
+export const metadata = {
+  title: "7-Day Warranty Policy | PhonesAI Pakistan",
+  description:
+    "PhonesAI ki 7-din warranty policy — kya cover hota hai, kya nahi, aur claim kaise karein. Ustaad Ji ka wada.",
+};
+
 export default function WarrantyPage() {
   return (
     <div className="min-h-screen bg-black text-white pt-24 pb-20">
