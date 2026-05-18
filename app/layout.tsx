@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: "add-your-google-search-console-verification-here",
+    google: "DpHB70CV4-4GzYfIYAIKbSnbWTJihGTcXjwgYfCytQ8",
   },
 };
 
@@ -76,69 +76,69 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Store",
-              name: "PhonesAI",
-              description:
-                "Pakistan ka trusted premium phone store — verified iPhones, Samsung flagships, iPads with 7-day warranty.",
-              url: "https://phonesai.pk",
-              telephone: "+923001234567",
-              address: {
-                "@type": "PostalAddress",
-                addressLocality: "Wah Cantt",
-                addressRegion: "Punjab",
-                addressCountry: "PK",
-              },
-              geo: {
-                "@type": "GeoCoordinates",
-                latitude: "33.7665",
-                longitude: "72.7516",
-              },
-              openingHours: "Mo-Sa 10:00-20:00",
-              priceRange: "PKR 50,000 - PKR 500,000",
-              sameAs: ["https://phonesai.pk"],
-              hasOfferCatalog: {
-                "@type": "OfferCatalog",
-                name: "Phones & Accessories",
-                itemListElement: [
-                  {
-                    "@type": "Offer",
-                    itemOffered: {
-                      "@type": "Product",
-                      name: "PTA Approved iPhones Pakistan",
-                    },
-                  },
-                  {
-                    "@type": "Offer",
-                    itemOffered: {
-                      "@type": "Product",
-                      name: "Non-PTA iPhones Pakistan",
-                    },
-                  },
-                  {
-                    "@type": "Offer",
-                    itemOffered: {
-                      "@type": "Product",
-                      name: "JV iPhones Pakistan",
-                    },
-                  },
-                  {
-                    "@type": "Offer",
-                    itemOffered: {
-                      "@type": "Product",
-                      name: "Samsung Galaxy S Ultra Pakistan",
-                    },
-                  },
-                ],
-              },
-            }),
-          }}
-        />
         <CartProvider>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Store",
+                name: "PhonesAI",
+                description:
+                  "Pakistan ka trusted premium phone store — verified iPhones, Samsung flagships, iPads with 7-day warranty.",
+                url: "https://phonesai.pk",
+                telephone: "+923001234567",
+                address: {
+                  "@type": "PostalAddress",
+                  addressLocality: "Wah Cantt",
+                  addressRegion: "Punjab",
+                  addressCountry: "PK",
+                },
+                geo: {
+                  "@type": "GeoCoordinates",
+                  latitude: "33.7665",
+                  longitude: "72.7516",
+                },
+                openingHours: "Mo-Sa 10:00-20:00",
+                priceRange: "PKR 50,000 - PKR 500,000",
+                sameAs: ["https://phonesai.pk"],
+                hasOfferCatalog: {
+                  "@type": "OfferCatalog",
+                  name: "Phones & Accessories",
+                  itemListElement: [
+                    {
+                      "@type": "Offer",
+                      itemOffered: {
+                        "@type": "Product",
+                        name: "PTA Approved iPhones Pakistan",
+                      },
+                    },
+                    {
+                      "@type": "Offer",
+                      itemOffered: {
+                        "@type": "Product",
+                        name: "Non-PTA iPhones Pakistan",
+                      },
+                    },
+                    {
+                      "@type": "Offer",
+                      itemOffered: {
+                        "@type": "Product",
+                        name: "JV iPhones Pakistan",
+                      },
+                    },
+                    {
+                      "@type": "Offer",
+                      itemOffered: {
+                        "@type": "Product",
+                        name: "Samsung Galaxy S Ultra Pakistan",
+                      },
+                    },
+                  ],
+                },
+              }),
+            }}
+          />
           <Navbar />
           {children}
           <Footer />
