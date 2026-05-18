@@ -122,7 +122,8 @@ function ShopContent() {
 
   return (
     <div className="min-h-screen bg-black text-white pt-16 sm:pt-20">
-      <main className="mx-auto max-w-6xl px-4 py-6 pb-32 sm:px-6 sm:py-10">
+      {/* pb-56 on mobile gives enough room above Ustaad Ji + Compare bar */}
+      <main className="mx-auto max-w-6xl px-4 py-6 pb-56 sm:pb-32 sm:px-6 sm:py-10">
 
         <div className="mb-6">
           <h1 className="text-2xl font-extrabold tracking-tight text-white sm:text-4xl">
@@ -215,8 +216,8 @@ function ShopContent() {
                       </div>
                     </a>
 
-                    {/* Action Buttons — pb-20 on mobile so Ustaad Ji float doesn't overlap */}
-                    <div className="px-3 pb-20 flex gap-2 sm:px-4 sm:pb-4">
+                    {/* Action Buttons */}
+                    <div className="px-3 pb-3 flex gap-2 sm:px-4 sm:pb-4">
                       <button
                         onClick={() => addItem({ id: phone.id, model: phone.model, storage: phone.storage, color: phone.color, category: phone.category, brand: phone.brand, condition: phone.condition, price: phone.price, discount_price: phone.discount_price, image: phone.images?.[0] ?? null, free_case: phone.free_case })}
                         className={`flex-1 rounded-xl py-2 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}
