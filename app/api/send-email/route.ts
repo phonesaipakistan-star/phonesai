@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM_EMAIL = "orders@mail.phonesai.pk";
+const FROM_EMAIL = "orders@phonesai.pk";
 const ADMIN_EMAIL = "phonesaipakistan@gmail.com";
 
 type OrderEmailData = {
