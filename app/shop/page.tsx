@@ -20,7 +20,6 @@ type Phone = {
   physical_condition: string;
   five_g: boolean;
   face_id: boolean;
-  true_tone: boolean;
   in_stock: boolean;
   featured: boolean;
   badge: string | null;
@@ -45,6 +44,7 @@ type Accessory = {
 };
 
 const brands = ["All", "Apple", "Samsung", "iPad", "Accessories"];
+const conditions = ["All", "New", "Pre-Owned"];
 
 const categoryColors: Record<string, string> = {
   PTA: "bg-green-500/20 text-green-300 border-green-500/30",
@@ -80,6 +80,7 @@ function ShopContent() {
   const [accessories, setAccessories] = useState<Accessory[]>([]);
   const [activeBrand, setActiveBrand] = useState(urlBrand ?? "All");
   const [activeCategory, setActiveCategory] = useState(urlCategory ?? "All");
+  const [activeCondition, setActiveCondition] = useState("All");
   const [loading, setLoading] = useState(true);
   const [compareList, setCompareList] = useState<Phone[]>([]);
 
@@ -114,15 +115,16 @@ function ShopContent() {
       if (activeBrand === "Apple" && (p.brand !== "Apple" || ["WiFi", "Cellular"].includes(p.category))) return false;
     }
     if (activeCategory !== "All" && p.category !== activeCategory) return false;
+    if (activeCondition !== "All" && p.condition !== activeCondition) return false;
     return true;
   });
 
   const filteredAccessories = activeBrand === "Accessories" || activeBrand === "All" ? accessories : [];
   const categories = getCategoriesForBrand(activeBrand);
+  const showConditionFilter = activeBrand !== "Accessories";
 
   return (
     <div className="min-h-screen bg-black text-white pt-16 sm:pt-20">
-      {/* pb-56 on mobile gives enough room above Ustaad Ji + Compare bar */}
       <main className="mx-auto max-w-6xl px-4 py-6 pb-56 sm:pb-32 sm:px-6 sm:py-10">
 
         <div className="mb-6">
@@ -144,11 +146,23 @@ function ShopContent() {
 
         {/* Category Filter */}
         {categories.length > 0 && (
-          <div className="mb-5 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          <div className="mb-3 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             {categories.map((cat) => (
               <button key={cat} onClick={() => setActiveCategory(cat)}
                 className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition ${activeCategory === cat ? "border-blue-400/60 bg-blue-500/20 text-blue-200" : "border-white/10 text-white/40 hover:text-white/60"}`}>
                 {cat === "All" ? "All Categories" : cat}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* New / Pre-Owned Filter */}
+        {showConditionFilter && (
+          <div className="mb-5 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {conditions.map((cond) => (
+              <button key={cond} onClick={() => setActiveCondition(cond)}
+                className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition ${activeCondition === cond ? "border-green-400/60 bg-green-500/20 text-green-200" : "border-white/10 text-white/40 hover:text-white/60"}`}>
+                {cond === "All" ? "New & Pre-Owned" : cond}
               </button>
             ))}
           </div>
@@ -171,6 +185,8 @@ function ShopContent() {
               {filteredPhones.map((phone) => {
                 const isInCompare = compareList.find((p) => p.id === phone.id);
                 const inCart = isInCart(phone.id);
+                const isPreOwned = phone.condition === "Pre-Owned";
+                const isNew = phone.condition === "New";
                 return (
                   <div key={phone.id} className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition duration-300 hover:border-white/20">
                     <a href={`/shop/${phone.id}`} className="flex gap-3 p-3 sm:flex-col sm:gap-0 sm:p-0">
@@ -187,7 +203,11 @@ function ShopContent() {
                         {phone.badge && (
                           <span className={`absolute left-2 top-2 rounded-full border px-2 py-0.5 text-[10px] font-medium ${badgeColors[phone.badge] ?? "bg-white/10 text-white/60 border-white/20"}`}>{phone.badge}</span>
                         )}
-                        {phone.free_case && phone.condition === "Used" && (
+                        {/* Free case badge — pre-owned gets case + screen protector, new gets case only */}
+                        {phone.free_case && isPreOwned && (
+                          <span className="absolute right-2 top-2 rounded-full border border-green-500/30 bg-green-500/20 px-2 py-0.5 text-[10px] text-green-300">Free Case + SP</span>
+                        )}
+                        {phone.free_case && isNew && (
                           <span className="absolute right-2 top-2 rounded-full border border-green-500/30 bg-green-500/20 px-2 py-0.5 text-[10px] text-green-300">Free Case</span>
                         )}
                       </div>
@@ -196,6 +216,9 @@ function ShopContent() {
                         <div className="flex flex-wrap gap-1 mb-1.5">
                           <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${categoryColors[phone.category] ?? "bg-white/10 text-white/60 border-white/20"}`}>{phone.category}</span>
                           {phone.five_g && <span className="rounded-full border border-blue-400/20 bg-blue-400/10 px-2 py-0.5 text-[10px] text-blue-300">5G</span>}
+                          <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${isPreOwned ? "border-amber-400/20 bg-amber-400/10 text-amber-300" : "border-green-400/20 bg-green-400/10 text-green-300"}`}>
+                            {phone.condition}
+                          </span>
                         </div>
                         <h2 className="text-sm font-bold text-white leading-tight sm:text-base">{phone.model}</h2>
                         <p className="text-xs text-white/40 mt-0.5">{phone.storage} • {phone.color}</p>
@@ -256,7 +279,7 @@ function ShopContent() {
                         <img src={acc.images[0]} alt={acc.name} className="h-full w-full object-contain p-3" />
                       ) : (
                         <div className="text-3xl">
-                          {acc.category === "Charger" ? "🔌" : acc.category === "Cable" ? "🔋" : acc.category === "Case" ? "📱" : "🛡️"}
+                          {acc.category === "Charger" ? "🔌" : acc.category === "Cable" ? "🔗" : acc.category === "AirPods" ? "🎧" : acc.category === "Apple Watch" ? "⌚" : "📦"}
                         </div>
                       )}
                     </div>

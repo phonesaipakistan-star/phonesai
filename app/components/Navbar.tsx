@@ -36,7 +36,6 @@ export default function Navbar() {
           {/* Logo + Wordmark */}
           <a href="/" className="flex items-center gap-2.5" onClick={() => setMenuOpen(false)}>
             <div className="relative flex items-center justify-center">
-              {/* Subtle blue glow behind logo */}
               <div className="absolute inset-0 rounded-full bg-blue-500/25 blur-md scale-150" />
               <img src="/logo.png" alt="PhonesAI" className="relative h-8 w-auto sm:h-9" />
             </div>
@@ -50,7 +49,7 @@ export default function Navbar() {
             <a href="/" className="transition hover:text-white">Home</a>
             <a href="/shop" className="transition hover:text-white">Shop</a>
             <button onClick={openUstaadJi} className="transition hover:text-white">Ustaad Ji</button>
-            <a href="https://wa.me/923001234567" target="_blank" rel="noopener noreferrer" className="transition hover:text-white">Contact</a>
+            <a href="https://wa.me/923041502560" target="_blank" rel="noopener noreferrer" className="transition hover:text-white">Contact</a>
             <button onClick={() => setCartOpen(true)}
               className="relative flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm text-white/80 transition hover:border-white/40 hover:text-white">
               <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="1.8">
@@ -93,7 +92,7 @@ export default function Navbar() {
             <a href="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/80 transition hover:bg-white/5 hover:text-white">🏠 Home</a>
             <a href="/shop" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/80 transition hover:bg-white/5 hover:text-white">📱 Shop</a>
             <button onClick={() => { openUstaadJi(); setMenuOpen(false); }} className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/80 transition hover:bg-white/5 hover:text-white">🤖 Ustaad Ji</button>
-            <a href="https://wa.me/923001234567" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/80 transition hover:bg-white/5 hover:text-white">💬 Contact on WhatsApp</a>
+            <a href="https://wa.me/923041502560" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/80 transition hover:bg-white/5 hover:text-white">💬 Contact on WhatsApp</a>
             <div className="pt-2 border-t border-white/10">
               <button onClick={() => { setCartOpen(true); setMenuOpen(false); }} className="flex w-full items-center justify-between rounded-xl bg-blue-500/10 border border-blue-400/20 px-4 py-3 text-sm font-semibold text-blue-300">
                 <span>🛒 View Cart</span>

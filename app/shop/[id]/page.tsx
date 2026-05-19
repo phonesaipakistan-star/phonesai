@@ -8,7 +8,7 @@ import { useCart } from "@/app/components/CartContext";
 type Phone = {
   id: string; model: string; storage: string; color: string; category: string; brand: string;
   condition: string; price: number; discount_price: number | null; battery_health: number;
-  physical_condition: string; five_g: boolean; face_id: boolean; true_tone: boolean;
+  physical_condition: string; five_g: boolean; face_id: boolean;
   in_stock: boolean; featured: boolean; badge: string | null; images: string[];
   condition_video: string | null; battery_screenshot: string | null; description: string | null;
   sim_status: string | null; accessories_included: string | null; region: string | null;
@@ -113,8 +113,8 @@ export default function ProductPage() {
   };
 
   const whatsappLink = phone
-    ? `https://wa.me/923001234567?text=Assalam o Alaikum! Ustaad Ji ne bheja hai. Mujhe ${phone.model} ${phone.storage} ${phone.color} (${phone.category}) mein interest hai.`
-    : `https://wa.me/923001234567`;
+    ? `https://wa.me/923041502560?text=Assalam o Alaikum! Ustaad Ji ne bheja hai. Mujhe ${phone.model} ${phone.storage} ${phone.color} (${phone.category}) mein interest hai.`
+    : `https://wa.me/923041502560`;
 
   if (loading) return <div className="flex min-h-screen items-center justify-center bg-black"><p className="animate-pulse text-white/40">Loading...</p></div>;
 
@@ -128,18 +128,20 @@ export default function ProductPage() {
   const allImages = phone.images?.length > 0 ? phone.images : [];
   const avgRating = reviews.length > 0 ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1) : null;
   const inCart = isInCart(phone.id);
+  const isPreOwned = phone.condition === "Pre-Owned";
+  const isNew = phone.condition === "New";
 
   return (
     <div className="min-h-screen bg-black text-white pt-16 sm:pt-20">
 
-      {/* 5% Discount Banner */}
+      {/* Discount Banner */}
       {showDiscountBanner && (
         <div className="fixed bottom-20 left-3 z-40 w-56 rounded-2xl border border-blue-400/30 bg-[#0a0a0a] p-3 shadow-[0_0_30px_rgba(59,130,246,0.2)] sm:bottom-6 sm:left-6 sm:w-64 sm:p-4">
           <button onClick={() => { setShowDiscountBanner(false); localStorage.setItem("phonesai_discount_banner_dismissed", "true"); }}
             className="absolute right-2 top-2 text-white/30 transition hover:text-white text-xs">✕</button>
           <p className="text-base mb-1">🎁</p>
-          <p className="text-xs font-bold text-white sm:text-sm">5% Off First Order!</p>
-          <p className="mt-1 text-[10px] text-white/50 leading-relaxed sm:text-xs">Email register karein aur pehli purchase pe 5% bachayein.</p>
+          <p className="text-xs font-bold text-white sm:text-sm">Special Discount!</p>
+          <p className="mt-1 text-[10px] text-white/50 leading-relaxed sm:text-xs">Email register karein aur pehli purchase pe discount bachayein.</p>
           <button onClick={() => { setShowDiscountBanner(false); localStorage.setItem("phonesai_discount_banner_dismissed", "true"); window.dispatchEvent(new CustomEvent("openEmailPopup")); }}
             className="mt-2 w-full rounded-xl bg-blue-500/20 border border-blue-400/30 py-1.5 text-[10px] font-semibold text-blue-200 transition hover:bg-blue-500/30 sm:py-2 sm:text-xs">
             Claim Discount →
@@ -149,7 +151,6 @@ export default function ProductPage() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 pb-24 sm:px-6 sm:py-10">
 
-        {/* Back link */}
         <a href="/shop" className="mb-4 inline-flex items-center gap-1 text-xs text-white/40 hover:text-white transition sm:mb-6">
           ← Back to Shop
         </a>
@@ -172,7 +173,8 @@ export default function ProductPage() {
                 </div>
               )}
               {phone.badge && <span className="absolute left-3 top-3 rounded-full border border-purple-500/30 bg-purple-500/20 px-2.5 py-0.5 text-xs font-medium text-purple-300">{phone.badge}</span>}
-              {phone.free_case && phone.condition === "Used" && <span className="absolute right-3 top-3 rounded-full border border-green-500/30 bg-green-500/20 px-2.5 py-0.5 text-xs text-green-300">Free Case 🎁</span>}
+              {phone.free_case && isPreOwned && <span className="absolute right-3 top-3 rounded-full border border-green-500/30 bg-green-500/20 px-2.5 py-0.5 text-xs text-green-300">Free Case + SP 🎁</span>}
+              {phone.free_case && isNew && <span className="absolute right-3 top-3 rounded-full border border-green-500/30 bg-green-500/20 px-2.5 py-0.5 text-xs text-green-300">Free Case 🎁</span>}
             </div>
             {allImages.length > 1 && (
               <div className="flex gap-2 overflow-x-auto pb-1">
@@ -190,7 +192,7 @@ export default function ProductPage() {
           <div className="flex flex-col">
             <div className="mb-3 flex flex-wrap gap-1.5">
               <span className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${categoryColors[phone.category] ?? "border-white/20 bg-white/10 text-white/60"}`}>{phone.category}</span>
-              <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs text-white/50">{phone.condition}</span>
+              <span className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${isPreOwned ? "border-amber-400/30 bg-amber-400/10 text-amber-300" : "border-green-400/30 bg-green-400/10 text-green-300"}`}>{phone.condition}</span>
               {phone.five_g && <span className="rounded-full border border-blue-400/20 bg-blue-400/10 px-2.5 py-0.5 text-xs font-semibold text-blue-300">5G Ready</span>}
             </div>
 
@@ -219,7 +221,7 @@ export default function ProductPage() {
               <p className="mt-1 text-xs text-white/30">Fixed price • No hidden charges</p>
             </div>
 
-            {/* Add to Cart — sticky on mobile */}
+            {/* Add to Cart */}
             <button
               onClick={() => addItem({ id: phone.id, model: phone.model, storage: phone.storage, color: phone.color, category: phone.category, brand: phone.brand, condition: phone.condition, price: phone.price, discount_price: phone.discount_price, image: allImages[0] ?? null, free_case: phone.free_case })}
               className={`mt-3 w-full rounded-2xl py-4 text-sm font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}
@@ -227,13 +229,22 @@ export default function ProductPage() {
               {inCart ? "✓ Added to Cart — View in Cart ↑" : "Add to Cart 🛒"}
             </button>
 
-            {/* Free Case */}
-            {phone.free_case && phone.condition === "Used" && (
+            {/* Free case messaging */}
+            {phone.free_case && isPreOwned && (
               <div className="mt-3 flex items-center gap-2.5 rounded-2xl border border-green-500/20 bg-green-500/5 px-4 py-3">
                 <span className="text-xl">🎁</span>
                 <div>
                   <p className="text-xs font-bold text-green-300 sm:text-sm">Free Case + Screen Protector!</p>
-                  <p className="text-[10px] text-white/40">Is used phone ke saath free cover included</p>
+                  <p className="text-[10px] text-white/40">Is pre-owned phone ke saath free cover aur screen protector included</p>
+                </div>
+              </div>
+            )}
+            {phone.free_case && isNew && (
+              <div className="mt-3 flex items-center gap-2.5 rounded-2xl border border-green-500/20 bg-green-500/5 px-4 py-3">
+                <span className="text-xl">🎁</span>
+                <div>
+                  <p className="text-xs font-bold text-green-300 sm:text-sm">Free Case!</p>
+                  <p className="text-[10px] text-white/40">Is naye phone ke saath free cover included</p>
                 </div>
               </div>
             )}
@@ -247,7 +258,7 @@ export default function ProductPage() {
               </div>
             </div>
 
-            {/* Stats Grid — 2x2 */}
+            {/* Stats Grid — 2 cols, no True Tone */}
             <div className="mt-3 grid grid-cols-2 gap-2 sm:gap-3">
               {phone.battery_health && (
                 <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
@@ -267,8 +278,8 @@ export default function ProductPage() {
                 <p className="text-xl font-extrabold text-white sm:text-2xl">{phone.face_id ? "✅" : "❌"}</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
-                <p className="mb-1 text-[10px] text-white/40 sm:text-xs">True Tone</p>
-                <p className="text-xl font-extrabold text-white sm:text-2xl">{phone.true_tone ? "✅" : "❌"}</p>
+                <p className="mb-1 text-[10px] text-white/40 sm:text-xs">5G</p>
+                <p className="text-xl font-extrabold text-white sm:text-2xl">{phone.five_g ? "✅" : "❌"}</p>
               </div>
             </div>
           </div>
@@ -319,6 +330,13 @@ export default function ProductPage() {
             <p className="text-xs leading-relaxed text-white/70 sm:text-sm">{phone.description}</p>
           </div>
         )}
+
+        {/* Delivery info */}
+        <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:mt-6 sm:p-6">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/30">Delivery</p>
+          <p className="text-sm font-bold text-white">Free Delivery — All Pakistan</p>
+          <p className="mt-1 text-xs text-white/40">Order before 2pm for next day delivery in nearby cities. All Pakistan: 1-3 working days.</p>
+        </div>
 
         {/* Bottom CTA */}
         <div className="mt-10 flex flex-col items-center gap-3 text-center sm:mt-14 sm:gap-4">

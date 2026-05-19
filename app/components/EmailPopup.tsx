@@ -37,7 +37,7 @@ export default function EmailPopup() {
     setTimeout(() => {
       setShowEmailPopup(false);
       localStorage.setItem("phonesai_email_dismissed", "true");
-    }, 2500);
+    }, 4000);
   };
 
   if (!showEmailPopup) return null;
@@ -50,15 +50,15 @@ export default function EmailPopup() {
           <>
             <div className="mb-5 text-center">
               <p className="text-2xl mb-2">🎁</p>
-              <h2 className="text-xl font-extrabold text-white">Get 5% Off Your First Order</h2>
-              <p className="mt-2 text-sm text-white/50">Apna email dein aur pehli purchase pe 5% discount pao.</p>
+              <h2 className="text-xl font-extrabold text-white">Special Discount — First Order!</h2>
+              <p className="mt-2 text-sm text-white/50">Apna email dein aur pehli purchase pe special discount pao.</p>
             </div>
             <form onSubmit={handleEmailSubmit} className="space-y-3">
               <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder="aapka@email.com"
                 className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/25 outline-none focus:border-blue-400/50" />
               <button type="submit" className="w-full rounded-xl bg-blue-500 py-3 text-sm font-bold text-white hover:bg-blue-400">
-                Claim My 5% Discount →
+                Claim My Discount →
               </button>
             </form>
             <button onClick={handleDismiss} className="mt-3 w-full text-center text-xs text-white/25 hover:text-white/50">
@@ -69,11 +69,12 @@ export default function EmailPopup() {
           <div className="text-center py-4">
             <p className="text-4xl mb-3">✅</p>
             <h2 className="text-xl font-extrabold text-white">Shukriya Janab!</h2>
-            <p className="mt-2 text-sm text-white/50">Aapka discount code:</p>
+            <p className="mt-2 text-sm text-white/50">Aapka special discount code:</p>
             <div className="mt-3 rounded-xl border border-blue-400/30 bg-blue-500/10 px-6 py-3">
-              <p className="text-xl font-extrabold tracking-widest text-blue-300">WELCOME5</p>
+              <p className="text-xl font-extrabold tracking-widest text-blue-300">SPECIAL5</p>
             </div>
             <p className="mt-2 text-xs text-white/40">Checkout pe apply karein — 5% off milega!</p>
+            <p className="mt-1 text-xs text-white/25">Screenshot kar lein ya yaad rakh lein!</p>
           </div>
         )}
       </div>

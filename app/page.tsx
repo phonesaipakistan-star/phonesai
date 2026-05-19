@@ -34,8 +34,8 @@ const categories = [
     ),
   },
   {
-    name: "Samsung Flagships",
-    description: "Galaxy S Ultra series — PTA & Non-PTA, verified and 5G ready.",
+    name: "Samsung",
+    description: "Galaxy S Ultra series — PTA & Non-PTA, verified and 5G ready. 7-day warranty.",
     link: "/shop?brand=Samsung",
     color: "from-purple-500/20 to-purple-600/10",
     icon: (
@@ -62,7 +62,7 @@ const categories = [
   },
   {
     name: "Accessories",
-    description: "Original chargers, cables, cases, and screen protectors.",
+    description: "Original Apple chargers, cables, AirPods, and Apple Watch — verified and authentic.",
     link: "/shop?brand=Accessories",
     color: "from-amber-500/20 to-amber-600/10",
     icon: (
@@ -106,13 +106,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-
       <main className="w-full pb-20">
 
         {/* HERO */}
         <section className="hero-gradient hero-dots relative left-1/2 w-screen -translate-x-1/2 overflow-hidden pt-20">
           <div className="mx-auto w-full max-w-7xl px-4 pb-8 sm:px-8 sm:pb-12 lg:pb-0">
-
             <div className="grid grid-cols-1 items-center gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-2 lg:min-h-[600px]">
 
               {/* Text column */}
@@ -157,7 +155,6 @@ export default function Home() {
                     lg:max-h-[580px]"
                 />
               </div>
-
             </div>
           </div>
         </section>
@@ -193,7 +190,7 @@ export default function Home() {
             <div className="text-center">
               <p className="text-xl sm:text-2xl">🚚</p>
               <p className="mt-1 text-xs font-bold text-white sm:text-sm">All Pakistan</p>
-              <p className="mt-0.5 text-[10px] text-white/40 hidden sm:block">Same day Isb/Rwp</p>
+              <p className="mt-0.5 text-[10px] text-white/40 hidden sm:block">1-3 day delivery</p>
             </div>
           </div>
         </section>

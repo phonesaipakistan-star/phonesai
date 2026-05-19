@@ -25,14 +25,14 @@ type Review = {
 const emptyPhoneForm = {
   model: "", storage: "", color: "", brand: "Apple", category: "JV", condition: "New",
   price: "", cost_price: "", discount_price: "", battery_health: "", physical_condition: "10/10",
-  face_id: true, true_tone: true, five_g: true, region: "LLA", ios_version: "", sim_status: "",
+  face_id: true, five_g: true, region: "LLA", ios_version: "", sim_status: "", sim_type: "Dual SIM",
   accessories_included: "", description: "", badge: "", featured: false, in_stock: true,
   free_case: false, images: "", condition_video: "", battery_screenshot: "", imei_number: "", supplier: "",
 };
 
 const emptyAccessoryForm = {
   name: "", brand: "Apple", category: "Charger", price: "", cost_price: "", discount_price: "",
-  condition: "New", in_stock: true, featured: false, is_original: false, description: "",
+  condition: "New", in_stock: true, featured: false, is_original: true, description: "",
   compatible_with: "", images: "", badge: "",
 };
 
@@ -47,6 +47,16 @@ const getCategoriesForBrand = (brand: string) => {
     case "Samsung": return ["PTA", "Non-PTA"];
     case "iPad": return ["WiFi", "Cellular"];
     default: return ["JV", "Non-PTA", "PTA"];
+  }
+};
+
+const getAccessoryIcon = (category: string) => {
+  switch (category) {
+    case "Charger": return "🔌";
+    case "Cable": return "🔗";
+    case "AirPods": return "🎧";
+    case "Apple Watch": return "⌚";
+    default: return "📦";
   }
 };
 
@@ -129,9 +139,10 @@ export default function AdminPage() {
       cost_price: phoneForm.cost_price ? parseInt(phoneForm.cost_price) : null,
       discount_price: phoneForm.discount_price ? parseInt(phoneForm.discount_price) : null,
       battery_health: phoneForm.battery_health ? parseInt(phoneForm.battery_health) : null,
-      physical_condition: phoneForm.physical_condition, face_id: phoneForm.face_id, true_tone: phoneForm.true_tone,
+      physical_condition: phoneForm.physical_condition, face_id: phoneForm.face_id,
       five_g: phoneForm.five_g, region: phoneForm.region, ios_version: phoneForm.ios_version || null,
-      sim_status: phoneForm.sim_status || null, accessories_included: phoneForm.accessories_included || null,
+      sim_status: phoneForm.sim_status || null, sim_type: phoneForm.sim_type || null,
+      accessories_included: phoneForm.accessories_included || null,
       description: phoneForm.description || null, badge: phoneForm.badge || null, featured: phoneForm.featured,
       in_stock: phoneForm.in_stock, free_case: phoneForm.free_case,
       images: phoneForm.images ? phoneForm.images.split(",").map(s => s.trim()).filter(Boolean) : [],
@@ -205,7 +216,6 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-black text-white pt-20">
-      {/* Admin indicator strip */}
       <div className="border-b border-amber-300/20 bg-amber-300/5 px-6 py-2 flex items-center justify-between">
         <span className="text-xs text-amber-300 font-semibold">🔐 Admin Panel</span>
         <div className="flex items-center gap-4">
@@ -229,7 +239,7 @@ export default function AdminPage() {
                 </button>
                 <button onClick={() => setActiveTab("accessories")}
                   className={`rounded-xl px-5 py-2.5 text-sm font-semibold transition ${activeTab === "accessories" ? "bg-blue-500 text-white" : "border border-white/10 text-white/50 hover:text-white"}`}>
-                  🔌 Accessories ({accessories.length})
+                  🎧 Accessories ({accessories.length})
                 </button>
                 <button onClick={() => setActiveTab("reviews")}
                   className={`rounded-xl px-5 py-2.5 text-sm font-semibold transition relative ${activeTab === "reviews" ? "bg-blue-500 text-white" : "border border-white/10 text-white/50 hover:text-white"}`}>
@@ -255,7 +265,7 @@ export default function AdminPage() {
                       <p className="font-bold text-white truncate">{phone.brand} {phone.model} • {phone.storage} • {phone.color}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-2">
                         <span className={`rounded-full border px-2 py-0.5 text-xs ${phone.category === "PTA" ? "border-green-500/30 text-green-300" : phone.category === "Non-PTA" ? "border-blue-500/30 text-blue-300" : phone.category === "JV" ? "border-amber-500/30 text-amber-300" : "border-purple-500/30 text-purple-300"}`}>{phone.category}</span>
-                        <span className="text-xs text-white/40">{phone.condition}</span>
+                        <span className={`text-xs ${phone.condition === "Pre-Owned" ? "text-amber-300" : "text-green-300"}`}>{phone.condition}</span>
                         {phone.battery_health && <span className="text-xs text-white/40">🔋 {phone.battery_health}%</span>}
                         {phone.free_case && <span className="text-xs text-green-300">🎁 Free Case</span>}
                       </div>
@@ -276,11 +286,11 @@ export default function AdminPage() {
               </div>
             ) : activeTab === "accessories" ? (
               <div className="space-y-3">
-                {accessories.length === 0 && <p className="text-white/30">No accessories yet.</p>}
+                {accessories.length === 0 && <p className="text-white/30">No accessories yet. Add AirPods, Apple Watch, Chargers, Cables.</p>}
                 {accessories.map(acc => (
                   <div key={acc.id} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-4">
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-2xl">
-                      {acc.category === "Charger" ? "🔌" : acc.category === "Cable" ? "🔋" : acc.category === "Case" ? "📱" : "🛡️"}
+                      {getAccessoryIcon(acc.category)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-white truncate">{acc.name}</p>
@@ -367,6 +377,25 @@ export default function AdminPage() {
                     {getCategoriesForBrand(phoneForm.brand).map(cat => <option key={cat} value={cat}>{cat}</option>)}
                   </select>
                 </div>
+                <div>
+                  <label className="mb-1 block text-xs text-white/40">Condition *</label>
+                  <select value={phoneForm.condition} onChange={e => setPhoneForm({...phoneForm, condition: e.target.value})}
+                    className="w-full rounded-xl border border-white/10 bg-[#111] px-4 py-2.5 text-sm text-white outline-none">
+                    <option value="New">New</option>
+                    <option value="Pre-Owned">Pre-Owned</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-white/40">SIM Type</label>
+                  <select value={phoneForm.sim_type} onChange={e => setPhoneForm({...phoneForm, sim_type: e.target.value})}
+                    className="w-full rounded-xl border border-white/10 bg-[#111] px-4 py-2.5 text-sm text-white outline-none">
+                    <option value="Single SIM">Single SIM</option>
+                    <option value="Dual SIM">Dual SIM</option>
+                    <option value="eSIM">eSIM</option>
+                    <option value="Dual eSIM">Dual eSIM</option>
+                    <option value="SIM + eSIM">SIM + eSIM</option>
+                  </select>
+                </div>
                 {[
                   { label: "Model *", key: "model", placeholder: "iPhone 16 Pro Max", required: true },
                   { label: "Storage *", key: "storage", placeholder: "256GB", required: true },
@@ -402,14 +431,6 @@ export default function AdminPage() {
                     <option value="Last Unit">Last Unit</option>
                   </select>
                 </div>
-                <div>
-                  <label className="mb-1 block text-xs text-white/40">Condition *</label>
-                  <select value={phoneForm.condition} onChange={e => setPhoneForm({...phoneForm, condition: e.target.value})}
-                    className="w-full rounded-xl border border-white/10 bg-[#111] px-4 py-2.5 text-sm text-white outline-none">
-                    <option value="New">New</option>
-                    <option value="Used">Used</option>
-                  </select>
-                </div>
               </div>
               {[
                 { label: "Image URLs (comma separated)", key: "images", placeholder: "https://..." },
@@ -433,7 +454,6 @@ export default function AdminPage() {
               <div className="flex flex-wrap gap-6">
                 {[
                   { label: "Face ID / Fingerprint", key: "face_id" },
-                  { label: "True Tone", key: "true_tone" },
                   { label: "5G", key: "five_g" },
                   { label: "In Stock", key: "in_stock" },
                   { label: "Featured", key: "featured" },
@@ -468,7 +488,7 @@ export default function AdminPage() {
                 <div>
                   <label className="mb-1 block text-xs text-white/40">Name *</label>
                   <input required value={accessoryForm.name} onChange={e => setAccessoryForm({...accessoryForm, name: e.target.value})}
-                    placeholder="Apple 20W USB-C Charger"
+                    placeholder="AirPods Pro 2nd Gen"
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50" />
                 </div>
                 <div>
@@ -476,7 +496,6 @@ export default function AdminPage() {
                   <select value={accessoryForm.brand} onChange={e => setAccessoryForm({...accessoryForm, brand: e.target.value})}
                     className="w-full rounded-xl border border-white/10 bg-[#111] px-4 py-2.5 text-sm text-white outline-none">
                     <option value="Apple">Apple</option>
-                    <option value="Samsung">Samsung</option>
                     <option value="Third Party">Third Party</option>
                   </select>
                 </div>
@@ -486,27 +505,26 @@ export default function AdminPage() {
                     className="w-full rounded-xl border border-white/10 bg-[#111] px-4 py-2.5 text-sm text-white outline-none">
                     <option value="Charger">Charger</option>
                     <option value="Cable">Cable</option>
-                    <option value="Case">Case</option>
-                    <option value="Screen Protector">Screen Protector</option>
-                    <option value="Other">Other</option>
+                    <option value="AirPods">AirPods</option>
+                    <option value="Apple Watch">Apple Watch</option>
                   </select>
                 </div>
                 <div>
                   <label className="mb-1 block text-xs text-white/40">Sale Price (PKR) *</label>
                   <input required value={accessoryForm.price} onChange={e => setAccessoryForm({...accessoryForm, price: e.target.value})}
-                    placeholder="3500" type="number"
+                    placeholder="45000" type="number"
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50" />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs text-white/40">Cost Price — private</label>
                   <input value={accessoryForm.cost_price} onChange={e => setAccessoryForm({...accessoryForm, cost_price: e.target.value})}
-                    placeholder="2500" type="number"
+                    placeholder="38000" type="number"
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50" />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs text-white/40">Compatible With</label>
                   <input value={accessoryForm.compatible_with} onChange={e => setAccessoryForm({...accessoryForm, compatible_with: e.target.value})}
-                    placeholder="iPhone 15, 16, 17"
+                    placeholder="iPhone 15, 16, 17, iPad"
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50" />
                 </div>
               </div>
@@ -519,7 +537,7 @@ export default function AdminPage() {
               <div>
                 <label className="mb-1 block text-xs text-white/40">Description</label>
                 <textarea value={accessoryForm.description} onChange={e => setAccessoryForm({...accessoryForm, description: e.target.value})}
-                  placeholder="Original Apple charger — pin-pack condition." rows={2}
+                  placeholder="Original Apple — pin-pack condition." rows={2}
                   className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50 resize-none" />
               </div>
               <div className="flex flex-wrap gap-6">

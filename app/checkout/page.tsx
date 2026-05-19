@@ -11,6 +11,7 @@ type Phone = {
   storage: string;
   color: string;
   category: string;
+  condition: string;
   price: number;
   discount_price: number | null;
   images: string[];
@@ -18,17 +19,15 @@ type Phone = {
 
 type PaymentMethod = "bank" | "easypaisa" | "jazzcash" | "raast" | "card";
 
-// ── Sanitization ──────────────────────────────────────────────────────────────
-// Strips all HTML/XML tags, path traversal sequences, and null bytes
 const sanitize = (value: string): string => {
   return value
-    .replace(/<[^>]*>/g, "")           // strip HTML/XML tags
-    .replace(/\.\.[/\\]/g, "")         // strip path traversal ../
-    .replace(/[/\\]/g, "")             // strip remaining slashes
-    .replace(/\0/g, "")                // strip null bytes
-    .replace(/[<>"'`;]/g, "")          // strip injection chars
+    .replace(/<[^>]*>/g, "")
+    .replace(/\.\.[/\\]/g, "")
+    .replace(/[/\\]/g, "")
+    .replace(/\0/g, "")
+    .replace(/[<>"'`;]/g, "")
     .trim()
-    .slice(0, 500);                     // max length
+    .slice(0, 500);
 };
 
 const sanitizeEmail = (value: string): string => {
@@ -39,8 +38,8 @@ const sanitizePhone = (value: string): string => {
   return value.replace(/[^0-9+\-() ]/g, "").slice(0, 20);
 };
 
-const COUPON_CODE = "WELCOME5";
-const COUPON_DISCOUNT = 0.05; // 5%
+const COUPON_CODE = "SPECIAL5";
+const COUPON_DISCOUNT = 0.05;
 
 const paymentMethods = [
   { id: "bank", label: "Bank Transfer", icon: "🏦" },
@@ -51,11 +50,31 @@ const paymentMethods = [
 ];
 
 const paymentDetails: Record<PaymentMethod, { title: string; detail: string; note: string }> = {
-  bank: { title: "Bank Transfer", detail: "Bank: [YOUR BANK NAME]\nAccount Title: [YOUR NAME]\nAccount Number: [YOUR ACCOUNT NUMBER]\nIBAN: [YOUR IBAN]", note: "Transfer the exact amount and send screenshot on WhatsApp." },
-  easypaisa: { title: "EasyPaisa", detail: "Account Number: [YOUR EASYPAISA NUMBER]\nAccount Title: [YOUR NAME]", note: "Send payment to above number and send screenshot on WhatsApp." },
-  jazzcash: { title: "JazzCash", detail: "Mobile Account: [YOUR JAZZCASH NUMBER]\nAccount Title: [YOUR NAME]", note: "Send payment to above number and send screenshot on WhatsApp." },
-  raast: { title: "Raast", detail: "Raast ID: [YOUR RAAST ID]\nAccount Title: [YOUR NAME]", note: "Send via Raast and send payment confirmation on WhatsApp." },
-  card: { title: "Debit / Credit Card", detail: "Bank: [YOUR BANK NAME]\nAccount Title: [YOUR NAME]\nIBAN: [YOUR IBAN]", note: "Transfer via your bank app using IBAN and send confirmation on WhatsApp." },
+  bank: {
+    title: "Bank Transfer",
+    detail: "Bank: Meezan Bank\nAccount Title: MC Mobile Corner\nAccount Number: 53010110263169\nIBAN: PK31MEZN0053010110263169",
+    note: "Transfer the exact amount and send screenshot on WhatsApp: 0304-1502560",
+  },
+  easypaisa: {
+    title: "EasyPaisa",
+    detail: "Account Number: 03041502560\nAccount Title: MC Mobile Corner",
+    note: "Send payment to above number and send screenshot on WhatsApp: 0304-1502560",
+  },
+  jazzcash: {
+    title: "JazzCash",
+    detail: "Mobile Account: 03041502560\nAccount Title: MC Mobile Corner",
+    note: "Send payment to above number and send screenshot on WhatsApp: 0304-1502560",
+  },
+  raast: {
+    title: "Raast",
+    detail: "Raast ID: 03041502560\nAccount Title: MC Mobile Corner",
+    note: "Send via Raast and send confirmation on WhatsApp: 0304-1502560",
+  },
+  card: {
+    title: "Debit / Credit Card",
+    detail: "Bank: Meezan Bank\nAccount Title: MC Mobile Corner\nIBAN: PK31MEZN0053010110263169",
+    note: "Transfer via your bank app using IBAN and send confirmation on WhatsApp: 0304-1502560",
+  },
 };
 
 const trustBadges = [
@@ -77,6 +96,7 @@ function CheckoutContent() {
   const [step, setStep] = useState<"details" | "payment" | "success">("details");
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", email: "", city: "", address: "", notes: "" });
   const [couponInput, setCouponInput] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
@@ -87,7 +107,7 @@ function CheckoutContent() {
       if (!phoneId) { setLoading(false); return; }
       const { data, error } = await supabase
         .from("phones")
-        .select("id,model,storage,color,category,price,discount_price,images")
+        .select("id,model,storage,color,category,condition,price,discount_price,images")
         .eq("id", phoneId)
         .single();
       if (!error && data) setPhone(data);
@@ -119,15 +139,43 @@ function CheckoutContent() {
     const cleanName = sanitize(form.name);
     const cleanPhone = sanitizePhone(form.phone);
     const cleanCity = sanitize(form.city);
-    if (!cleanName || !cleanPhone || !cleanCity) return;
+    const cleanEmail = sanitizeEmail(form.email);
+    const cleanAddress = sanitize(form.address);
+    if (!cleanName || !cleanPhone || !cleanCity || !cleanEmail || !cleanAddress) return;
     setStep("payment");
+  };
+
+  const sendOrderEmail = async (
+    cleanForm: { name: string; email: string; phone: string; city: string },
+    orderItems: { model: string; storage: string; color: string; category: string; condition: string; price: number }[],
+    totalPrice: number,
+    paymentMethod: string
+  ) => {
+    try {
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "order_confirmation",
+          customerName: cleanForm.name,
+          customerEmail: cleanForm.email,
+          customerWhatsApp: cleanForm.phone,
+          customerCity: cleanForm.city,
+          items: orderItems,
+          totalPrice,
+          paymentMethod,
+          couponApplied,
+        }),
+      });
+    } catch (err) {
+      console.error("Email send failed:", err);
+    }
   };
 
   const handleOrderSubmit = async () => {
     if (!selectedPayment) return;
     setSubmitting(true);
 
-    // Sanitize all form fields before saving
     const cleanForm = {
       name: sanitize(form.name),
       phone: sanitizePhone(form.phone),
@@ -138,6 +186,7 @@ function CheckoutContent() {
     };
 
     if (isCartCheckout && items.length > 0) {
+      const orderItems = [];
       for (const item of items) {
         const itemPrice = couponApplied
           ? Math.round((item.discount_price ?? item.price) * (1 - COUPON_DISCOUNT))
@@ -154,7 +203,16 @@ function CheckoutContent() {
           delivery_status: "pending",
           delivery_city: cleanForm.city,
         });
+        orderItems.push({
+          model: item.model,
+          storage: item.storage,
+          color: item.color,
+          category: item.category,
+          condition: item.condition,
+          price: itemPrice,
+        });
       }
+      await sendOrderEmail(cleanForm, orderItems, finalPrice, selectedPayment);
       clearCart();
     } else if (phone) {
       await supabase.from("orders").insert({
@@ -169,7 +227,21 @@ function CheckoutContent() {
         delivery_status: "pending",
         delivery_city: cleanForm.city,
       });
+      await sendOrderEmail(
+        cleanForm,
+        [{
+          model: phone.model,
+          storage: phone.storage,
+          color: phone.color,
+          category: phone.category,
+          condition: phone.condition ?? "",
+          price: finalPrice,
+        }],
+        finalPrice,
+        selectedPayment
+      );
     }
+
     setSubmitting(false);
     setStep("success");
   };
@@ -205,12 +277,18 @@ function CheckoutContent() {
           <div className="flex flex-col items-center gap-6 py-20 text-center">
             <div className="flex h-20 w-20 items-center justify-center rounded-full border border-green-500/30 bg-green-500/10 text-4xl">✅</div>
             <h1 className="text-3xl font-extrabold text-white">Order Received!</h1>
-            <p className="max-w-md text-white/50 leading-relaxed">Shukriya Janab! Aapka order mil gaya. Hum jald hi aapko confirm karenge. Payment screenshot WhatsApp par zaroor bhejein.</p>
+            <p className="max-w-md text-white/50 leading-relaxed">Shukriya Janab! Aapka order mil gaya. Confirmation email bhej di gayi hai. Payment screenshot WhatsApp par zaroor bhejein.</p>
+            <div className="rounded-2xl border border-purple-400/20 bg-purple-500/5 px-6 py-4 text-sm text-purple-200">
+              🎬 Ab apna unboxing video banao — warranty ka proof aur apne doston ko dikhao apna naya phone! Tag us @phonesai.pk
+            </div>
             <div className="rounded-2xl border border-amber-300/20 bg-amber-300/5 px-6 py-4 text-sm text-amber-200">
               🧔 Ustaad Ji ka wada — 7-din warranty ke saath aapka phone verified hai.
             </div>
+            <div className="rounded-2xl border border-blue-400/20 bg-blue-500/5 px-6 py-4 text-sm text-blue-200">
+              📧 Check karein aapki email — order confirmation aur unboxing guide bhej di gayi hai!
+            </div>
             <div className="flex gap-3 flex-wrap justify-center">
-              <a href="https://wa.me/923001234567?text=Assalam o Alaikum! Maine order place kiya hai. Payment screenshot bhej raha/rahi hoon."
+              <a href="https://wa.me/923041502560?text=Assalam o Alaikum! Maine order place kiya hai. Payment screenshot bhej raha/rahi hoon."
                 target="_blank" rel="noopener noreferrer"
                 className="rounded-2xl bg-green-500 px-6 py-3 text-sm font-bold text-white hover:bg-green-400 transition">
                 Send Screenshot on WhatsApp
@@ -263,9 +341,11 @@ function CheckoutContent() {
                       />
                     </div>
                   </div>
+
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium text-white/50">Email (optional — get 5% discount)</label>
+                    <label className="mb-1.5 block text-xs font-medium text-white/50">Email *</label>
                     <input
+                      required
                       value={form.email}
                       onChange={e => setForm({...form, email: sanitizeEmail(e.target.value)})}
                       placeholder="ahmed@gmail.com"
@@ -274,6 +354,7 @@ function CheckoutContent() {
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/25 outline-none focus:border-blue-400/50"
                     />
                   </div>
+
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
                       <label className="mb-1.5 block text-xs font-medium text-white/50">City *</label>
@@ -287,8 +368,9 @@ function CheckoutContent() {
                       />
                     </div>
                     <div>
-                      <label className="mb-1.5 block text-xs font-medium text-white/50">Full Address</label>
+                      <label className="mb-1.5 block text-xs font-medium text-white/50">Full Address *</label>
                       <input
+                        required
                         value={form.address}
                         onChange={e => setForm({...form, address: e.target.value})}
                         placeholder="House 123, Street 4..."
@@ -297,6 +379,7 @@ function CheckoutContent() {
                       />
                     </div>
                   </div>
+
                   <div>
                     <label className="mb-1.5 block text-xs font-medium text-white/50">Special Notes (optional)</label>
                     <textarea
@@ -316,7 +399,7 @@ function CheckoutContent() {
                       <input
                         value={couponInput}
                         onChange={e => { setCouponInput(e.target.value.toUpperCase()); setCouponError(""); setCouponApplied(false); }}
-                        placeholder="e.g. WELCOME5"
+                        placeholder="Enter coupon code"
                         maxLength={20}
                         className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/25 outline-none focus:border-blue-400/50 uppercase"
                       />
@@ -326,14 +409,36 @@ function CheckoutContent() {
                       </button>
                     </div>
                     {couponApplied && (
-                      <p className="mt-1.5 text-xs text-green-400">✓ WELCOME5 applied — 5% discount!</p>
+                      <p className="mt-1.5 text-xs text-green-400">✓ SPECIAL5 applied — 5% discount!</p>
                     )}
                     {couponError && (
                       <p className="mt-1.5 text-xs text-red-400">{couponError}</p>
                     )}
                   </div>
 
-                  <button type="submit" className="w-full rounded-2xl bg-blue-500 py-4 text-sm font-bold text-white transition hover:bg-blue-400">
+                  {/* Terms & Conditions Checkbox */}
+                  <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
+                    <input
+                      type="checkbox"
+                      id="terms"
+                      checked={agreedToTerms}
+                      onChange={e => setAgreedToTerms(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 accent-blue-500 shrink-0"
+                    />
+                    <label htmlFor="terms" className="text-xs text-white/60 leading-relaxed cursor-pointer">
+                      Main ne{" "}
+                      <a href="/terms" target="_blank" className="text-blue-400 hover:underline">Terms & Conditions</a>
+                      {" "}aur{" "}
+                      <a href="/warranty" target="_blank" className="text-blue-400 hover:underline">Warranty Policy</a>
+                      {" "}parh li hai aur main in se mutafiq hoon. Main samajhta/samajhti hoon ke warranty claim ke liye unboxing video zaroori hai.
+                    </label>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={!agreedToTerms}
+                    className="w-full rounded-2xl bg-blue-500 py-4 text-sm font-bold text-white transition hover:bg-blue-400 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
                     Continue to Payment →
                   </button>
                   <p className="text-center text-xs text-white/25">🔒 SSL Secured • Your information is safe with us</p>
@@ -364,7 +469,12 @@ function CheckoutContent() {
                   {selectedPayment && (
                     <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
                       <p className="text-sm font-semibold text-white mb-2">📸 Payment Screenshot</p>
-                      <p className="text-xs text-white/40 leading-relaxed">Payment complete karne ke baad screenshot WhatsApp par bhejein: <span className="text-blue-400">wa.me/923001234567</span></p>
+                      <p className="text-xs text-white/40 leading-relaxed">
+                        Payment complete karne ke baad screenshot WhatsApp par bhejein:{" "}
+                        <a href="https://wa.me/923041502560" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                          wa.me/923041502560
+                        </a>
+                      </p>
                     </div>
                   )}
                   <div className="flex gap-3">
@@ -400,7 +510,7 @@ function CheckoutContent() {
                     <div className="border-t border-white/10 pt-3 mt-3 space-y-1">
                       <div className="flex justify-between"><span className="text-sm text-white/50">Delivery</span><span className="text-sm font-bold text-green-400">Free</span></div>
                       {couponApplied && (
-                        <div className="flex justify-between"><span className="text-sm text-green-400">Coupon (WELCOME5)</span><span className="text-sm font-bold text-green-400">-Rs. {discount.toLocaleString()}</span></div>
+                        <div className="flex justify-between"><span className="text-sm text-green-400">Coupon (SPECIAL5)</span><span className="text-sm font-bold text-green-400">-Rs. {discount.toLocaleString()}</span></div>
                       )}
                       <div className="flex justify-between"><span className="font-bold text-white">Total ({count} items)</span><span className="font-extrabold text-white">Rs. {finalPrice.toLocaleString()}</span></div>
                     </div>
@@ -416,7 +526,7 @@ function CheckoutContent() {
                       <div className="flex justify-between"><span className="text-sm text-white/50">Price</span><span className="text-sm font-bold text-white">Rs. {basePrice.toLocaleString()}</span></div>
                       <div className="flex justify-between"><span className="text-sm text-white/50">Delivery</span><span className="text-sm font-bold text-green-400">Free</span></div>
                       {couponApplied && (
-                        <div className="flex justify-between"><span className="text-sm text-green-400">Coupon (WELCOME5)</span><span className="text-sm font-bold text-green-400">-Rs. {discount.toLocaleString()}</span></div>
+                        <div className="flex justify-between"><span className="text-sm text-green-400">Coupon (SPECIAL5)</span><span className="text-sm font-bold text-green-400">-Rs. {discount.toLocaleString()}</span></div>
                       )}
                       <div className="flex justify-between border-t border-white/10 pt-2 mt-2"><span className="font-bold text-white">Total</span><span className="font-extrabold text-white">Rs. {finalPrice.toLocaleString()}</span></div>
                     </div>

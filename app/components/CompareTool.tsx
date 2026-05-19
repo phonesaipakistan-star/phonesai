@@ -1,7 +1,7 @@
 "use client";
- 
-import { useState, useEffect } from "react";
- 
+
+import { useState } from "react";
+
 type Phone = {
   id: string;
   model: string;
@@ -16,17 +16,16 @@ type Phone = {
   physical_condition: string;
   five_g: boolean;
   face_id: boolean;
-  true_tone: boolean;
   images: string[];
   free_case: boolean;
 };
- 
+
 type CompareToolProps = {
   selectedPhones: Phone[];
   onRemove: (id: string) => void;
   onClear: () => void;
 };
- 
+
 const Row = ({ label, a, b, highlight }: { label: string; a: string; b: string; highlight?: boolean }) => (
   <div className={`grid grid-cols-3 gap-4 py-3 border-b border-white/5 ${highlight ? "bg-white/[0.02] rounded-xl px-3" : ""}`}>
     <p className="text-xs text-white/40 self-center">{label}</p>
@@ -34,19 +33,19 @@ const Row = ({ label, a, b, highlight }: { label: string; a: string; b: string; 
     <p className="text-sm font-semibold text-white text-center">{b}</p>
   </div>
 );
- 
+
 export default function CompareTool({ selectedPhones, onRemove, onClear }: CompareToolProps) {
   const [showPopup, setShowPopup] = useState(false);
- 
+
   const openUstaadJi = () => {
     window.dispatchEvent(new CustomEvent("openUstaadJi"));
     setShowPopup(false);
   };
- 
+
   if (selectedPhones.length === 0) return null;
- 
+
   const [a, b] = selectedPhones;
- 
+
   return (
     <>
       {/* Floating Bar */}
@@ -79,18 +78,18 @@ export default function CompareTool({ selectedPhones, onRemove, onClear }: Compa
           </div>
         </div>
       </div>
- 
+
       {/* Comparison Popup */}
       {showPopup && a && b && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-white/20 bg-[#0a0a0a] shadow-2xl">
- 
+
             {/* Header */}
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-[#0a0a0a] px-6 py-4">
               <h2 className="text-lg font-extrabold text-white">Compare Phones</h2>
               <button onClick={() => setShowPopup(false)} className="text-white/40 hover:text-white transition">✕</button>
             </div>
- 
+
             <div className="p-6">
               {/* Phone Headers */}
               <div className="grid grid-cols-3 gap-4 mb-6">
@@ -107,7 +106,7 @@ export default function CompareTool({ selectedPhones, onRemove, onClear }: Compa
                   </div>
                 ))}
               </div>
- 
+
               {/* Comparison Rows */}
               <div className="space-y-1">
                 <Row label="Price"
@@ -123,20 +122,16 @@ export default function CompareTool({ selectedPhones, onRemove, onClear }: Compa
                 <Row label="Face ID"
                   a={a.face_id ? "✅ Working" : "❌ Not working"}
                   b={b.face_id ? "✅ Working" : "❌ Not working"} />
-                <Row label="True Tone"
-                  a={a.true_tone ? "✅ Active" : "❌ Not active"}
-                  b={b.true_tone ? "✅ Active" : "❌ Not active"}
-                  highlight />
                 <Row label="5G"
                   a={a.five_g ? "✅ Ready" : "❌ No"}
-                  b={b.five_g ? "✅ Ready" : "❌ No"} />
-                <Row label="Free Case"
-                  a={a.free_case && a.condition === "Used" ? "🎁 Included" : "—"}
-                  b={b.free_case && b.condition === "Used" ? "🎁 Included" : "—"}
+                  b={b.five_g ? "✅ Ready" : "❌ No"}
                   highlight />
-                <Row label="Brand" a={a.brand} b={b.brand} />
+                <Row label="Free Accessories"
+                  a={a.free_case && a.condition === "Pre-Owned" ? "🎁 Case + Screen Protector" : a.free_case && a.condition === "New" ? "🎁 Case" : "—"}
+                  b={b.free_case && b.condition === "Pre-Owned" ? "🎁 Case + Screen Protector" : b.free_case && b.condition === "New" ? "🎁 Case" : "—"} />
+                <Row label="Brand" a={a.brand} b={b.brand} highlight />
               </div>
- 
+
               {/* Price difference */}
               <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-center">
                 {(() => {
@@ -154,7 +149,7 @@ export default function CompareTool({ selectedPhones, onRemove, onClear }: Compa
                   );
                 })()}
               </div>
- 
+
               {/* CTAs */}
               <div className="mt-6 grid grid-cols-2 gap-3">
                 <button onClick={openUstaadJi}
