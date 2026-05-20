@@ -17,7 +17,7 @@ type Phone = {
   images: string[];
 };
 
-type PaymentMethod = "bank" | "easypaisa" | "jazzcash" | "raast" | "card";
+type PaymentMethod = "bank" | "easypaisa" | "jazzcash" | "raast";
 
 const sanitize = (value: string): string => {
   return value
@@ -46,7 +46,6 @@ const paymentMethods = [
   { id: "easypaisa", label: "EasyPaisa", icon: "🟢" },
   { id: "jazzcash", label: "JazzCash", icon: "🔴" },
   { id: "raast", label: "Raast", icon: "⚡" },
-  { id: "card", label: "Debit / Credit Card", icon: "💳" },
 ];
 
 const paymentDetails: Record<PaymentMethod, { title: string; detail: string; note: string }> = {
@@ -69,11 +68,6 @@ const paymentDetails: Record<PaymentMethod, { title: string; detail: string; not
     title: "Raast",
     detail: "Raast ID: 03041502560\nAccount Title: MC Mobile Corner",
     note: "Send via Raast and send confirmation on WhatsApp: 0304-1502560",
-  },
-  card: {
-    title: "Debit / Credit Card",
-    detail: "Bank: Meezan Bank\nAccount Title: MC Mobile Corner\nIBAN: PK31MEZN0053010110263169",
-    note: "Transfer via your bank app using IBAN and send confirmation on WhatsApp: 0304-1502560",
   },
 };
 
