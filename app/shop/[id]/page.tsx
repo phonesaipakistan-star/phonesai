@@ -5,6 +5,8 @@ import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useCart } from "@/app/components/CartContext";
 
+const SUPABASE_URL = "https://xadxdkbdwyulprfukrjb.supabase.co";
+
 type Phone = {
   id: string; model: string; storage: string; color: string; category: string; brand: string;
   condition: string; price: number; discount_price: number | null; battery_health: number;
@@ -17,7 +19,7 @@ type Phone = {
 
 type Review = {
   id: string; customer_name: string; customer_city: string; rating: number;
-  review_text: string; verified_buyer: boolean; created_at: string;
+  review_text: string; verified_buyer: boolean; created_at: string; photo_url: string | null;
 };
 
 const categoryColors: Record<string, string> = {
@@ -68,6 +70,8 @@ export default function ProductPage() {
   const [activeImage, setActiveImage] = useState(0);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewForm, setReviewForm] = useState({ name: "", city: "", rating: 5, text: "" });
+  const [reviewPhoto, setReviewPhoto] = useState<File | null>(null);
+  const [reviewPhotoPreview, setReviewPhotoPreview] = useState<string | null>(null);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [showDiscountBanner, setShowDiscountBanner] = useState(false);
@@ -98,15 +102,36 @@ export default function ProductPage() {
     }
   }, []);
 
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setReviewPhoto(file);
+    setReviewPhotoPreview(URL.createObjectURL(file));
+  };
+
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reviewForm.name || !reviewForm.text || !phone) return;
     setSubmittingReview(true);
+
+    let photoUrl: string | null = null;
+
+    // Upload photo if selected
+    if (reviewPhoto) {
+      const ext = reviewPhoto.name.split(".").pop();
+      const fileName = `review-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("phone-images").upload(fileName, reviewPhoto, { upsert: true });
+      if (!error) {
+        photoUrl = `${SUPABASE_URL}/storage/v1/object/public/phone-images/${fileName}`;
+      }
+    }
+
     await supabase.from("reviews").insert({
       customer_name: reviewForm.name, customer_city: reviewForm.city,
       rating: reviewForm.rating, review_text: reviewForm.text,
       product_model: phone.model, review_type: "product",
       verified_buyer: false, approved: false,
+      photo_url: photoUrl,
     });
     setSubmittingReview(false);
     setReviewSubmitted(true);
@@ -258,7 +283,7 @@ export default function ProductPage() {
               </div>
             </div>
 
-            {/* Stats Grid — 2 cols, no True Tone */}
+            {/* Stats Grid */}
             <div className="mt-3 grid grid-cols-2 gap-2 sm:gap-3">
               {phone.battery_health && (
                 <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
@@ -376,6 +401,10 @@ export default function ProductPage() {
               {reviews.map((review) => (
                 <div key={review.id} className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 flex flex-col gap-2 sm:p-6 sm:gap-3">
                   <StarRating rating={review.rating} />
+                  {/* Review photo */}
+                  {review.photo_url && (
+                    <img src={review.photo_url} alt="Review" className="w-full h-40 object-cover rounded-xl border border-white/10" />
+                  )}
                   <p className="text-xs text-white/80 leading-relaxed sm:text-sm">"{review.review_text}"</p>
                   <div className="mt-auto flex items-center justify-between">
                     <div>
@@ -424,6 +453,25 @@ export default function ProductPage() {
                     placeholder="Aapka experience kaisa tha?" rows={3}
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50 resize-none" />
                 </div>
+
+                {/* Photo Upload */}
+                <div>
+                  <label className="mb-1 block text-xs text-white/40">Add Photo (optional) 📸</label>
+                  {reviewPhotoPreview ? (
+                    <div className="relative inline-block">
+                      <img src={reviewPhotoPreview} alt="Preview" className="h-24 w-24 object-cover rounded-xl border border-white/10" />
+                      <button type="button" onClick={() => { setReviewPhoto(null); setReviewPhotoPreview(null); }}
+                        className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">✕</button>
+                    </div>
+                  ) : (
+                    <label className="flex h-20 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-white/20 text-white/40 transition hover:border-white/40 hover:text-white/70">
+                      <span className="text-xl">📷</span>
+                      <span className="text-xs">Apni unboxing ya phone ki photo upload karein</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={handlePhotoSelect} />
+                    </label>
+                  )}
+                </div>
+
                 <button type="submit" disabled={submittingReview}
                   className="w-full rounded-xl bg-blue-500 py-3 text-sm font-bold text-white transition hover:bg-blue-400 disabled:opacity-50">
                   {submittingReview ? "Submitting..." : "Submit Review →"}

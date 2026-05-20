@@ -17,6 +17,7 @@ type Review = {
   review_text: string;
   product_model: string | null;
   verified_buyer: boolean;
+  photo_url: string | null;
 };
 
 const categories = [
@@ -91,7 +92,7 @@ export default function Home() {
     const fetchReviews = async () => {
       const { data } = await supabase
         .from("reviews")
-        .select("id,customer_name,customer_city,rating,review_text,product_model,verified_buyer")
+        .select("id,customer_name,customer_city,rating,review_text,product_model,verified_buyer,photo_url")
         .eq("approved", true)
         .order("rating", { ascending: false });
       if (data) setReviews(data);
@@ -227,6 +228,9 @@ export default function Home() {
                   <div key={review.id}
                     className="w-full shrink-0 rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-3 sm:w-[calc(33.333%-10px)]">
                     <StarRating rating={review.rating} />
+                    {review.photo_url && (
+                      <img src={review.photo_url} alt="Review" className="w-full h-40 object-cover rounded-xl border border-white/10" />
+                    )}
                     <p className="text-sm text-white/80 leading-relaxed flex-1">"{review.review_text}"</p>
                     {review.product_model && <p className="text-xs text-blue-300/60">re: {review.product_model}</p>}
                     <div className="flex items-center justify-between pt-2 border-t border-white/5">
