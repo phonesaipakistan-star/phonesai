@@ -36,19 +36,22 @@ export default function EmailPopup() {
     e.preventDefault();
     if (!email) return;
     setSending(true);
-
+  
     const token = generateToken();
-
+  
     try {
-      // Save email with token — not yet verified
-      await supabase.from("customer_leads").upsert({
+      const { error } = await supabase.from("customer_leads").insert({
         email,
         token,
         verified: false,
         discount_used: false,
-      }, { onConflict: "email" });
-
-      // Send verification email via Resend
+      });
+  
+      if (error) {
+        console.error("Supabase insert error:", error);
+      }
+  
+      // Send verification email regardless
       await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -61,7 +64,7 @@ export default function EmailPopup() {
     } catch (err) {
       console.error("Email signup error:", err);
     }
-
+  
     setSending(false);
     setSubmitted(true);
     setTimeout(() => {
