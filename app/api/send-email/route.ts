@@ -39,7 +39,7 @@ const getVerificationEmail = (email: string, token: string) => `
       <p style="font-size:40px;margin:0 0 12px;">🎁</p>
       <h2 style="color:#93c5fd;font-size:22px;font-weight:800;margin:0 0 8px;">Email Verify Karein</h2>
       <p style="color:#bfdbfe;font-size:14px;margin:0 0 24px;">Apna SPECIAL5 discount code hasil karne ke liye neeche button dabayein.</p>
-      <a href="${SITE_URL}/verify-email?token=${token}"
+      <a href="${SITE_URL}/api/verify-email?token=${token}"
         style="display:inline-block;background:#3b82f6;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;">
         ✅ Email Verify Karein — Discount Lein
       </a>
@@ -250,7 +250,6 @@ export async function POST(req: Request) {
     // 1. Order confirmation to customer
     if (data.customerEmail) {
       const res1 = await fetch("https://api.resend.com/emails", {
-        method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${RESEND_API_KEY}`,
