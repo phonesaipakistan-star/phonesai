@@ -3,14 +3,16 @@ import { NextResponse } from "next/server";
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = "orders@phonesai.pk";
 const ADMIN_EMAIL = "phonesaipakistan@gmail.com";
+const SITE_URL = "https://phonesai.pk";
 
 type OrderEmailData = {
-  type: "order_confirmation" | "unboxing_guide" | "admin_notification";
-  customerName: string;
+  type: "order_confirmation" | "unboxing_guide" | "admin_notification" | "verify_email";
+  customerName?: string;
   customerEmail: string;
-  customerWhatsApp: string;
-  customerCity: string;
-  items: {
+  customerWhatsApp?: string;
+  customerCity?: string;
+  verificationToken?: string;
+  items?: {
     model: string;
     storage: string;
     color: string;
@@ -18,10 +20,45 @@ type OrderEmailData = {
     condition: string;
     price: number;
   }[];
-  totalPrice: number;
-  paymentMethod: string;
+  totalPrice?: number;
+  paymentMethod?: string;
   couponApplied?: boolean;
 };
+
+const getVerificationEmail = (email: string, token: string) => `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#000000;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <h1 style="color:#ffffff;font-size:28px;font-weight:800;margin:0;">Phones<span style="color:#3B82F6;">AI</span></h1>
+      <p style="color:#6B7280;font-size:14px;margin:8px 0 0;">Premium Shopping, Reinvented.</p>
+    </div>
+    <div style="background:#0c1a3a;border:1px solid #1e40af;border-radius:16px;padding:32px;text-align:center;margin-bottom:24px;">
+      <p style="font-size:40px;margin:0 0 12px;">🎁</p>
+      <h2 style="color:#93c5fd;font-size:22px;font-weight:800;margin:0 0 8px;">Email Verify Karein</h2>
+      <p style="color:#bfdbfe;font-size:14px;margin:0 0 24px;">Apna SPECIAL5 discount code hasil karne ke liye neeche button dabayein.</p>
+      <a href="${SITE_URL}/verify-email?token=${token}"
+        style="display:inline-block;background:#3b82f6;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;">
+        ✅ Email Verify Karein — Discount Lein
+      </a>
+    </div>
+    <div style="background:#111111;border:1px solid #1f2937;border-radius:16px;padding:24px;margin-bottom:24px;">
+      <p style="color:#9ca3af;font-size:13px;margin:0 0 8px;">Verify karne ke baad milega:</p>
+      <div style="background:#1a2a1a;border:1px solid #166534;border-radius:12px;padding:16px;text-align:center;">
+        <p style="color:#4ade80;font-size:24px;font-weight:800;letter-spacing:0.1em;margin:0;">SPECIAL5</p>
+        <p style="color:#86efac;font-size:12px;margin:4px 0 0;">5% off your first order</p>
+      </div>
+    </div>
+    <p style="color:#6b7280;font-size:12px;text-align:center;margin:0;">Yeh link 24 ghante mein expire ho jata hai. Agar aapne signup nahi kiya toh is email ko ignore karein.</p>
+    <div style="text-align:center;padding-top:24px;border-top:1px solid #1f2937;margin-top:24px;">
+      <p style="color:#6b7280;font-size:12px;margin:0;">PhonesAI • <a href="https://phonesai.pk" style="color:#3b82f6;text-decoration:none;">phonesai.pk</a></p>
+    </div>
+  </div>
+</body>
+</html>
+`;
 
 const getOrderConfirmationEmail = (data: OrderEmailData) => `
 <!DOCTYPE html>
@@ -48,7 +85,7 @@ const getOrderConfirmationEmail = (data: OrderEmailData) => `
 
     <div style="background:#111111;border:1px solid #1f2937;border-radius:16px;padding:24px;margin-bottom:24px;">
       <h3 style="color:#9ca3af;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 16px;">Order Summary</h3>
-      ${data.items.map(item => `
+      ${(data.items ?? []).map(item => `
       <div style="padding:12px 0;border-bottom:1px solid #1f2937;">
         <p style="color:#ffffff;font-size:14px;font-weight:700;margin:0;">${item.model}</p>
         <p style="color:#6b7280;font-size:12px;margin:4px 0 0;">${item.storage} • ${item.color} • ${item.category} • ${item.condition}</p>
@@ -56,7 +93,7 @@ const getOrderConfirmationEmail = (data: OrderEmailData) => `
       </div>
       `).join("")}
       <div style="padding:16px 0 0;">
-        <p style="color:#ffffff;font-size:16px;font-weight:800;margin:0;">Total: Rs. ${data.totalPrice.toLocaleString()}</p>
+        <p style="color:#ffffff;font-size:16px;font-weight:800;margin:0;">Total: Rs. ${data.totalPrice?.toLocaleString()}</p>
         ${data.couponApplied ? `<p style="color:#4ade80;font-size:12px;margin:8px 0 0;">✓ SPECIAL5 discount applied</p>` : ""}
       </div>
     </div>
@@ -164,11 +201,11 @@ const getAdminNotificationEmail = (data: OrderEmailData) => `
     <p><strong>Email:</strong> ${data.customerEmail}</p>
     <p><strong>City:</strong> ${data.customerCity}</p>
     <p><strong>Payment:</strong> ${data.paymentMethod}</p>
-    <p><strong>Total:</strong> Rs. ${data.totalPrice.toLocaleString()}</p>
+    <p><strong>Total:</strong> Rs. ${data.totalPrice?.toLocaleString()}</p>
     ${data.couponApplied ? `<p><strong>Coupon:</strong> SPECIAL5 applied</p>` : ""}
     <hr>
     <h3>Items:</h3>
-    ${data.items.map(item => `
+    ${(data.items ?? []).map(item => `
       <div style="background:#f9fafb;padding:12px;border-radius:8px;margin-bottom:8px;">
         <p style="margin:0;font-weight:bold;">${item.model} — ${item.storage} — ${item.color}</p>
         <p style="margin:4px 0 0;color:#6b7280;">${item.category} • ${item.condition} • Rs. ${item.price.toLocaleString()}</p>
@@ -187,7 +224,28 @@ export async function POST(req: Request) {
     }
 
     const data: OrderEmailData = await req.json();
-    console.log("Sending email for order:", data.customerName, data.customerEmail);
+
+    // Handle email verification
+    if (data.type === "verify_email") {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${RESEND_API_KEY}`,
+        },
+        body: JSON.stringify({
+          from: `PhonesAI <${FROM_EMAIL}>`,
+          to: [data.customerEmail],
+          subject: "Email Verify Karein — SPECIAL5 Discount Pao 🎁",
+          html: getVerificationEmail(data.customerEmail, data.verificationToken!),
+        }),
+      });
+      const r = await res.json();
+      console.log("Verification email result:", r);
+      return NextResponse.json({ success: true });
+    }
+
+    console.log("Sending order email for:", data.customerName, data.customerEmail);
 
     // 1. Order confirmation to customer
     if (data.customerEmail) {
@@ -200,7 +258,7 @@ export async function POST(req: Request) {
         body: JSON.stringify({
           from: `PhonesAI <${FROM_EMAIL}>`,
           to: [data.customerEmail],
-          subject: `Order Confirmed — ${data.items[0]?.model ?? "Your Phone"} 📱`,
+          subject: `Order Confirmed — ${data.items?.[0]?.model ?? "Your Phone"} 📱`,
           html: getOrderConfirmationEmail(data),
         }),
       });
@@ -218,7 +276,7 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         from: `PhonesAI Orders <${FROM_EMAIL}>`,
         to: [ADMIN_EMAIL],
-        subject: `🛒 New Order — ${data.customerName} — Rs. ${data.totalPrice.toLocaleString()}`,
+        subject: `🛒 New Order — ${data.customerName} — Rs. ${data.totalPrice?.toLocaleString()}`,
         html: getAdminNotificationEmail(data),
       }),
     });

@@ -3,10 +3,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+function generateToken() {
+  return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
 export default function EmailPopup() {
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     const dismissed = localStorage.getItem("phonesai_email_dismissed");
@@ -30,14 +35,39 @@ export default function EmailPopup() {
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
+    setSending(true);
+
+    const token = generateToken();
+
     try {
-      await supabase.from("customer_leads").insert({ email, discount_used: false });
-    } catch { }
+      // Save email with token — not yet verified
+      await supabase.from("customer_leads").upsert({
+        email,
+        token,
+        verified: false,
+        discount_used: false,
+      }, { onConflict: "email" });
+
+      // Send verification email via Resend
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "verify_email",
+          customerEmail: email,
+          verificationToken: token,
+        }),
+      });
+    } catch (err) {
+      console.error("Email signup error:", err);
+    }
+
+    setSending(false);
     setSubmitted(true);
     setTimeout(() => {
       setShowEmailPopup(false);
       localStorage.setItem("phonesai_email_dismissed", "true");
-    }, 4000);
+    }, 5000);
   };
 
   if (!showEmailPopup) return null;
@@ -57,8 +87,8 @@ export default function EmailPopup() {
               <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder="aapka@email.com"
                 className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/25 outline-none focus:border-blue-400/50" />
-              <button type="submit" className="w-full rounded-xl bg-blue-500 py-3 text-sm font-bold text-white hover:bg-blue-400">
-                Claim My Discount →
+              <button type="submit" disabled={sending} className="w-full rounded-xl bg-blue-500 py-3 text-sm font-bold text-white hover:bg-blue-400 disabled:opacity-50">
+                {sending ? "Bhej rahe hain..." : "Claim My Discount →"}
               </button>
             </form>
             <button onClick={handleDismiss} className="mt-3 w-full text-center text-xs text-white/25 hover:text-white/50">
@@ -67,14 +97,13 @@ export default function EmailPopup() {
           </>
         ) : (
           <div className="text-center py-4">
-            <p className="text-4xl mb-3">✅</p>
-            <h2 className="text-xl font-extrabold text-white">Shukriya Janab!</h2>
-            <p className="mt-2 text-sm text-white/50">Aapka special discount code:</p>
-            <div className="mt-3 rounded-xl border border-blue-400/30 bg-blue-500/10 px-6 py-3">
-              <p className="text-xl font-extrabold tracking-widest text-blue-300">SPECIAL5</p>
+            <p className="text-4xl mb-3">📧</p>
+            <h2 className="text-xl font-extrabold text-white">Email Check Karein!</h2>
+            <p className="mt-2 text-sm text-white/50">Aapki email pe ek verification link bheja gaya hai.</p>
+            <p className="mt-2 text-xs text-white/30">Link click karein aur SPECIAL5 discount code hasil karein!</p>
+            <div className="mt-4 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+              <p className="text-xs text-white/40">Spam folder bhi check karein agar email na aaye.</p>
             </div>
-            <p className="mt-2 text-xs text-white/40">Checkout pe apply karein — 5% off milega!</p>
-            <p className="mt-1 text-xs text-white/25">Screenshot kar lein ya yaad rakh lein!</p>
           </div>
         )}
       </div>
