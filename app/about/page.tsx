@@ -14,6 +14,13 @@ export default function AboutPage() {
           <p>PhonesAI Wah Cantt, Pakistan mein based ek premium device store hai. Hum iPhones, Samsung, iPads, aur accessories sell karte hain — sirf verified, asli, aur 7-din warranty ke saath.</p>
           <p>Hamare paas ek decade se zyada ka tajurba hai is market mein. Har device personally check hoti hai Ustaad Ji ke haath se — battery health, Face ID, physical condition, sab kuch verify hota hai pehle aapke paas pohonchne se.</p>
           <p>Hum believe karte hain ke premium shopping mein trust sabse pehle aata hai. Isliye hum sirf wohi bechte hain jo hum khud use karein — koi compromise nahi, koi hidden charges nahi.</p>
+
+          {/* Mobile Corner collaboration */}
+          <div className="rounded-2xl border border-blue-400/20 bg-blue-500/5 p-6">
+            <p className="text-blue-300 font-semibold text-sm mb-2">🤝 Our Collaboration</p>
+            <p>PhonesAI ek premium digital storefront hai jo <span className="text-white font-medium">Mobile Corner, Wah Cantt</span> ke saath mil kar kaam karta hai — aapko verified devices ki guarantee ke saath ek established physical store ka trust milta hai.</p>
+          </div>
+
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 space-y-3">
             <div className="flex items-center gap-3"><span className="text-xl">📍</span><p className="text-white">Wah Cantt, Punjab, Pakistan</p></div>
             <div className="flex items-center gap-3"><span className="text-xl">💬</span><a href="https://wa.me/923041502560" className="text-blue-400 hover:underline">WhatsApp: 0304-1502560</a></div>

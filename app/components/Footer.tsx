@@ -26,7 +26,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Info — reordered */}
+          {/* Info */}
           <div>
             <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-white/30">Info</p>
             <ul className="space-y-2.5 text-sm text-white/50">
@@ -68,12 +68,9 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 sm:flex-row">
           <p className="text-xs text-white/25">© 2026 PhonesAI. All rights reserved. Wah Cantt, Pakistan.</p>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-white/25">Powered by</span>
-            <span className="text-xs font-semibold text-white/40">AI + Trust</span>
-          </div>
+          <p className="text-xs text-white/20">PhonesAI — in collaboration with <span className="text-white/35 font-medium">Mobile Corner</span></p>
         </div>
 
       </div>
