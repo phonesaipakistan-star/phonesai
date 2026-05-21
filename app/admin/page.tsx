@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 const ADMIN_PASSWORD = "PhonesAI321@";
+const SUPABASE_URL = "https://xadxdkbdwyulprfukrjb.supabase.co";
 
 type Phone = {
   id: string; model: string; storage: string; color: string; category: string;
@@ -13,7 +14,7 @@ type Phone = {
 
 type Accessory = {
   id: string; name: string; brand: string; category: string; price: number;
-  in_stock: boolean; featured: boolean; is_original: boolean;
+  in_stock: boolean; featured: boolean; is_original: boolean; images: string[];
 };
 
 type Review = {
@@ -27,13 +28,17 @@ const emptyPhoneForm = {
   price: "", cost_price: "", discount_price: "", battery_health: "", physical_condition: "10/10",
   face_id: true, five_g: true, region: "LLA", ios_version: "", sim_status: "", sim_type: "Dual SIM",
   accessories_included: "", description: "", badge: "", featured: false, in_stock: true,
-  free_case: false, images: "", condition_video: "", battery_screenshot: "", imei_number: "", supplier: "",
+  free_case: false,
+  images: [] as string[],
+  condition_video: "",
+  battery_screenshot: [] as string[],
+  imei_number: "", supplier: "",
 };
 
 const emptyAccessoryForm = {
   name: "", brand: "Apple", category: "Charger", price: "", cost_price: "", discount_price: "",
   condition: "New", in_stock: true, featured: false, is_original: true, description: "",
-  compatible_with: "", images: "", badge: "",
+  compatible_with: "", images: [] as string[], badge: "",
 };
 
 const emptyReviewForm = {
@@ -66,6 +71,141 @@ const StarDisplay = ({ rating }: { rating: number }) => (
   </div>
 );
 
+// ── Image Uploader ────────────────────────────────────────────────────────────
+function ImageUploader({ bucket, existingUrls, onUpload, label, accept = "image/*" }: {
+  bucket: string;
+  existingUrls: string[];
+  onUpload: (urls: string[]) => void;
+  label: string;
+  accept?: string;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [previews, setPreviews] = useState<string[]>(existingUrls);
+
+  const isVideo = (url: string) => url.match(/\.(mp4|mov|webm|avi)$/i);
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    const newUrls: string[] = [];
+    for (const file of Array.from(files)) {
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from(bucket).upload(fileName, file, { upsert: true });
+      if (!error) {
+        const url = `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${fileName}`;
+        newUrls.push(url);
+      } else {
+        console.error("Upload error:", error);
+      }
+    }
+    const combined = [...previews, ...newUrls];
+    setPreviews(combined);
+    onUpload(combined);
+    setUploading(false);
+  };
+
+  const removeItem = (index: number) => {
+    const updated = previews.filter((_, i) => i !== index);
+    setPreviews(updated);
+    onUpload(updated);
+  };
+
+  return (
+    <div>
+      <label className="mb-2 block text-xs text-white/40">{label}</label>
+      <div className="flex flex-wrap gap-2 mb-2">
+        {previews.map((url, i) => (
+          <div key={i} className="relative group">
+            {isVideo(url) ? (
+              <div className="h-16 w-24 flex items-center justify-center rounded-xl border border-white/10 bg-white/5">
+                <span className="text-2xl">🎬</span>
+              </div>
+            ) : (
+              <img src={url} alt="" className="h-16 w-16 object-contain rounded-xl border border-white/10 bg-white/5 p-1" />
+            )}
+            <button type="button" onClick={() => removeItem(i)}
+              className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white opacity-0 group-hover:opacity-100 transition">✕</button>
+          </div>
+        ))}
+        <label className={`flex h-16 w-16 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-white/20 text-white/40 transition hover:border-blue-400/50 hover:text-blue-300 ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}>
+          {uploading ? (
+            <span className="text-xs animate-pulse">Uploading...</span>
+          ) : (
+            <>
+              <span className="text-lg">+</span>
+              <span className="text-[10px]">Upload</span>
+            </>
+          )}
+          <input type="file" multiple accept={accept} className="hidden" disabled={uploading}
+            onChange={e => handleFiles(e.target.files)} />
+        </label>
+      </div>
+      {uploading && <p className="text-xs text-blue-400 animate-pulse">⏳ Uploading to Supabase Storage...</p>}
+    </div>
+  );
+}
+
+// ── Video Uploader (single video) ─────────────────────────────────────────────
+function VideoUploader({ bucket, existingUrl, onUpload, label }: {
+  bucket: string;
+  existingUrl: string;
+  onUpload: (url: string) => void;
+  label: string;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [url, setUrl] = useState(existingUrl);
+
+  const handleFile = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const file = files[0];
+    setUploading(true);
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "mp4";
+    const fileName = `video-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from(bucket).upload(fileName, file, { upsert: true });
+    if (!error) {
+      const newUrl = `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${fileName}`;
+      setUrl(newUrl);
+      onUpload(newUrl);
+    } else {
+      console.error("Video upload error:", error);
+    }
+    setUploading(false);
+  };
+
+  return (
+    <div>
+      <label className="mb-2 block text-xs text-white/40">{label}</label>
+      {url ? (
+        <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+          <span className="text-2xl">🎬</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-green-400 font-medium">Video uploaded ✓</p>
+            <p className="text-[10px] text-white/30 truncate">{url}</p>
+          </div>
+          <button type="button" onClick={() => { setUrl(""); onUpload(""); }}
+            className="text-red-400 text-xs hover:text-red-300">Remove</button>
+        </div>
+      ) : (
+        <label className={`flex h-20 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/20 text-white/40 transition hover:border-blue-400/50 hover:text-blue-300 ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}>
+          {uploading ? (
+            <p className="text-xs animate-pulse">⏳ Uploading video...</p>
+          ) : (
+            <>
+              <span className="text-2xl">🎬</span>
+              <span className="text-xs">Click to upload video (MP4, MOV)</span>
+              <span className="text-[10px] text-white/25">Max 100MB recommended</span>
+            </>
+          )}
+          <input type="file" accept="video/*" className="hidden" disabled={uploading}
+            onChange={e => handleFile(e.target.files)} />
+        </label>
+      )}
+    </div>
+  );
+}
+
+// ── Main Admin Page ───────────────────────────────────────────────────────────
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [password, setPassword] = useState("");
@@ -75,7 +215,7 @@ export default function AdminPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"phones" | "accessories" | "reviews">("phones");
-  const [view, setView] = useState<"list" | "add" | "edit" | "add_review">("list");
+  const [view, setView] = useState<"list" | "add" | "edit" | "add_review" | "edit_accessory">("list");
   const [phoneForm, setPhoneForm] = useState(emptyPhoneForm);
   const [accessoryForm, setAccessoryForm] = useState(emptyAccessoryForm);
   const [reviewForm, setReviewForm] = useState(emptyReviewForm);
@@ -86,7 +226,7 @@ export default function AdminPage() {
 
   const fetchData = async () => {
     const { data: phoneData } = await supabase.from("phones").select("id,model,storage,color,category,brand,condition,price,battery_health,in_stock,featured,badge,images,free_case").order("created_at", { ascending: false });
-    const { data: accessoryData } = await supabase.from("accessories").select("id,name,brand,category,price,in_stock,featured,is_original").order("created_at", { ascending: false });
+    const { data: accessoryData } = await supabase.from("accessories").select("id,name,brand,category,price,in_stock,featured,is_original,images").order("created_at", { ascending: false });
     const { data: reviewData } = await supabase.from("reviews").select("*").order("created_at", { ascending: false });
     if (phoneData) setPhones(phoneData);
     if (accessoryData) setAccessories(accessoryData);
@@ -125,9 +265,27 @@ export default function AdminPage() {
 
   const handleEditPhone = (phone: Phone) => {
     setEditId(phone.id);
-    setPhoneForm({ ...emptyPhoneForm, model: phone.model, storage: phone.storage, color: phone.color, brand: phone.brand ?? "Apple", category: phone.category, condition: phone.condition, price: phone.price.toString(), battery_health: phone.battery_health?.toString() ?? "", badge: phone.badge ?? "", featured: phone.featured, in_stock: phone.in_stock, free_case: phone.free_case ?? false, images: phone.images?.join(", ") ?? "" });
+    setPhoneForm({
+      ...emptyPhoneForm,
+      model: phone.model, storage: phone.storage, color: phone.color,
+      brand: phone.brand ?? "Apple", category: phone.category, condition: phone.condition,
+      price: phone.price.toString(), battery_health: phone.battery_health?.toString() ?? "",
+      badge: phone.badge ?? "", featured: phone.featured, in_stock: phone.in_stock,
+      free_case: phone.free_case ?? false, images: phone.images ?? [],
+    });
     setActiveTab("phones");
     setView("edit");
+  };
+
+  const handleEditAccessory = (acc: Accessory) => {
+    setEditId(acc.id);
+    setAccessoryForm({
+      ...emptyAccessoryForm,
+      name: acc.name, brand: acc.brand, category: acc.category,
+      price: acc.price.toString(), in_stock: acc.in_stock, featured: acc.featured,
+      is_original: acc.is_original, images: acc.images ?? [],
+    });
+    setView("edit_accessory");
   };
 
   const handleSavePhone = async (e: React.FormEvent) => {
@@ -143,14 +301,20 @@ export default function AdminPage() {
       five_g: phoneForm.five_g, region: phoneForm.region, ios_version: phoneForm.ios_version || null,
       sim_status: phoneForm.sim_status || null, sim_type: phoneForm.sim_type || null,
       accessories_included: phoneForm.accessories_included || null,
-      description: phoneForm.description || null, badge: phoneForm.badge || null, featured: phoneForm.featured,
-      in_stock: phoneForm.in_stock, free_case: phoneForm.free_case,
-      images: phoneForm.images ? phoneForm.images.split(",").map(s => s.trim()).filter(Boolean) : [],
-      condition_video: phoneForm.condition_video || null, battery_screenshot: phoneForm.battery_screenshot || null,
+      description: phoneForm.description || null, badge: phoneForm.badge || null,
+      featured: phoneForm.featured, in_stock: phoneForm.in_stock, free_case: phoneForm.free_case,
+      images: phoneForm.images,
+      condition_video: phoneForm.condition_video || null,
+      battery_screenshot: phoneForm.battery_screenshot,
       imei_number: phoneForm.imei_number || null, supplier: phoneForm.supplier || null,
     };
-    if (view === "edit" && editId) { await supabase.from("phones").update(payload).eq("id", editId); setSuccessMsg("Phone updated!"); }
-    else { await supabase.from("phones").insert(payload); setSuccessMsg("Phone added!"); }
+    if (view === "edit" && editId) {
+      await supabase.from("phones").update(payload).eq("id", editId);
+      setSuccessMsg("Phone updated!");
+    } else {
+      await supabase.from("phones").insert(payload);
+      setSuccessMsg("Phone added!");
+    }
     setSaving(false); setPhoneForm(emptyPhoneForm); setEditId(null); setView("list"); fetchData();
     setTimeout(() => setSuccessMsg(""), 3000);
   };
@@ -160,16 +324,23 @@ export default function AdminPage() {
     setSaving(true);
     const payload = {
       name: accessoryForm.name, brand: accessoryForm.brand, category: accessoryForm.category,
-      price: parseInt(accessoryForm.price), cost_price: accessoryForm.cost_price ? parseInt(accessoryForm.cost_price) : null,
+      price: parseInt(accessoryForm.price),
+      cost_price: accessoryForm.cost_price ? parseInt(accessoryForm.cost_price) : null,
       discount_price: accessoryForm.discount_price ? parseInt(accessoryForm.discount_price) : null,
       condition: accessoryForm.condition, in_stock: accessoryForm.in_stock, featured: accessoryForm.featured,
       is_original: accessoryForm.is_original, description: accessoryForm.description || null,
       compatible_with: accessoryForm.compatible_with ? accessoryForm.compatible_with.split(",").map(s => s.trim()).filter(Boolean) : [],
-      images: accessoryForm.images ? accessoryForm.images.split(",").map(s => s.trim()).filter(Boolean) : [],
+      images: accessoryForm.images,
       badge: accessoryForm.badge || null,
     };
-    await supabase.from("accessories").insert(payload);
-    setSuccessMsg("Accessory added!"); setSaving(false); setAccessoryForm(emptyAccessoryForm); setView("list"); fetchData();
+    if (view === "edit_accessory" && editId) {
+      await supabase.from("accessories").update(payload).eq("id", editId);
+      setSuccessMsg("Accessory updated!");
+    } else {
+      await supabase.from("accessories").insert(payload);
+      setSuccessMsg("Accessory added!");
+    }
+    setSaving(false); setAccessoryForm(emptyAccessoryForm); setEditId(null); setView("list"); fetchData();
     setTimeout(() => setSuccessMsg(""), 3000);
   };
 
@@ -286,11 +457,11 @@ export default function AdminPage() {
               </div>
             ) : activeTab === "accessories" ? (
               <div className="space-y-3">
-                {accessories.length === 0 && <p className="text-white/30">No accessories yet. Add AirPods, Apple Watch, Chargers, Cables.</p>}
+                {accessories.length === 0 && <p className="text-white/30">No accessories yet.</p>}
                 {accessories.map(acc => (
                   <div key={acc.id} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-2xl">
-                      {getAccessoryIcon(acc.category)}
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/5 text-2xl">
+                      {acc.images?.[0] ? <img src={acc.images[0]} alt="" className="h-full w-full object-contain" /> : getAccessoryIcon(acc.category)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-white truncate">{acc.name}</p>
@@ -306,6 +477,7 @@ export default function AdminPage() {
                         className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${acc.in_stock ? "border-green-500/30 bg-green-500/10 text-green-300" : "border-red-500/30 bg-red-500/10 text-red-300"}`}>
                         {acc.in_stock ? "In Stock" : "Sold Out"}
                       </button>
+                      <button onClick={() => handleEditAccessory(acc)} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white/50 transition hover:text-white">Edit</button>
                       <button onClick={() => handleDelete(acc.id, "accessories")} className="rounded-lg border border-red-500/20 px-3 py-1.5 text-xs text-red-400 transition hover:bg-red-500/10">Delete</button>
                     </div>
                   </div>
@@ -355,7 +527,7 @@ export default function AdminPage() {
           </>
         )}
 
-        {/* Phone Form */}
+        {/* ── Phone Form ── */}
         {(view === "add" || view === "edit") && activeTab === "phones" && (
           <>
             <div className="mb-8"><h1 className="text-2xl font-extrabold text-white">{view === "edit" ? "Edit Phone" : "Add New Phone"}</h1></div>
@@ -432,19 +604,33 @@ export default function AdminPage() {
                   </select>
                 </div>
               </div>
-              {[
-                { label: "Image URLs (comma separated)", key: "images", placeholder: "https://..." },
-                { label: "Condition Video URL", key: "condition_video", placeholder: "https://youtube.com/..." },
-                { label: "Battery Screenshot URL", key: "battery_screenshot", placeholder: "https://..." },
-              ].map(({ label, key, placeholder }) => (
-                <div key={key}>
-                  <label className="mb-1 block text-xs text-white/40">{label}</label>
-                  <input value={phoneForm[key as keyof typeof phoneForm] as string}
-                    onChange={e => setPhoneForm({...phoneForm, [key]: e.target.value})}
-                    placeholder={placeholder}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50" />
-                </div>
-              ))}
+
+              {/* Phone Images Upload */}
+              <ImageUploader
+                bucket="phone-images"
+                existingUrls={phoneForm.images}
+                onUpload={(urls) => setPhoneForm({...phoneForm, images: urls})}
+                label="📸 Phone Photos — upload from laptop or phone (JPEG, HEIC, PNG)"
+                accept="image/*"
+              />
+
+              {/* Condition Video Upload */}
+              <VideoUploader
+                bucket="phone-images"
+                existingUrl={phoneForm.condition_video}
+                onUpload={(url) => setPhoneForm({...phoneForm, condition_video: url})}
+                label="🎬 Condition Video — upload MP4 or MOV (shows phone working condition)"
+              />
+
+              {/* Battery Screenshot Upload */}
+              <ImageUploader
+                bucket="phone-images"
+                existingUrls={phoneForm.battery_screenshot}
+                onUpload={(urls) => setPhoneForm({...phoneForm, battery_screenshot: urls})}
+                label="🔋 Battery Health Screenshot — upload from phone settings"
+                accept="image/*"
+              />
+
               <div>
                 <label className="mb-1 block text-xs text-white/40">Ustaad Ji Notes</label>
                 <textarea value={phoneForm.description} onChange={e => setPhoneForm({...phoneForm, description: e.target.value})}
@@ -479,10 +665,10 @@ export default function AdminPage() {
           </>
         )}
 
-        {/* Accessory Form */}
-        {view === "add" && activeTab === "accessories" && (
+        {/* ── Accessory Form ── */}
+        {(view === "add" && activeTab === "accessories") || view === "edit_accessory" ? (
           <>
-            <div className="mb-8"><h1 className="text-2xl font-extrabold text-white">Add New Accessory</h1></div>
+            <div className="mb-8"><h1 className="text-2xl font-extrabold text-white">{view === "edit_accessory" ? "Edit Accessory" : "Add New Accessory"}</h1></div>
             <form onSubmit={handleSaveAccessory} className="space-y-5">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
@@ -528,12 +714,16 @@ export default function AdminPage() {
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50" />
                 </div>
               </div>
-              <div>
-                <label className="mb-1 block text-xs text-white/40">Image URLs (comma separated)</label>
-                <input value={accessoryForm.images} onChange={e => setAccessoryForm({...accessoryForm, images: e.target.value})}
-                  placeholder="https://..."
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50" />
-              </div>
+
+              {/* Accessory Images Upload */}
+              <ImageUploader
+                bucket="phone-images"
+                existingUrls={accessoryForm.images}
+                onUpload={(urls) => setAccessoryForm({...accessoryForm, images: urls})}
+                label="📸 Accessory Photos — upload from laptop or phone"
+                accept="image/*"
+              />
+
               <div>
                 <label className="mb-1 block text-xs text-white/40">Description</label>
                 <textarea value={accessoryForm.description} onChange={e => setAccessoryForm({...accessoryForm, description: e.target.value})}
@@ -551,18 +741,18 @@ export default function AdminPage() {
                 ))}
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => { setView("list"); setAccessoryForm(emptyAccessoryForm); }}
+                <button type="button" onClick={() => { setView("list"); setAccessoryForm(emptyAccessoryForm); setEditId(null); }}
                   className="rounded-xl border border-white/15 px-6 py-3 text-sm font-semibold text-white/60 hover:text-white transition">Cancel</button>
                 <button type="submit" disabled={saving}
                   className="flex-1 rounded-xl bg-blue-500 py-3 text-sm font-bold text-white transition hover:bg-blue-400 disabled:opacity-50">
-                  {saving ? "Saving..." : "Add Accessory"}
+                  {saving ? "Saving..." : view === "edit_accessory" ? "Update Accessory" : "Add Accessory"}
                 </button>
               </div>
             </form>
           </>
-        )}
+        ) : null}
 
-        {/* Review Form */}
+        {/* ── Review Form ── */}
         {view === "add_review" && (
           <>
             <div className="mb-8">
