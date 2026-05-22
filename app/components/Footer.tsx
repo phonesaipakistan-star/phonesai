@@ -11,7 +11,7 @@ export default function Footer() {
               Premium Shopping, Reinvented. Pakistan ka most trusted smart store — verified devices, AI-powered experience.
             </p>
             <p className="mt-4 text-xs text-white/25">📍 Wah Cantt, Pakistan</p>
-            <p className="mt-1 text-xs text-white/25">🚚 Order before 2pm — next day delivery nearby cities. 1-3 days all Pakistan.</p>
+            <p className="mt-1 text-xs text-white/25">🚚 Order before 2pm — next day delivery nearby. 1-3 days all Pakistan.</p>
           </div>
 
           {/* Shop */}
@@ -26,17 +26,19 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Info */}
+          {/* Services + Info */}
           <div>
+            <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-white/30">Services</p>
+            <ul className="space-y-2.5 text-sm text-white/50 mb-6">
+              <li><a href="/trade-in" className="transition hover:text-white">Trade-In Centre</a></li>
+              <li><a href="/repairs" className="transition hover:text-white">Repair Centre</a></li>
+              <li><a href="/support" className="transition hover:text-white">After-Sales Support</a></li>
+            </ul>
             <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-white/30">Info</p>
             <ul className="space-y-2.5 text-sm text-white/50">
               <li><a href="/about" className="transition hover:text-white">About PhonesAI</a></li>
               <li><a href="/contact" className="transition hover:text-white">Contact Us</a></li>
-              <li>
-                <a href="https://taxcalculator.pk/pta-tax" target="_blank" rel="noopener noreferrer" className="transition hover:text-white">
-                  PTA Tax Calculator
-                </a>
-              </li>
+              <li><a href="https://taxcalculator.pk/pta-tax" target="_blank" rel="noopener noreferrer" className="transition hover:text-white">PTA Tax Calculator</a></li>
               <li><a href="/warranty" className="transition hover:text-white">7-Day Warranty Policy</a></li>
               <li><a href="/terms" className="transition hover:text-white">Terms & Conditions</a></li>
               <li><a href="/privacy" className="transition hover:text-white">Privacy Policy</a></li>

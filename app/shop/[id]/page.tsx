@@ -18,6 +18,12 @@ type Phone = {
   ios_version: string | null; model_number: string | null; free_case: boolean;
 };
 
+type Accessory = {
+  id: string; name: string; brand: string; category: string; price: number;
+  discount_price: number | null; condition: string; in_stock: boolean;
+  images: string[]; description: string | null;
+};
+
 type Review = {
   id: string; customer_name: string; customer_city: string; rating: number;
   review_text: string; verified_buyer: boolean; created_at: string; photo_url: string | null;
@@ -70,6 +76,8 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [relatedAccessories, setRelatedAccessories] = useState<Accessory[]>([]);
+  const [relatedPhones, setRelatedPhones] = useState<Phone[]>([]);
   const [reviewForm, setReviewForm] = useState({ name: "", city: "", rating: 5, text: "" });
   const [reviewPhoto, setReviewPhoto] = useState<File | null>(null);
   const [reviewPhotoPreview, setReviewPhotoPreview] = useState<string | null>(null);
@@ -87,12 +95,27 @@ export default function ProductPage() {
   }, [id]);
 
   useEffect(() => {
+    if (!phone) return;
+
     const fetchReviews = async () => {
-      if (!phone) return;
       const { data } = await supabase.from("reviews").select("*").eq("approved", true).eq("product_model", phone.model).order("created_at", { ascending: false });
       if (data) setReviews(data);
     };
+
+    const fetchRelated = async () => {
+      // Fetch accessories
+      const { data: accData } = await supabase.from("accessories").select("*").eq("in_stock", true).limit(4);
+      if (accData) setRelatedAccessories(accData);
+
+      // Fetch related phones — same brand, same category, different id
+      const { data: phonesData } = await supabase.from("phones").select("*")
+        .eq("in_stock", true).eq("brand", phone.brand).eq("category", phone.category)
+        .neq("id", phone.id).limit(3);
+      if (phonesData) setRelatedPhones(phonesData);
+    };
+
     fetchReviews();
+    fetchRelated();
   }, [phone]);
 
   useEffect(() => {
@@ -175,15 +198,11 @@ export default function ProductPage() {
 
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-16">
 
-          {/* Image Gallery — fixed to fill properly */}
+          {/* Image Gallery */}
           <div className="flex flex-col gap-3">
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] sm:rounded-3xl" style={{aspectRatio: "4/3"}}>
               {allImages.length > 0 ? (
-                <img
-                  src={allImages[activeImage]}
-                  alt={phone.model}
-                  className="absolute inset-0 h-full w-full object-cover transition duration-500"
-                />
+                <img src={allImages[activeImage]} alt={phone.model} className="absolute inset-0 h-full w-full object-cover transition duration-500" />
               ) : (
                 <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-white/20">
                   <svg viewBox="0 0 24 24" fill="none" className="h-14 w-14" stroke="currentColor" strokeWidth="0.8">
@@ -226,21 +245,17 @@ export default function ProductPage() {
               <div className="mt-3 flex items-center gap-2">
                 <StarRating rating={Math.round(parseFloat(avgRating))} />
                 <span className="text-sm font-bold text-white">{avgRating}</span>
-                <span className="text-xs text-white/40">({reviews.length} reviews)</span>
+                <span className="text-xs text-white/40">({reviews.length} {reviews.length === 1 ? "review" : "reviews"})</span>
               </div>
             )}
 
-            {/* PRICE — redesigned to make discount pop */}
+            {/* Price */}
             <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-4 sm:px-6 sm:py-5">
               {phone.discount_price ? (
                 <div>
                   <div className="flex items-baseline gap-3">
-                    <p className="text-3xl font-extrabold text-white sm:text-4xl">
-                      Rs. {phone.discount_price.toLocaleString()}
-                    </p>
-                    <p className="text-lg text-white/30 line-through sm:text-xl">
-                      Rs. {phone.price.toLocaleString()}
-                    </p>
+                    <p className="text-3xl font-extrabold text-white sm:text-4xl">Rs. {phone.discount_price.toLocaleString()}</p>
+                    <p className="text-lg text-white/30 line-through sm:text-xl">Rs. {phone.price.toLocaleString()}</p>
                   </div>
                   <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1">
                     <span className="text-xs font-bold text-green-400">You save Rs. {savings.toLocaleString()}</span>
@@ -256,12 +271,10 @@ export default function ProductPage() {
             {/* Add to Cart */}
             <button
               onClick={() => addItem({ id: phone.id, model: phone.model, storage: phone.storage, color: phone.color, category: phone.category, brand: phone.brand, condition: phone.condition, price: phone.price, discount_price: phone.discount_price, image: allImages[0] ?? null, free_case: phone.free_case })}
-              className={`mt-3 w-full rounded-2xl py-4 text-sm font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}
-            >
+              className={`mt-3 w-full rounded-2xl py-4 text-sm font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}>
               {inCart ? "✓ Added to Cart — View in Cart ↑" : "Add to Cart 🛒"}
             </button>
 
-            {/* Free case */}
             {phone.free_case && isPreOwned && (
               <div className="mt-3 flex items-center gap-2.5 rounded-2xl border border-green-500/20 bg-green-500/5 px-4 py-3">
                 <span className="text-xl">🎁</span>
@@ -281,7 +294,6 @@ export default function ProductPage() {
               </div>
             )}
 
-            {/* Ustaad Ji trust badge */}
             <div className="mt-3 flex items-center gap-2.5 rounded-2xl border border-amber-300/20 bg-amber-300/5 px-4 py-3">
               <span className="text-xl">🧔</span>
               <div>
@@ -323,7 +335,6 @@ export default function ProductPage() {
         <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-6">
             <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/30 sm:mb-4 sm:text-xs">SIM Status</p>
-            {/* FIXED: just show the sim_status value, no auto-generated 2-month text */}
             <p className="text-base font-bold text-white sm:text-lg">{phone.sim_status ?? "—"}</p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-6">
@@ -356,27 +367,22 @@ export default function ProductPage() {
           </div>
         )}
 
-        {/* ABOUT THIS PHONE — redesigned, premium, not an essay */}
+        {/* About This Phone */}
         {phone.product_description && (
           <div className="mt-4 sm:mt-6 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.04] to-white/[0.01]">
             <div className="border-b border-white/5 px-5 py-3 sm:px-6">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">About This Phone</p>
             </div>
             <div className="px-5 py-4 sm:px-6 sm:py-5">
-              {/* Parse description into bullet points if it has sentences, else show clean paragraphs */}
               <div className="space-y-2">
-                {phone.product_description
-                  .split(/\.\s+/)
-                  .filter(s => s.trim().length > 10)
-                  .slice(0, 6)
-                  .map((sentence, i) => (
-                    <div key={i} className="flex items-start gap-2.5">
-                      <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-400/60" />
-                      <p className="text-xs leading-relaxed text-white/65 sm:text-sm">
-                        {sentence.trim().endsWith(".") ? sentence.trim() : sentence.trim() + "."}
-                      </p>
-                    </div>
-                  ))}
+                {phone.product_description.split(/\.\s+/).filter(s => s.trim().length > 10).slice(0, 6).map((sentence, i) => (
+                  <div key={i} className="flex items-start gap-2.5">
+                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-400/60" />
+                    <p className="text-xs leading-relaxed text-white/65 sm:text-sm">
+                      {sentence.trim().endsWith(".") ? sentence.trim() : sentence.trim() + "."}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -384,7 +390,7 @@ export default function ProductPage() {
 
         {/* Ustaad Ji Notes */}
         {phone.description && (
-          <div className="mt-4 rounded-2xl border border-amber-400/15 bg-amber-400/[0.04] p-4 sm:mt-4 sm:p-6">
+          <div className="mt-4 rounded-2xl border border-amber-400/15 bg-amber-400/[0.04] p-4 sm:p-6">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-base">🧔</span>
               <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-400/60">Ustaad Ji Notes</p>
@@ -393,12 +399,126 @@ export default function ProductPage() {
           </div>
         )}
 
-        {/* Delivery info */}
-        <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:mt-4 sm:p-6">
+        {/* Delivery */}
+        <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-6">
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/30">Delivery</p>
           <p className="text-sm font-bold text-white">Free Delivery — All Pakistan</p>
           <p className="mt-1 text-xs text-white/40">Order before 2pm for next day delivery in nearby cities. All Pakistan: 1-3 working days.</p>
         </div>
+
+        {/* ── AFTER-SALES SUPPORT SECTION ── */}
+        <div className="mt-6 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-transparent overflow-hidden">
+          <div className="border-b border-white/5 px-5 py-3 sm:px-6">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">After Purchase — We've Got You</p>
+          </div>
+          <div className="grid grid-cols-2 gap-px bg-white/5 sm:grid-cols-4">
+            {[
+              { icon: "🛡️", label: "7-Day Warranty", sub: "New & Pre-Owned", href: "/support#warranty" },
+              { icon: "🔧", label: "Repair Service", sub: "Same day available", href: "/repairs" },
+              { icon: "🔄", label: "Trade-In", sub: "Best rates", href: "/trade-in" },
+              { icon: "💬", label: "WhatsApp Support", sub: "0304-1502560", href: "https://wa.me/923041502560" },
+            ].map(item => (
+              <a key={item.label} href={item.href}
+                target={item.href.startsWith("https") ? "_blank" : undefined}
+                rel={item.href.startsWith("https") ? "noopener noreferrer" : undefined}
+                className="flex flex-col items-center gap-1.5 bg-black/40 px-3 py-4 text-center transition hover:bg-white/[0.04]">
+                <span className="text-xl">{item.icon}</span>
+                <p className="text-xs font-bold text-white">{item.label}</p>
+                <p className="text-[10px] text-white/35">{item.sub}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* ── RELATED ACCESSORIES ── */}
+        {relatedAccessories.length > 0 && (
+          <>
+            <div className="my-10 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-extrabold text-white sm:text-xl">Complete Your Setup</h2>
+                <a href="/shop?brand=Accessories" className="text-xs font-semibold text-blue-400 hover:text-blue-300">See All →</a>
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+                {relatedAccessories.map(acc => {
+                  const inCart = isInCart(acc.id);
+                  return (
+                    <div key={acc.id} className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+                      <div className="relative h-24 overflow-hidden bg-white/5 sm:h-32">
+                        {acc.images?.[0] ? (
+                          <img src={acc.images[0]} alt={acc.name} className="absolute inset-0 h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-2xl">
+                            {acc.category === "Charger" ? "🔌" : acc.category === "Cable" ? "🔗" : acc.category === "AirPods" ? "🎧" : "⌚"}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-1 flex-col p-3">
+                        <p className="text-xs font-bold text-white leading-tight line-clamp-2">{acc.name}</p>
+                        <p className="mt-1 text-xs font-extrabold text-white">Rs. {(acc.discount_price ?? acc.price).toLocaleString()}</p>
+                        <button
+                          onClick={() => addItem({ id: acc.id, model: acc.name, storage: "", color: "", category: acc.category, brand: acc.brand, condition: acc.condition, price: acc.price, discount_price: acc.discount_price, image: acc.images?.[0] ?? null, free_case: false })}
+                          className={`mt-2 w-full rounded-xl py-1.5 text-[10px] font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}>
+                          {inCart ? "✓ In Cart" : "Add to Cart"}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ── RELATED PHONES ── */}
+        {relatedPhones.length > 0 && (
+          <>
+            <div className="my-10 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-extrabold text-white sm:text-xl">Similar Phones</h2>
+                <a href="/shop" className="text-xs font-semibold text-blue-400 hover:text-blue-300">See All →</a>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+                {relatedPhones.map(p => {
+                  const pInCart = isInCart(p.id);
+                  const pSavings = p.discount_price ? p.price - p.discount_price : 0;
+                  return (
+                    <a key={p.id} href={`/shop/${p.id}`} className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3 transition hover:border-white/20 sm:flex-col sm:gap-0 sm:p-0">
+                      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-white/5 bg-white/[0.03] sm:h-36 sm:w-full sm:rounded-none sm:rounded-t-2xl">
+                        {p.images?.[0] ? (
+                          <img src={p.images[0]} alt={p.model} className="absolute inset-0 h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center">
+                            <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-white/10" stroke="currentColor" strokeWidth="1">
+                              <rect x="7" y="2.5" width="10" height="19" rx="2.4" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-1 flex-col justify-center sm:p-3">
+                        <p className="text-xs font-bold text-white leading-tight">{p.model}</p>
+                        <p className="text-[10px] text-white/40 mt-0.5">{p.storage} • {p.color}</p>
+                        {p.battery_health && <p className="text-[10px] text-white/40">🔋{p.battery_health}%</p>}
+                        <div className="mt-1.5">
+                          {p.discount_price ? (
+                            <>
+                              <p className="text-[10px] text-white/30 line-through">Rs. {p.price.toLocaleString()}</p>
+                              <p className="text-sm font-extrabold text-white">Rs. {p.discount_price.toLocaleString()}</p>
+                              <p className="text-[10px] text-green-400">Save Rs. {pSavings.toLocaleString()}</p>
+                            </>
+                          ) : (
+                            <p className="text-sm font-extrabold text-white">Rs. {p.price.toLocaleString()}</p>
+                          )}
+                        </div>
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Bottom CTA */}
         <div className="mt-10 flex flex-col items-center gap-3 text-center sm:mt-14 sm:gap-4">
@@ -429,7 +549,7 @@ export default function ProductPage() {
             <div className="flex items-center gap-2 mb-6">
               <StarRating rating={Math.round(parseFloat(avgRating))} />
               <span className="text-sm font-bold text-white">{avgRating}</span>
-              <span className="text-xs text-white/40">({reviews.length} reviews)</span>
+              <span className="text-xs text-white/40">({reviews.length} {reviews.length === 1 ? "review" : "reviews"})</span>
             </div>
           ) : <p className="text-sm text-white/40 mb-6">Be the first to review!</p>}
 
@@ -438,9 +558,7 @@ export default function ProductPage() {
               {reviews.map((review) => (
                 <div key={review.id} className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 flex flex-col gap-2 sm:p-6 sm:gap-3">
                   <StarRating rating={review.rating} />
-                  {review.photo_url && (
-                    <img src={review.photo_url} alt="Review" className="w-full h-40 object-cover rounded-xl border border-white/10" />
-                  )}
+                  {review.photo_url && <img src={review.photo_url} alt="Review" className="w-full h-40 object-cover rounded-xl border border-white/10" />}
                   <p className="text-xs text-white/80 leading-relaxed sm:text-sm">"{review.review_text}"</p>
                   <div className="mt-auto flex items-center justify-between">
                     <div>
@@ -454,7 +572,6 @@ export default function ProductPage() {
             </div>
           )}
 
-          {/* Review Form */}
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-6">
             <h3 className="mb-4 text-base font-bold text-white sm:mb-6 sm:text-lg">Leave a Review</h3>
             {reviewSubmitted ? (
@@ -468,14 +585,12 @@ export default function ProductPage() {
                 <div className="grid gap-3 grid-cols-2">
                   <div>
                     <label className="mb-1 block text-xs text-white/40">Your Name *</label>
-                    <input required value={reviewForm.name} onChange={e => setReviewForm({...reviewForm, name: e.target.value})}
-                      placeholder="Ahmed Khan"
+                    <input required value={reviewForm.name} onChange={e => setReviewForm({...reviewForm, name: e.target.value})} placeholder="Ahmed Khan"
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50" />
                   </div>
                   <div>
                     <label className="mb-1 block text-xs text-white/40">City</label>
-                    <input value={reviewForm.city} onChange={e => setReviewForm({...reviewForm, city: e.target.value})}
-                      placeholder="Islamabad"
+                    <input value={reviewForm.city} onChange={e => setReviewForm({...reviewForm, city: e.target.value})} placeholder="Islamabad"
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50" />
                   </div>
                 </div>
@@ -485,8 +600,7 @@ export default function ProductPage() {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs text-white/40">Your Review *</label>
-                  <textarea required value={reviewForm.text} onChange={e => setReviewForm({...reviewForm, text: e.target.value})}
-                    placeholder="Aapka experience kaisa tha?" rows={3}
+                  <textarea required value={reviewForm.text} onChange={e => setReviewForm({...reviewForm, text: e.target.value})} placeholder="Aapka experience kaisa tha?" rows={3}
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50 resize-none" />
                 </div>
                 <div>

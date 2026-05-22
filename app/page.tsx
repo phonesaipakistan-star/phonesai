@@ -113,8 +113,6 @@ export default function Home() {
         <section className="hero-gradient hero-dots relative left-1/2 w-screen -translate-x-1/2 overflow-hidden pt-20">
           <div className="mx-auto w-full max-w-7xl px-4 pb-8 sm:px-8 sm:pb-12 lg:pb-0">
             <div className="grid grid-cols-1 items-center gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-2 lg:min-h-[600px]">
-
-              {/* Text column */}
               <div className="z-10 flex w-full flex-col gap-4 sm:gap-5 py-8 lg:py-16">
                 <p className="block w-fit rounded-full border border-amber-300/40 bg-amber-300/10 px-3 py-1 text-xs font-medium tracking-[0.15em] text-amber-200">
                   NOW WITH AI SHOPKEEPER
@@ -125,12 +123,8 @@ export default function Home() {
                     PhonesAI
                   </h1>
                 </div>
-                <p className="block w-fit rounded-full border border-blue-300/40 bg-blue-400/15 px-3 py-1 text-xs font-semibold text-blue-200">
-                  5G Ready
-                </p>
-                <p className="text-lg font-light leading-snug text-white sm:text-xl lg:text-3xl">
-                  Premium Shopping, Reinvented.
-                </p>
+                <p className="block w-fit rounded-full border border-blue-300/40 bg-blue-400/15 px-3 py-1 text-xs font-semibold text-blue-200">5G Ready</p>
+                <p className="text-lg font-light leading-snug text-white sm:text-xl lg:text-3xl">Premium Shopping, Reinvented.</p>
                 <div className="flex flex-wrap gap-3">
                   <button type="button" onClick={openUstaadJi}
                     className="inline-flex items-center justify-center rounded-full border border-blue-300/60 bg-gradient-to-r from-blue-500/35 to-cyan-400/30 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_0_35px_rgba(59,130,246,0.55)] transition hover:scale-[1.03]">
@@ -141,20 +135,9 @@ export default function Home() {
                   </a>
                 </div>
               </div>
-
-              {/* Image column */}
-              <div className="relative flex items-end justify-center sm:justify-end
-                h-64 sm:h-80 lg:h-full lg:min-h-[600px]
-                [mask-image:linear-gradient(to_bottom,black_70%,transparent_100%)]">
-                <img
-                  src="/iphone17.png"
-                  alt="iPhone 17 Pro"
-                  className="h-full w-auto max-h-64 object-contain object-bottom
-                    animate-[scaleReveal_1.4s_cubic-bezier(0.16,1,0.3,1)_forwards]
-                    [filter:brightness(0.9)_saturate(0.95)]
-                    sm:max-h-80
-                    lg:max-h-[580px]"
-                />
+              <div className="relative flex items-end justify-center sm:justify-end h-64 sm:h-80 lg:h-full lg:min-h-[600px] [mask-image:linear-gradient(to_bottom,black_70%,transparent_100%)]">
+                <img src="/iphone17.png" alt="iPhone 17 Pro"
+                  className="h-full w-auto max-h-64 object-contain object-bottom animate-[scaleReveal_1.4s_cubic-bezier(0.16,1,0.3,1)_forwards] [filter:brightness(0.9)_saturate(0.95)] sm:max-h-80 lg:max-h-[580px]" />
               </div>
             </div>
           </div>
@@ -196,6 +179,56 @@ export default function Home() {
           </div>
         </section>
 
+        {/* ── SERVICES SECTION — Trade-In + Repairs ── */}
+        <section className="mx-auto mt-10 max-w-6xl px-4 sm:px-6">
+          <div className="mb-5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-white/30">More Than Just Shopping</p>
+            <h2 className="mt-1 text-2xl font-extrabold text-white sm:text-3xl">Our Services</h2>
+          </div>
+          <div className="grid gap-3 grid-cols-1 sm:grid-cols-3 sm:gap-4">
+
+            {/* Trade-In */}
+            <a href="/trade-in" className="group relative overflow-hidden rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/15 to-blue-600/5 p-5 sm:p-6 transition hover:border-blue-400/40 hover:-translate-y-0.5">
+              <div className="mb-3 text-3xl">🔄</div>
+              <h3 className="text-base font-bold text-white mb-1">Trade-In Centre</h3>
+              <p className="text-xs text-white/50 leading-relaxed mb-3">iPhone, Samsung, Pixel — apna purana phone best rate pe trade karein. Physical store pe instant settlement.</p>
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {["Apple", "Samsung", "Google Pixel"].map(b => (
+                  <span key={b} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/50">{b}</span>
+                ))}
+              </div>
+              <p className="text-xs font-semibold text-blue-300 group-hover:text-blue-200">Get Quote →</p>
+            </a>
+
+            {/* Repairs */}
+            <a href="/repairs" className="group relative overflow-hidden rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/15 to-amber-600/5 p-5 sm:p-6 transition hover:border-amber-400/40 hover:-translate-y-0.5">
+              <div className="mb-3 text-3xl">🔧</div>
+              <h3 className="text-base font-bold text-white mb-1">Repair Centre</h3>
+              <p className="text-xs text-white/50 leading-relaxed mb-3">Screen, battery, camera — expert repairs by our team. Same day service available. 30-day warranty on all work.</p>
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {["Screen Repair", "Battery", "Camera"].map(s => (
+                  <span key={s} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/50">{s}</span>
+                ))}
+              </div>
+              <p className="text-xs font-semibold text-amber-300 group-hover:text-amber-200">Book Repair →</p>
+            </a>
+
+            {/* After-Sales */}
+            <a href="/support" className="group relative overflow-hidden rounded-2xl border border-green-500/20 bg-gradient-to-br from-green-500/15 to-green-600/5 p-5 sm:p-6 transition hover:border-green-400/40 hover:-translate-y-0.5">
+              <div className="mb-3 text-3xl">🛡️</div>
+              <h3 className="text-base font-bold text-white mb-1">After-Sales Support</h3>
+              <p className="text-xs text-white/50 leading-relaxed mb-3">Purchase ke baad bhi hum aapke saath hain. Warranty claims, unboxing guide, direct WhatsApp support.</p>
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {["Warranty", "Unboxing", "WhatsApp"].map(s => (
+                  <span key={s} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/50">{s}</span>
+                ))}
+              </div>
+              <p className="text-xs font-semibold text-green-300 group-hover:text-green-200">Learn More →</p>
+            </a>
+
+          </div>
+        </section>
+
         {/* Reviews */}
         {reviews.length > 0 && (
           <section className="mx-auto mt-10 max-w-6xl px-4 sm:px-6">
@@ -220,7 +253,6 @@ export default function Home() {
                 </div>
               )}
             </div>
-
             <div className="overflow-hidden">
               <div className="flex gap-3 transition-transform duration-500 ease-in-out sm:gap-4"
                 style={{ transform: `translateX(calc(-${currentSlide} * (100% + 12px)))` }}>
@@ -228,9 +260,7 @@ export default function Home() {
                   <div key={review.id}
                     className="w-full shrink-0 rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-3 sm:w-[calc(33.333%-10px)]">
                     <StarRating rating={review.rating} />
-                    {review.photo_url && (
-                      <img src={review.photo_url} alt="Review" className="w-full h-40 object-cover rounded-xl border border-white/10" />
-                    )}
+                    {review.photo_url && <img src={review.photo_url} alt="Review" className="w-full h-40 object-cover rounded-xl border border-white/10" />}
                     <p className="text-sm text-white/80 leading-relaxed flex-1">"{review.review_text}"</p>
                     {review.product_model && <p className="text-xs text-blue-300/60">re: {review.product_model}</p>}
                     <div className="flex items-center justify-between pt-2 border-t border-white/5">
@@ -246,7 +276,6 @@ export default function Home() {
                 ))}
               </div>
             </div>
-
             {reviews.length > 1 && (
               <div className="mt-4 flex justify-center gap-1.5">
                 {reviews.map((_, i) => (
@@ -257,6 +286,7 @@ export default function Home() {
             )}
           </section>
         )}
+
       </main>
     </div>
   );
