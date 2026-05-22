@@ -204,7 +204,7 @@ export default function ProductPage() {
           <div className="flex flex-col gap-3">
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] sm:rounded-3xl" style={{aspectRatio: "4/3"}}>
               {allImages.length > 0 ? (
-                <img src={allImages[activeImage]} alt={phone.model} className="absolute inset-0 h-full w-full object-contain p-2 transition duration-500 cursor-zoom-in" onClick={() => setLightboxOpen(true); setLightboxIndex(activeImage);} />
+                <img src={allImages[activeImage]} alt={phone.model} className="absolute inset-0 h-full w-full object-contain p-2 transition duration-500 cursor-zoom-in" onClick={() => { setLightboxOpen(true); setLightboxIndex(activeImage); }} />
               ) : (
                 <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-white/20">
                   <svg viewBox="0 0 24 24" fill="none" className="h-14 w-14" stroke="currentColor" strokeWidth="0.8">
