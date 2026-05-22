@@ -7,40 +7,16 @@ import { useCart } from "@/app/components/CartContext";
 import CompareTool from "@/app/components/CompareTool";
 
 type Phone = {
-  id: string;
-  model: string;
-  storage: string;
-  color: string;
-  category: string;
-  brand: string;
-  condition: string;
-  price: number;
-  discount_price: number | null;
-  battery_health: number;
-  physical_condition: string;
-  five_g: boolean;
-  face_id: boolean;
-  in_stock: boolean;
-  featured: boolean;
-  badge: string | null;
-  images: string[];
-  free_case: boolean;
+  id: string; model: string; storage: string; color: string; category: string; brand: string;
+  condition: string; price: number; discount_price: number | null; battery_health: number;
+  physical_condition: string; five_g: boolean; face_id: boolean; in_stock: boolean;
+  featured: boolean; badge: string | null; images: string[]; free_case: boolean;
 };
 
 type Accessory = {
-  id: string;
-  name: string;
-  brand: string;
-  category: string;
-  price: number;
-  discount_price: number | null;
-  condition: string;
-  in_stock: boolean;
-  featured: boolean;
-  badge: string | null;
-  images: string[];
-  is_original: boolean;
-  description: string | null;
+  id: string; name: string; brand: string; category: string; price: number;
+  discount_price: number | null; condition: string; in_stock: boolean; featured: boolean;
+  badge: string | null; images: string[]; is_original: boolean; description: string | null;
 };
 
 const brands = ["All", "Apple", "Samsung", "iPad", "Accessories"];
@@ -200,10 +176,10 @@ function ShopContent() {
                             <circle cx="12" cy="18.5" r="1" fill="currentColor" />
                           </svg>
                         )}
+                        {/* Badge only — NO condition badge */}
                         {phone.badge && (
                           <span className={`absolute left-2 top-2 rounded-full border px-2 py-0.5 text-[10px] font-medium ${badgeColors[phone.badge] ?? "bg-white/10 text-white/60 border-white/20"}`}>{phone.badge}</span>
                         )}
-                        {/* Free case badge — pre-owned gets case + screen protector, new gets case only */}
                         {phone.free_case && isPreOwned && (
                           <span className="absolute right-2 top-2 rounded-full border border-green-500/30 bg-green-500/20 px-2 py-0.5 text-[10px] text-green-300">Free Case + SP</span>
                         )}
@@ -213,12 +189,10 @@ function ShopContent() {
                       </div>
 
                       <div className="flex flex-1 flex-col justify-center sm:p-4">
+                        {/* Category + 5G only — condition (New/Pre-Owned) badge REMOVED */}
                         <div className="flex flex-wrap gap-1 mb-1.5">
                           <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${categoryColors[phone.category] ?? "bg-white/10 text-white/60 border-white/20"}`}>{phone.category}</span>
                           {phone.five_g && <span className="rounded-full border border-blue-400/20 bg-blue-400/10 px-2 py-0.5 text-[10px] text-blue-300">5G</span>}
-                          <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${isPreOwned ? "border-amber-400/20 bg-amber-400/10 text-amber-300" : "border-green-400/20 bg-green-400/10 text-green-300"}`}>
-                            {phone.condition}
-                          </span>
                         </div>
                         <h2 className="text-sm font-bold text-white leading-tight sm:text-base">{phone.model}</h2>
                         <p className="text-xs text-white/40 mt-0.5">{phone.storage} • {phone.color}</p>
@@ -239,22 +213,15 @@ function ShopContent() {
                       </div>
                     </a>
 
-                    {/* Action Buttons */}
                     <div className="px-3 pb-3 flex gap-2 sm:px-4 sm:pb-4">
                       <button
                         onClick={() => addItem({ id: phone.id, model: phone.model, storage: phone.storage, color: phone.color, category: phone.category, brand: phone.brand, condition: phone.condition, price: phone.price, discount_price: phone.discount_price, image: phone.images?.[0] ?? null, free_case: phone.free_case })}
-                        className={`flex-1 rounded-xl py-2 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}
-                      >
+                        className={`flex-1 rounded-xl py-2 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}>
                         {inCart ? "✓ In Cart" : "Add to Cart"}
                       </button>
-                      <button
-                        onClick={() => toggleCompare(phone)}
-                        disabled={!isInCompare && compareList.length >= 2}
-                        className={`rounded-xl border px-2.5 py-2 text-xs transition ${isInCompare ? "border-blue-400/60 bg-blue-500/20 text-blue-200" : compareList.length >= 2 ? "border-white/5 text-white/20 cursor-not-allowed" : "border-white/10 text-white/40 hover:text-white/70"}`}
-                      >⇄</button>
-                      <a href={`/shop/${phone.id}`} className="rounded-xl border border-white/10 px-3 py-2 text-xs text-white/40 transition hover:text-white">
-                        View
-                      </a>
+                      <button onClick={() => toggleCompare(phone)} disabled={!isInCompare && compareList.length >= 2}
+                        className={`rounded-xl border px-2.5 py-2 text-xs transition ${isInCompare ? "border-blue-400/60 bg-blue-500/20 text-blue-200" : compareList.length >= 2 ? "border-white/5 text-white/20 cursor-not-allowed" : "border-white/10 text-white/40 hover:text-white/70"}`}>⇄</button>
+                      <a href={`/shop/${phone.id}`} className="rounded-xl border border-white/10 px-3 py-2 text-xs text-white/40 transition hover:text-white">View</a>
                     </div>
                   </div>
                 );
@@ -286,11 +253,11 @@ function ShopContent() {
                     <div className="flex flex-1 flex-col p-3">
                       <p className="text-xs font-bold text-white leading-tight">{acc.name}</p>
                       <p className="text-xs text-white/40 mt-0.5">{acc.brand}</p>
+                      {acc.description && <p className="mt-1 text-[10px] text-white/35 leading-relaxed line-clamp-2">{acc.description}</p>}
                       <p className="mt-2 text-sm font-extrabold text-white">Rs. {acc.price.toLocaleString()}</p>
                       <button
                         onClick={() => addItem({ id: acc.id, model: acc.name, storage: "", color: "", category: acc.category, brand: acc.brand, condition: acc.condition, price: acc.price, discount_price: acc.discount_price, image: acc.images?.[0] ?? null, free_case: false })}
-                        className={`mt-2 w-full rounded-xl py-2 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}
-                      >
+                        className={`mt-2 w-full rounded-xl py-2 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}>
                         {inCart ? "✓ In Cart" : "Add to Cart"}
                       </button>
                     </div>
@@ -302,11 +269,9 @@ function ShopContent() {
         )}
       </main>
 
-      <CompareTool
-        selectedPhones={compareList}
+      <CompareTool selectedPhones={compareList}
         onRemove={(id) => setCompareList((prev) => prev.filter((p) => p.id !== id))}
-        onClear={() => setCompareList([])}
-      />
+        onClear={() => setCompareList([])} />
     </div>
   );
 }

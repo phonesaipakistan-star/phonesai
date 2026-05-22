@@ -12,7 +12,8 @@ type Phone = {
   condition: string; price: number; discount_price: number | null; battery_health: number;
   physical_condition: string; five_g: boolean; face_id: boolean;
   in_stock: boolean; featured: boolean; badge: string | null; images: string[];
-  condition_video: string | null; battery_screenshot: string | null; description: string | null;
+  condition_video: string | null; battery_screenshot: string | null;
+  product_description: string | null; description: string | null;
   sim_status: string | null; accessories_included: string | null; region: string | null;
   ios_version: string | null; model_number: string | null; free_case: boolean;
 };
@@ -77,21 +78,18 @@ export default function ProductPage() {
   const [showDiscountBanner, setShowDiscountBanner] = useState(false);
 
   useEffect(() => {
-    const fetchPhone = async () => {
-      const { data, error } = await supabase.from("phones").select("*").eq("id", id).single();
-      if (!error && data) setPhone(data);
-      setLoading(false);
-    };
-    if (id) fetchPhone();
+    if (id) {
+      supabase.from("phones").select("*").eq("id", id).single().then(({ data, error }) => {
+        if (!error && data) setPhone(data);
+        setLoading(false);
+      });
+    }
   }, [id]);
 
   useEffect(() => {
-    const fetchReviews = async () => {
-      if (!phone) return;
-      const { data } = await supabase.from("reviews").select("*").eq("approved", true).eq("product_model", phone.model).order("created_at", { ascending: false });
-      if (data) setReviews(data);
-    };
-    fetchReviews();
+    if (!phone) return;
+    supabase.from("reviews").select("*").eq("approved", true).eq("product_model", phone.model)
+      .order("created_at", { ascending: false }).then(({ data }) => { if (data) setReviews(data); });
   }, [phone]);
 
   useEffect(() => {
@@ -113,25 +111,18 @@ export default function ProductPage() {
     e.preventDefault();
     if (!reviewForm.name || !reviewForm.text || !phone) return;
     setSubmittingReview(true);
-
     let photoUrl: string | null = null;
-
-    // Upload photo if selected
     if (reviewPhoto) {
       const ext = reviewPhoto.name.split(".").pop();
       const fileName = `review-${Date.now()}.${ext}`;
       const { error } = await supabase.storage.from("phone-images").upload(fileName, reviewPhoto, { upsert: true });
-      if (!error) {
-        photoUrl = `${SUPABASE_URL}/storage/v1/object/public/phone-images/${fileName}`;
-      }
+      if (!error) photoUrl = `${SUPABASE_URL}/storage/v1/object/public/phone-images/${fileName}`;
     }
-
     await supabase.from("reviews").insert({
       customer_name: reviewForm.name, customer_city: reviewForm.city,
       rating: reviewForm.rating, review_text: reviewForm.text,
       product_model: phone.model, review_type: "product",
-      verified_buyer: false, approved: false,
-      photo_url: photoUrl,
+      verified_buyer: false, approved: false, photo_url: photoUrl,
     });
     setSubmittingReview(false);
     setReviewSubmitted(true);
@@ -142,7 +133,6 @@ export default function ProductPage() {
     : `https://wa.me/923041502560`;
 
   if (loading) return <div className="flex min-h-screen items-center justify-center bg-black"><p className="animate-pulse text-white/40">Loading...</p></div>;
-
   if (!phone) return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-black text-white">
       <p className="text-2xl font-bold text-white/30">Phone not found</p>
@@ -175,10 +165,7 @@ export default function ProductPage() {
       )}
 
       <main className="mx-auto max-w-6xl px-4 py-6 pb-24 sm:px-6 sm:py-10">
-
-        <a href="/shop" className="mb-4 inline-flex items-center gap-1 text-xs text-white/40 hover:text-white transition sm:mb-6">
-          ← Back to Shop
-        </a>
+        <a href="/shop" className="mb-4 inline-flex items-center gap-1 text-xs text-white/40 hover:text-white transition sm:mb-6">← Back to Shop</a>
 
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-16">
 
@@ -247,14 +234,11 @@ export default function ProductPage() {
             </div>
 
             {/* Add to Cart */}
-            <button
-              onClick={() => addItem({ id: phone.id, model: phone.model, storage: phone.storage, color: phone.color, category: phone.category, brand: phone.brand, condition: phone.condition, price: phone.price, discount_price: phone.discount_price, image: allImages[0] ?? null, free_case: phone.free_case })}
-              className={`mt-3 w-full rounded-2xl py-4 text-sm font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}
-            >
+            <button onClick={() => addItem({ id: phone.id, model: phone.model, storage: phone.storage, color: phone.color, category: phone.category, brand: phone.brand, condition: phone.condition, price: phone.price, discount_price: phone.discount_price, image: allImages[0] ?? null, free_case: phone.free_case })}
+              className={`mt-3 w-full rounded-2xl py-4 text-sm font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}>
               {inCart ? "✓ Added to Cart — View in Cart ↑" : "Add to Cart 🛒"}
             </button>
 
-            {/* Free case messaging */}
             {phone.free_case && isPreOwned && (
               <div className="mt-3 flex items-center gap-2.5 rounded-2xl border border-green-500/20 bg-green-500/5 px-4 py-3">
                 <span className="text-xl">🎁</span>
@@ -349,10 +333,22 @@ export default function ProductPage() {
           </div>
         )}
 
-        {phone.description && (
+        {/* Product Description — general, shown first */}
+        {phone.product_description && (
           <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:mt-6 sm:p-6">
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/30">Ustaad Ji Notes</p>
-            <p className="text-xs leading-relaxed text-white/70 sm:text-sm">{phone.description}</p>
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/30">About This Phone</p>
+            <p className="text-sm leading-relaxed text-white/70">{phone.product_description}</p>
+          </div>
+        )}
+
+        {/* Ustaad Ji Notes — phone-specific condition notes, shown below description */}
+        {phone.description && (
+          <div className="mt-4 rounded-2xl border border-amber-300/20 bg-amber-300/5 p-4 sm:mt-6 sm:p-6">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-base">🧔</span>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-200/60">Ustaad Ji Notes</p>
+            </div>
+            <p className="text-sm leading-relaxed text-white/70">{phone.description}</p>
           </div>
         )}
 
@@ -401,10 +397,7 @@ export default function ProductPage() {
               {reviews.map((review) => (
                 <div key={review.id} className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 flex flex-col gap-2 sm:p-6 sm:gap-3">
                   <StarRating rating={review.rating} />
-                  {/* Review photo */}
-                  {review.photo_url && (
-                    <img src={review.photo_url} alt="Review" className="w-full h-40 object-cover rounded-xl border border-white/10" />
-                  )}
+                  {review.photo_url && <img src={review.photo_url} alt="Review" className="w-full h-40 object-cover rounded-xl border border-white/10" />}
                   <p className="text-xs text-white/80 leading-relaxed sm:text-sm">"{review.review_text}"</p>
                   <div className="mt-auto flex items-center justify-between">
                     <div>
@@ -453,8 +446,6 @@ export default function ProductPage() {
                     placeholder="Aapka experience kaisa tha?" rows={3}
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50 resize-none" />
                 </div>
-
-                {/* Photo Upload */}
                 <div>
                   <label className="mb-1 block text-xs text-white/40">Add Photo (optional) 📸</label>
                   {reviewPhotoPreview ? (
@@ -471,7 +462,6 @@ export default function ProductPage() {
                     </label>
                   )}
                 </div>
-
                 <button type="submit" disabled={submittingReview}
                   className="w-full rounded-xl bg-blue-500 py-3 text-sm font-bold text-white transition hover:bg-blue-400 disabled:opacity-50">
                   {submittingReview ? "Submitting..." : "Submit Review →"}

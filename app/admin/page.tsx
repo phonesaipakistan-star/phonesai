@@ -27,11 +27,8 @@ const emptyPhoneForm = {
   model: "", storage: "", color: "", brand: "Apple", category: "JV", condition: "New",
   price: "", cost_price: "", discount_price: "", battery_health: "", physical_condition: "10/10",
   face_id: true, five_g: true, region: "LLA", ios_version: "", sim_status: "", sim_type: "Dual SIM",
-  accessories_included: "", description: "", badge: "", featured: false, in_stock: true,
-  free_case: false,
-  images: [] as string[],
-  condition_video: "",
-  battery_screenshot: [] as string[],
+  accessories_included: "", product_description: "", description: "", badge: "", featured: false, in_stock: true,
+  free_case: false, images: [] as string[], condition_video: "", battery_screenshot: [] as string[],
   imei_number: "", supplier: "",
 };
 
@@ -71,18 +68,13 @@ const StarDisplay = ({ rating }: { rating: number }) => (
   </div>
 );
 
-// ── Image Uploader ────────────────────────────────────────────────────────────
 function ImageUploader({ bucket, existingUrls, onUpload, label, accept = "image/*" }: {
-  bucket: string;
-  existingUrls: string[];
-  onUpload: (urls: string[]) => void;
-  label: string;
-  accept?: string;
+  bucket: string; existingUrls: string[]; onUpload: (urls: string[]) => void; label: string; accept?: string;
 }) {
   const [uploading, setUploading] = useState(false);
   const [previews, setPreviews] = useState<string[]>(existingUrls);
 
-  const isVideo = (url: string) => url.match(/\.(mp4|mov|webm|avi)$/i);
+  const isVideo = (url: string) => !!url.match(/\.(mp4|mov|webm|avi)$/i);
 
   const handleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -92,12 +84,8 @@ function ImageUploader({ bucket, existingUrls, onUpload, label, accept = "image/
       const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
       const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
       const { error } = await supabase.storage.from(bucket).upload(fileName, file, { upsert: true });
-      if (!error) {
-        const url = `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${fileName}`;
-        newUrls.push(url);
-      } else {
-        console.error("Upload error:", error);
-      }
+      if (!error) newUrls.push(`${SUPABASE_URL}/storage/v1/object/public/${bucket}/${fileName}`);
+      else console.error("Upload error:", error);
     }
     const combined = [...previews, ...newUrls];
     setPreviews(combined);
@@ -117,28 +105,17 @@ function ImageUploader({ bucket, existingUrls, onUpload, label, accept = "image/
       <div className="flex flex-wrap gap-2 mb-2">
         {previews.map((url, i) => (
           <div key={i} className="relative group">
-            {isVideo(url) ? (
-              <div className="h-16 w-24 flex items-center justify-center rounded-xl border border-white/10 bg-white/5">
-                <span className="text-2xl">🎬</span>
-              </div>
-            ) : (
-              <img src={url} alt="" className="h-16 w-16 object-contain rounded-xl border border-white/10 bg-white/5 p-1" />
-            )}
+            {isVideo(url)
+              ? <div className="h-16 w-24 flex items-center justify-center rounded-xl border border-white/10 bg-white/5"><span className="text-2xl">🎬</span></div>
+              : <img src={url} alt="" className="h-16 w-16 object-contain rounded-xl border border-white/10 bg-white/5 p-1" />
+            }
             <button type="button" onClick={() => removeItem(i)}
               className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white opacity-0 group-hover:opacity-100 transition">✕</button>
           </div>
         ))}
         <label className={`flex h-16 w-16 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-white/20 text-white/40 transition hover:border-blue-400/50 hover:text-blue-300 ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}>
-          {uploading ? (
-            <span className="text-xs animate-pulse">Uploading...</span>
-          ) : (
-            <>
-              <span className="text-lg">+</span>
-              <span className="text-[10px]">Upload</span>
-            </>
-          )}
-          <input type="file" multiple accept={accept} className="hidden" disabled={uploading}
-            onChange={e => handleFiles(e.target.files)} />
+          {uploading ? <span className="text-xs animate-pulse">Uploading...</span> : <><span className="text-lg">+</span><span className="text-[10px]">Upload</span></>}
+          <input type="file" multiple accept={accept} className="hidden" disabled={uploading} onChange={e => handleFiles(e.target.files)} />
         </label>
       </div>
       {uploading && <p className="text-xs text-blue-400 animate-pulse">⏳ Uploading to Supabase Storage...</p>}
@@ -146,12 +123,8 @@ function ImageUploader({ bucket, existingUrls, onUpload, label, accept = "image/
   );
 }
 
-// ── Video Uploader (single video) ─────────────────────────────────────────────
 function VideoUploader({ bucket, existingUrl, onUpload, label }: {
-  bucket: string;
-  existingUrl: string;
-  onUpload: (url: string) => void;
-  label: string;
+  bucket: string; existingUrl: string; onUpload: (url: string) => void; label: string;
 }) {
   const [uploading, setUploading] = useState(false);
   const [url, setUrl] = useState(existingUrl);
@@ -165,11 +138,8 @@ function VideoUploader({ bucket, existingUrl, onUpload, label }: {
     const { error } = await supabase.storage.from(bucket).upload(fileName, file, { upsert: true });
     if (!error) {
       const newUrl = `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${fileName}`;
-      setUrl(newUrl);
-      onUpload(newUrl);
-    } else {
-      console.error("Video upload error:", error);
-    }
+      setUrl(newUrl); onUpload(newUrl);
+    } else console.error("Video upload error:", error);
     setUploading(false);
   };
 
@@ -183,29 +153,18 @@ function VideoUploader({ bucket, existingUrl, onUpload, label }: {
             <p className="text-xs text-green-400 font-medium">Video uploaded ✓</p>
             <p className="text-[10px] text-white/30 truncate">{url}</p>
           </div>
-          <button type="button" onClick={() => { setUrl(""); onUpload(""); }}
-            className="text-red-400 text-xs hover:text-red-300">Remove</button>
+          <button type="button" onClick={() => { setUrl(""); onUpload(""); }} className="text-red-400 text-xs hover:text-red-300">Remove</button>
         </div>
       ) : (
         <label className={`flex h-20 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/20 text-white/40 transition hover:border-blue-400/50 hover:text-blue-300 ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}>
-          {uploading ? (
-            <p className="text-xs animate-pulse">⏳ Uploading video...</p>
-          ) : (
-            <>
-              <span className="text-2xl">🎬</span>
-              <span className="text-xs">Click to upload video (MP4, MOV)</span>
-              <span className="text-[10px] text-white/25">Max 100MB recommended</span>
-            </>
-          )}
-          <input type="file" accept="video/*" className="hidden" disabled={uploading}
-            onChange={e => handleFile(e.target.files)} />
+          {uploading ? <p className="text-xs animate-pulse">⏳ Uploading video...</p> : <><span className="text-2xl">🎬</span><span className="text-xs">Click to upload video (MP4, MOV)</span><span className="text-[10px] text-white/25">Max 100MB recommended</span></>}
+          <input type="file" accept="video/*" className="hidden" disabled={uploading} onChange={e => handleFile(e.target.files)} />
         </label>
       )}
     </div>
   );
 }
 
-// ── Main Admin Page ───────────────────────────────────────────────────────────
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [password, setPassword] = useState("");
@@ -222,12 +181,18 @@ export default function AdminPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   const [reviewFilter, setReviewFilter] = useState<"all" | "pending" | "approved">("all");
 
   const fetchData = async () => {
-    const { data: phoneData } = await supabase.from("phones").select("id,model,storage,color,category,brand,condition,price,battery_health,in_stock,featured,badge,images,free_case").order("created_at", { ascending: false });
-    const { data: accessoryData } = await supabase.from("accessories").select("id,name,brand,category,price,in_stock,featured,is_original,images").order("created_at", { ascending: false });
+    const { data: phoneData, error: pe } = await supabase.from("phones")
+      .select("id,model,storage,color,category,brand,condition,price,battery_health,in_stock,featured,badge,images,free_case")
+      .order("created_at", { ascending: false });
+    const { data: accessoryData } = await supabase.from("accessories")
+      .select("id,name,brand,category,price,in_stock,featured,is_original,images")
+      .order("created_at", { ascending: false });
     const { data: reviewData } = await supabase.from("reviews").select("*").order("created_at", { ascending: false });
+    if (pe) console.error("Phone fetch error:", pe);
     if (phoneData) setPhones(phoneData);
     if (accessoryData) setAccessories(accessoryData);
     if (reviewData) setReviews(reviewData);
@@ -291,37 +256,64 @@ export default function AdminPage() {
   const handleSavePhone = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setErrorMsg("");
+
     const payload = {
-      model: phoneForm.model, storage: phoneForm.storage, color: phoneForm.color, brand: phoneForm.brand,
-      category: phoneForm.category, condition: phoneForm.condition, price: parseInt(phoneForm.price),
+      model: phoneForm.model,
+      storage: phoneForm.storage,
+      color: phoneForm.color,
+      brand: phoneForm.brand,
+      category: phoneForm.category,
+      condition: phoneForm.condition,
+      price: parseInt(phoneForm.price),
       cost_price: phoneForm.cost_price ? parseInt(phoneForm.cost_price) : null,
       discount_price: phoneForm.discount_price ? parseInt(phoneForm.discount_price) : null,
       battery_health: phoneForm.battery_health ? parseInt(phoneForm.battery_health) : null,
-      physical_condition: phoneForm.physical_condition, face_id: phoneForm.face_id,
-      five_g: phoneForm.five_g, region: phoneForm.region, ios_version: phoneForm.ios_version || null,
-      sim_status: phoneForm.sim_status || null, sim_type: phoneForm.sim_type || null,
+      physical_condition: phoneForm.physical_condition,
+      face_id: phoneForm.face_id,
+      five_g: phoneForm.five_g,
+      region: phoneForm.region,
+      ios_version: phoneForm.ios_version || null,
+      sim_status: phoneForm.sim_status || null,
+      sim_type: phoneForm.sim_type || null,
       accessories_included: phoneForm.accessories_included || null,
-      description: phoneForm.description || null, badge: phoneForm.badge || null,
-      featured: phoneForm.featured, in_stock: phoneForm.in_stock, free_case: phoneForm.free_case,
+      product_description: phoneForm.product_description || null,
+      description: phoneForm.description || null,
+      badge: phoneForm.badge || null,
+      featured: phoneForm.featured,
+      in_stock: phoneForm.in_stock,
+      free_case: phoneForm.free_case,
       images: phoneForm.images,
       condition_video: phoneForm.condition_video || null,
       battery_screenshot: phoneForm.battery_screenshot,
-      imei_number: phoneForm.imei_number || null, supplier: phoneForm.supplier || null,
+      imei_number: phoneForm.imei_number || null,
+      supplier: phoneForm.supplier || null,
     };
+
     if (view === "edit" && editId) {
-      await supabase.from("phones").update(payload).eq("id", editId);
+      const { error } = await supabase.from("phones").update(payload).eq("id", editId);
+      if (error) { setErrorMsg(`Update failed: ${error.message}`); setSaving(false); return; }
       setSuccessMsg("Phone updated!");
     } else {
-      await supabase.from("phones").insert(payload);
+      const { data, error } = await supabase.from("phones").insert(payload).select();
+      if (error) { setErrorMsg(`Insert failed: ${error.message}`); setSaving(false); return; }
+      if (!data || data.length === 0) { setErrorMsg("Insert returned no data — check RLS policies."); setSaving(false); return; }
       setSuccessMsg("Phone added!");
     }
-    setSaving(false); setPhoneForm(emptyPhoneForm); setEditId(null); setView("list"); fetchData();
+
+    setSaving(false);
+    setPhoneForm(emptyPhoneForm);
+    setEditId(null);
+    setView("list");
+    await fetchData();
     setTimeout(() => setSuccessMsg(""), 3000);
   };
 
   const handleSaveAccessory = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setErrorMsg("");
+
     const payload = {
       name: accessoryForm.name, brand: accessoryForm.brand, category: accessoryForm.category,
       price: parseInt(accessoryForm.price),
@@ -330,17 +322,22 @@ export default function AdminPage() {
       condition: accessoryForm.condition, in_stock: accessoryForm.in_stock, featured: accessoryForm.featured,
       is_original: accessoryForm.is_original, description: accessoryForm.description || null,
       compatible_with: accessoryForm.compatible_with ? accessoryForm.compatible_with.split(",").map(s => s.trim()).filter(Boolean) : [],
-      images: accessoryForm.images,
-      badge: accessoryForm.badge || null,
+      images: accessoryForm.images, badge: accessoryForm.badge || null,
     };
+
     if (view === "edit_accessory" && editId) {
-      await supabase.from("accessories").update(payload).eq("id", editId);
+      const { error } = await supabase.from("accessories").update(payload).eq("id", editId);
+      if (error) { setErrorMsg(`Update failed: ${error.message}`); setSaving(false); return; }
       setSuccessMsg("Accessory updated!");
     } else {
-      await supabase.from("accessories").insert(payload);
+      const { data, error } = await supabase.from("accessories").insert(payload).select();
+      if (error) { setErrorMsg(`Insert failed: ${error.message}`); setSaving(false); return; }
+      if (!data || data.length === 0) { setErrorMsg("Insert returned no data — check RLS policies."); setSaving(false); return; }
       setSuccessMsg("Accessory added!");
     }
-    setSaving(false); setAccessoryForm(emptyAccessoryForm); setEditId(null); setView("list"); fetchData();
+
+    setSaving(false); setAccessoryForm(emptyAccessoryForm); setEditId(null); setView("list");
+    await fetchData();
     setTimeout(() => setSuccessMsg(""), 3000);
   };
 
@@ -353,7 +350,8 @@ export default function AdminPage() {
       product_model: reviewForm.product_model || null, review_type: reviewForm.review_type,
       verified_buyer: reviewForm.verified_buyer, approved: reviewForm.approved,
     });
-    setSuccessMsg("Review added!"); setSaving(false); setReviewForm(emptyReviewForm); setView("list"); fetchData();
+    setSuccessMsg("Review added!"); setSaving(false); setReviewForm(emptyReviewForm); setView("list");
+    await fetchData();
     setTimeout(() => setSuccessMsg(""), 3000);
   };
 
@@ -362,7 +360,6 @@ export default function AdminPage() {
     if (reviewFilter === "approved") return r.approved;
     return true;
   });
-
   const pendingCount = reviews.filter(r => !r.approved).length;
 
   if (!authed) {
@@ -396,9 +393,8 @@ export default function AdminPage() {
       </div>
 
       <main className="mx-auto max-w-6xl px-6 py-10">
-        {successMsg && (
-          <div className="mb-6 rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-300">✅ {successMsg}</div>
-        )}
+        {successMsg && <div className="mb-6 rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-300">✅ {successMsg}</div>}
+        {errorMsg && <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">❌ {errorMsg}</div>}
 
         {view === "list" && (
           <>
@@ -605,38 +601,36 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {/* Phone Images Upload */}
-              <ImageUploader
-                bucket="phone-images"
-                existingUrls={phoneForm.images}
+              <ImageUploader bucket="phone-images" existingUrls={phoneForm.images}
                 onUpload={(urls) => setPhoneForm({...phoneForm, images: urls})}
-                label="📸 Phone Photos — upload from laptop or phone (JPEG, HEIC, PNG)"
-                accept="image/*"
-              />
+                label="📸 Phone Photos — upload from laptop or phone (JPEG, HEIC, PNG)" />
 
-              {/* Condition Video Upload */}
-              <VideoUploader
-                bucket="phone-images"
-                existingUrl={phoneForm.condition_video}
+              <VideoUploader bucket="phone-images" existingUrl={phoneForm.condition_video}
                 onUpload={(url) => setPhoneForm({...phoneForm, condition_video: url})}
-                label="🎬 Condition Video — upload MP4 or MOV (shows phone working condition)"
-              />
+                label="🎬 Condition Video — upload MP4 or MOV" />
 
-              {/* Battery Screenshot Upload */}
-              <ImageUploader
-                bucket="phone-images"
-                existingUrls={phoneForm.battery_screenshot}
+              <ImageUploader bucket="phone-images" existingUrls={phoneForm.battery_screenshot}
                 onUpload={(urls) => setPhoneForm({...phoneForm, battery_screenshot: urls})}
-                label="🔋 Battery Health Screenshot — upload from phone settings"
-                accept="image/*"
-              />
+                label="🔋 Battery Health Screenshot" />
 
+              {/* Product Description — shown publicly on product page */}
               <div>
-                <label className="mb-1 block text-xs text-white/40">Ustaad Ji Notes</label>
-                <textarea value={phoneForm.description} onChange={e => setPhoneForm({...phoneForm, description: e.target.value})}
-                  placeholder="Pin-pack sealed unit." rows={3}
+                <label className="mb-1 block text-xs text-white/40">Product Description — shown on product page</label>
+                <p className="mb-1.5 text-[10px] text-white/25">General description of the phone shown to customers e.g. "iPhone 16 Pro Max featuring A18 Pro chip, 48MP camera system..."</p>
+                <textarea value={phoneForm.product_description} onChange={e => setPhoneForm({...phoneForm, product_description: e.target.value})}
+                  placeholder="iPhone 16 Pro Max with A18 Pro chip, 48MP main camera, titanium build. Perfect for heavy users." rows={3}
                   className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50 resize-none" />
               </div>
+
+              {/* Ustaad Ji Notes — internal notes shown on product page */}
+              <div>
+                <label className="mb-1 block text-xs text-white/40">Ustaad Ji Notes — specific condition notes</label>
+                <p className="mb-1.5 text-[10px] text-white/25">Phone-specific condition details e.g. "Pin-pack sealed. Screen 10/10. All buttons working. Unboxing video available."</p>
+                <textarea value={phoneForm.description} onChange={e => setPhoneForm({...phoneForm, description: e.target.value})}
+                  placeholder="Pin-pack sealed unit. Screen 10/10. All buttons working." rows={3}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50 resize-none" />
+              </div>
+
               <div className="flex flex-wrap gap-6">
                 {[
                   { label: "Face ID / Fingerprint", key: "face_id" },
@@ -714,16 +708,9 @@ export default function AdminPage() {
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50" />
                 </div>
               </div>
-
-              {/* Accessory Images Upload */}
-              <ImageUploader
-                bucket="phone-images"
-                existingUrls={accessoryForm.images}
+              <ImageUploader bucket="phone-images" existingUrls={accessoryForm.images}
                 onUpload={(urls) => setAccessoryForm({...accessoryForm, images: urls})}
-                label="📸 Accessory Photos — upload from laptop or phone"
-                accept="image/*"
-              />
-
+                label="📸 Accessory Photos — upload from laptop or phone" />
               <div>
                 <label className="mb-1 block text-xs text-white/40">Description</label>
                 <textarea value={accessoryForm.description} onChange={e => setAccessoryForm({...accessoryForm, description: e.target.value})}
