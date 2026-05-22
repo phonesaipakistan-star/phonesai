@@ -7,16 +7,40 @@ import { useCart } from "@/app/components/CartContext";
 import CompareTool from "@/app/components/CompareTool";
 
 type Phone = {
-  id: string; model: string; storage: string; color: string; category: string; brand: string;
-  condition: string; price: number; discount_price: number | null; battery_health: number;
-  physical_condition: string; five_g: boolean; face_id: boolean; in_stock: boolean;
-  featured: boolean; badge: string | null; images: string[]; free_case: boolean;
+  id: string;
+  model: string;
+  storage: string;
+  color: string;
+  category: string;
+  brand: string;
+  condition: string;
+  price: number;
+  discount_price: number | null;
+  battery_health: number;
+  physical_condition: string;
+  five_g: boolean;
+  face_id: boolean;
+  in_stock: boolean;
+  featured: boolean;
+  badge: string | null;
+  images: string[];
+  free_case: boolean;
 };
 
 type Accessory = {
-  id: string; name: string; brand: string; category: string; price: number;
-  discount_price: number | null; condition: string; in_stock: boolean; featured: boolean;
-  badge: string | null; images: string[]; is_original: boolean; description: string | null;
+  id: string;
+  name: string;
+  brand: string;
+  category: string;
+  price: number;
+  discount_price: number | null;
+  condition: string;
+  in_stock: boolean;
+  featured: boolean;
+  badge: string | null;
+  images: string[];
+  is_original: boolean;
+  description: string | null;
 };
 
 const brands = ["All", "Apple", "Samsung", "iPad", "Accessories"];
@@ -62,9 +86,11 @@ function ShopContent() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: phoneData } = await supabase.from("phones").select("*").eq("in_stock", true)
+      const { data: phoneData } = await supabase
+        .from("phones").select("*").eq("in_stock", true)
         .order("featured", { ascending: false }).order("created_at", { ascending: false });
-      const { data: accessoryData } = await supabase.from("accessories").select("*").eq("in_stock", true)
+      const { data: accessoryData } = await supabase
+        .from("accessories").select("*").eq("in_stock", true)
         .order("featured", { ascending: false });
       if (phoneData) setPhones(phoneData);
       if (accessoryData) setAccessories(accessoryData);
@@ -163,36 +189,57 @@ function ShopContent() {
                 const inCart = isInCart(phone.id);
                 const isPreOwned = phone.condition === "Pre-Owned";
                 const isNew = phone.condition === "New";
+                const savings = phone.discount_price ? phone.price - phone.discount_price : 0;
                 return (
                   <div key={phone.id} className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition duration-300 hover:border-white/20">
                     <a href={`/shop/${phone.id}`} className="flex gap-3 p-3 sm:flex-col sm:gap-0 sm:p-0">
-                      <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/5 bg-white/[0.03] sm:h-44 sm:w-full sm:rounded-none sm:rounded-t-2xl">
+
+                      {/* IMAGE BOX — fixed aspect ratio, object-cover for clean fill */}
+                      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-white/5 bg-white/[0.03] sm:h-48 sm:w-full sm:rounded-none sm:rounded-t-2xl">
                         {phone.images && phone.images.length > 0 ? (
-                          <img src={phone.images[0]} alt={phone.model} className="h-full w-full object-contain p-2 sm:p-4" />
+                          <img
+                            src={phone.images[0]}
+                            alt={phone.model}
+                            className="absolute inset-0 h-full w-full object-cover"
+                          />
                         ) : (
-                          <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-white/10 sm:h-12 sm:w-12" stroke="currentColor" strokeWidth="1">
-                            <rect x="7" y="2.5" width="10" height="19" rx="2.4" />
-                            <path d="M10 5.5H14" strokeLinecap="round" />
-                            <circle cx="12" cy="18.5" r="1" fill="currentColor" />
-                          </svg>
+                          <div className="flex h-full w-full items-center justify-center">
+                            <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-white/10 sm:h-12 sm:w-12" stroke="currentColor" strokeWidth="1">
+                              <rect x="7" y="2.5" width="10" height="19" rx="2.4" />
+                              <path d="M10 5.5H14" strokeLinecap="round" />
+                              <circle cx="12" cy="18.5" r="1" fill="currentColor" />
+                            </svg>
+                          </div>
                         )}
-                        {/* Badge only — NO condition badge */}
+
+                        {/* Badge — bottom left on mobile, top left on desktop */}
                         {phone.badge && (
-                          <span className={`absolute left-2 top-2 rounded-full border px-2 py-0.5 text-[10px] font-medium ${badgeColors[phone.badge] ?? "bg-white/10 text-white/60 border-white/20"}`}>{phone.badge}</span>
+                          <span className={`absolute bottom-2 left-2 rounded-full border px-2 py-0.5 text-[10px] font-medium sm:top-2 sm:bottom-auto ${badgeColors[phone.badge] ?? "bg-white/10 text-white/60 border-white/20"}`}>
+                            {phone.badge}
+                          </span>
                         )}
+
+                        {/* Free case badge — bottom right on mobile, top right on desktop */}
                         {phone.free_case && isPreOwned && (
-                          <span className="absolute right-2 top-2 rounded-full border border-green-500/30 bg-green-500/20 px-2 py-0.5 text-[10px] text-green-300">Free Case + SP</span>
+                          <span className="absolute bottom-2 right-2 rounded-full border border-green-500/30 bg-green-500/20 px-2 py-0.5 text-[10px] text-green-300 sm:top-2 sm:bottom-auto">
+                            🎁 Free Case
+                          </span>
                         )}
                         {phone.free_case && isNew && (
-                          <span className="absolute right-2 top-2 rounded-full border border-green-500/30 bg-green-500/20 px-2 py-0.5 text-[10px] text-green-300">Free Case</span>
+                          <span className="absolute bottom-2 right-2 rounded-full border border-green-500/30 bg-green-500/20 px-2 py-0.5 text-[10px] text-green-300 sm:top-2 sm:bottom-auto">
+                            🎁 Case
+                          </span>
                         )}
                       </div>
 
                       <div className="flex flex-1 flex-col justify-center sm:p-4">
-                        {/* Category + 5G only — condition (New/Pre-Owned) badge REMOVED */}
                         <div className="flex flex-wrap gap-1 mb-1.5">
-                          <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${categoryColors[phone.category] ?? "bg-white/10 text-white/60 border-white/20"}`}>{phone.category}</span>
-                          {phone.five_g && <span className="rounded-full border border-blue-400/20 bg-blue-400/10 px-2 py-0.5 text-[10px] text-blue-300">5G</span>}
+                          <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${categoryColors[phone.category] ?? "bg-white/10 text-white/60 border-white/20"}`}>
+                            {phone.category}
+                          </span>
+                          {phone.five_g && (
+                            <span className="rounded-full border border-blue-400/20 bg-blue-400/10 px-2 py-0.5 text-[10px] text-blue-300">5G</span>
+                          )}
                         </div>
                         <h2 className="text-sm font-bold text-white leading-tight sm:text-base">{phone.model}</h2>
                         <p className="text-xs text-white/40 mt-0.5">{phone.storage} • {phone.color}</p>
@@ -200,12 +247,15 @@ function ShopContent() {
                           {phone.battery_health && <span>🔋{phone.battery_health}%</span>}
                           {phone.face_id && <span>🔒FaceID</span>}
                         </div>
+
+                        {/* PRICE — discount pops */}
                         <div className="mt-2">
                           {phone.discount_price ? (
-                            <>
-                              <p className="text-[10px] text-white/30 line-through">Rs. {phone.price.toLocaleString()}</p>
+                            <div>
+                              <p className="text-xs text-white/35 line-through">Rs. {phone.price.toLocaleString()}</p>
                               <p className="text-base font-extrabold text-white sm:text-lg">Rs. {phone.discount_price.toLocaleString()}</p>
-                            </>
+                              <p className="text-[10px] font-semibold text-green-400 mt-0.5">Save Rs. {savings.toLocaleString()} ↓</p>
+                            </div>
                           ) : (
                             <p className="text-base font-extrabold text-white sm:text-lg">Rs. {phone.price.toLocaleString()}</p>
                           )}
@@ -213,15 +263,22 @@ function ShopContent() {
                       </div>
                     </a>
 
+                    {/* Action Buttons */}
                     <div className="px-3 pb-3 flex gap-2 sm:px-4 sm:pb-4">
                       <button
                         onClick={() => addItem({ id: phone.id, model: phone.model, storage: phone.storage, color: phone.color, category: phone.category, brand: phone.brand, condition: phone.condition, price: phone.price, discount_price: phone.discount_price, image: phone.images?.[0] ?? null, free_case: phone.free_case })}
-                        className={`flex-1 rounded-xl py-2 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}>
+                        className={`flex-1 rounded-xl py-2 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}
+                      >
                         {inCart ? "✓ In Cart" : "Add to Cart"}
                       </button>
-                      <button onClick={() => toggleCompare(phone)} disabled={!isInCompare && compareList.length >= 2}
-                        className={`rounded-xl border px-2.5 py-2 text-xs transition ${isInCompare ? "border-blue-400/60 bg-blue-500/20 text-blue-200" : compareList.length >= 2 ? "border-white/5 text-white/20 cursor-not-allowed" : "border-white/10 text-white/40 hover:text-white/70"}`}>⇄</button>
-                      <a href={`/shop/${phone.id}`} className="rounded-xl border border-white/10 px-3 py-2 text-xs text-white/40 transition hover:text-white">View</a>
+                      <button
+                        onClick={() => toggleCompare(phone)}
+                        disabled={!isInCompare && compareList.length >= 2}
+                        className={`rounded-xl border px-2.5 py-2 text-xs transition ${isInCompare ? "border-blue-400/60 bg-blue-500/20 text-blue-200" : compareList.length >= 2 ? "border-white/5 text-white/20 cursor-not-allowed" : "border-white/10 text-white/40 hover:text-white/70"}`}
+                      >⇄</button>
+                      <a href={`/shop/${phone.id}`} className="rounded-xl border border-white/10 px-3 py-2 text-xs text-white/40 transition hover:text-white">
+                        View
+                      </a>
                     </div>
                   </div>
                 );
@@ -241,11 +298,11 @@ function ShopContent() {
                 const inCart = isInCart(acc.id);
                 return (
                   <div key={acc.id} className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex h-28 items-center justify-center overflow-hidden bg-white/5 sm:h-36">
+                    <div className="relative h-28 overflow-hidden bg-white/5 sm:h-36">
                       {acc.images && acc.images.length > 0 ? (
-                        <img src={acc.images[0]} alt={acc.name} className="h-full w-full object-contain p-3" />
+                        <img src={acc.images[0]} alt={acc.name} className="absolute inset-0 h-full w-full object-cover" />
                       ) : (
-                        <div className="text-3xl">
+                        <div className="flex h-full w-full items-center justify-center text-3xl">
                           {acc.category === "Charger" ? "🔌" : acc.category === "Cable" ? "🔗" : acc.category === "AirPods" ? "🎧" : acc.category === "Apple Watch" ? "⌚" : "📦"}
                         </div>
                       )}
@@ -253,11 +310,18 @@ function ShopContent() {
                     <div className="flex flex-1 flex-col p-3">
                       <p className="text-xs font-bold text-white leading-tight">{acc.name}</p>
                       <p className="text-xs text-white/40 mt-0.5">{acc.brand}</p>
-                      {acc.description && <p className="mt-1 text-[10px] text-white/35 leading-relaxed line-clamp-2">{acc.description}</p>}
-                      <p className="mt-2 text-sm font-extrabold text-white">Rs. {acc.price.toLocaleString()}</p>
+                      {acc.description && (
+                        <p className="text-[10px] text-white/30 mt-1 leading-relaxed line-clamp-2">{acc.description}</p>
+                      )}
+                      <p className="mt-2 text-sm font-extrabold text-white">
+                        {acc.discount_price ? (
+                          <><span className="text-[10px] text-white/30 line-through mr-1">Rs. {acc.price.toLocaleString()}</span>Rs. {acc.discount_price.toLocaleString()}</>
+                        ) : `Rs. ${acc.price.toLocaleString()}`}
+                      </p>
                       <button
                         onClick={() => addItem({ id: acc.id, model: acc.name, storage: "", color: "", category: acc.category, brand: acc.brand, condition: acc.condition, price: acc.price, discount_price: acc.discount_price, image: acc.images?.[0] ?? null, free_case: false })}
-                        className={`mt-2 w-full rounded-xl py-2 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}>
+                        className={`mt-2 w-full rounded-xl py-2 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}
+                      >
                         {inCart ? "✓ In Cart" : "Add to Cart"}
                       </button>
                     </div>
@@ -269,9 +333,11 @@ function ShopContent() {
         )}
       </main>
 
-      <CompareTool selectedPhones={compareList}
+      <CompareTool
+        selectedPhones={compareList}
         onRemove={(id) => setCompareList((prev) => prev.filter((p) => p.id !== id))}
-        onClear={() => setCompareList([])} />
+        onClear={() => setCompareList([])}
+      />
     </div>
   );
 }

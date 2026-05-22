@@ -12,8 +12,8 @@ type Phone = {
   condition: string; price: number; discount_price: number | null; battery_health: number;
   physical_condition: string; five_g: boolean; face_id: boolean;
   in_stock: boolean; featured: boolean; badge: string | null; images: string[];
-  condition_video: string | null; battery_screenshot: string | null;
-  product_description: string | null; description: string | null;
+  condition_video: string | null; battery_screenshot: string | null; description: string | null;
+  product_description: string | null;
   sim_status: string | null; accessories_included: string | null; region: string | null;
   ios_version: string | null; model_number: string | null; free_case: boolean;
 };
@@ -33,7 +33,7 @@ const categoryColors: Record<string, string> = {
 
 const categoryDescriptions: Record<string, string> = {
   PTA: "Officially registered. SIM-ready from day one. Zero tension.",
-  "Non-PTA": "Factory unlocked. SIM works ~2 months, then PTA registration needed.",
+  "Non-PTA": "Factory unlocked. SIM works, PTA registration needed eventually.",
   JV: "Carrier-locked. Full iPhone power for WiFi & secondary use.",
   WiFi: "WiFi only. No SIM slot. Perfect for home and office use.",
   Cellular: "SIM + WiFi. Works anywhere with data or WiFi.",
@@ -78,18 +78,21 @@ export default function ProductPage() {
   const [showDiscountBanner, setShowDiscountBanner] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      supabase.from("phones").select("*").eq("id", id).single().then(({ data, error }) => {
-        if (!error && data) setPhone(data);
-        setLoading(false);
-      });
-    }
+    const fetchPhone = async () => {
+      const { data, error } = await supabase.from("phones").select("*").eq("id", id).single();
+      if (!error && data) setPhone(data);
+      setLoading(false);
+    };
+    if (id) fetchPhone();
   }, [id]);
 
   useEffect(() => {
-    if (!phone) return;
-    supabase.from("reviews").select("*").eq("approved", true).eq("product_model", phone.model)
-      .order("created_at", { ascending: false }).then(({ data }) => { if (data) setReviews(data); });
+    const fetchReviews = async () => {
+      if (!phone) return;
+      const { data } = await supabase.from("reviews").select("*").eq("approved", true).eq("product_model", phone.model).order("created_at", { ascending: false });
+      if (data) setReviews(data);
+    };
+    fetchReviews();
   }, [phone]);
 
   useEffect(() => {
@@ -145,6 +148,7 @@ export default function ProductPage() {
   const inCart = isInCart(phone.id);
   const isPreOwned = phone.condition === "Pre-Owned";
   const isNew = phone.condition === "New";
+  const savings = phone.discount_price ? phone.price - phone.discount_price : 0;
 
   return (
     <div className="min-h-screen bg-black text-white pt-16 sm:pt-20">
@@ -165,17 +169,23 @@ export default function ProductPage() {
       )}
 
       <main className="mx-auto max-w-6xl px-4 py-6 pb-24 sm:px-6 sm:py-10">
-        <a href="/shop" className="mb-4 inline-flex items-center gap-1 text-xs text-white/40 hover:text-white transition sm:mb-6">← Back to Shop</a>
+        <a href="/shop" className="mb-4 inline-flex items-center gap-1 text-xs text-white/40 hover:text-white transition sm:mb-6">
+          ← Back to Shop
+        </a>
 
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-16">
 
-          {/* Image Gallery */}
+          {/* Image Gallery — fixed to fill properly */}
           <div className="flex flex-col gap-3">
-            <div className="relative flex h-64 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] sm:h-[420px] sm:rounded-3xl">
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] sm:rounded-3xl" style={{aspectRatio: "4/3"}}>
               {allImages.length > 0 ? (
-                <img src={allImages[activeImage]} alt={phone.model} className="h-full w-full object-contain p-6 transition duration-500 sm:p-8" />
+                <img
+                  src={allImages[activeImage]}
+                  alt={phone.model}
+                  className="absolute inset-0 h-full w-full object-cover transition duration-500"
+                />
               ) : (
-                <div className="flex flex-col items-center gap-2 text-white/20">
+                <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-white/20">
                   <svg viewBox="0 0 24 24" fill="none" className="h-14 w-14" stroke="currentColor" strokeWidth="0.8">
                     <rect x="7" y="2.5" width="10" height="19" rx="2.4" />
                     <path d="M10 5.5H14" strokeLinecap="round" />
@@ -192,8 +202,8 @@ export default function ProductPage() {
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {allImages.map((img, i) => (
                   <button key={i} onClick={() => setActiveImage(i)}
-                    className={`h-14 w-14 shrink-0 overflow-hidden rounded-xl border transition ${activeImage === i ? "border-blue-400/60" : "border-white/10 opacity-50"}`}>
-                    <img src={img} alt="" className="h-full w-full object-contain p-1" />
+                    className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border transition ${activeImage === i ? "border-blue-400/60" : "border-white/10 opacity-50"}`}>
+                    <img src={img} alt="" className="absolute inset-0 h-full w-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -220,25 +230,38 @@ export default function ProductPage() {
               </div>
             )}
 
-            {/* Price */}
+            {/* PRICE — redesigned to make discount pop */}
             <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-4 sm:px-6 sm:py-5">
               {phone.discount_price ? (
-                <>
-                  <p className="text-xs text-white/30 line-through">Rs. {phone.price.toLocaleString()}</p>
-                  <p className="text-3xl font-extrabold text-white sm:text-4xl">Rs. {phone.discount_price.toLocaleString()}</p>
-                </>
+                <div>
+                  <div className="flex items-baseline gap-3">
+                    <p className="text-3xl font-extrabold text-white sm:text-4xl">
+                      Rs. {phone.discount_price.toLocaleString()}
+                    </p>
+                    <p className="text-lg text-white/30 line-through sm:text-xl">
+                      Rs. {phone.price.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1">
+                    <span className="text-xs font-bold text-green-400">You save Rs. {savings.toLocaleString()}</span>
+                    <span className="text-xs text-green-400/60">({Math.round((savings / phone.price) * 100)}% off)</span>
+                  </div>
+                </div>
               ) : (
                 <p className="text-3xl font-extrabold text-white sm:text-4xl">Rs. {phone.price.toLocaleString()}</p>
               )}
-              <p className="mt-1 text-xs text-white/30">Fixed price • No hidden charges</p>
+              <p className="mt-2 text-xs text-white/30">Fixed price • No hidden charges</p>
             </div>
 
             {/* Add to Cart */}
-            <button onClick={() => addItem({ id: phone.id, model: phone.model, storage: phone.storage, color: phone.color, category: phone.category, brand: phone.brand, condition: phone.condition, price: phone.price, discount_price: phone.discount_price, image: allImages[0] ?? null, free_case: phone.free_case })}
-              className={`mt-3 w-full rounded-2xl py-4 text-sm font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}>
+            <button
+              onClick={() => addItem({ id: phone.id, model: phone.model, storage: phone.storage, color: phone.color, category: phone.category, brand: phone.brand, condition: phone.condition, price: phone.price, discount_price: phone.discount_price, image: allImages[0] ?? null, free_case: phone.free_case })}
+              className={`mt-3 w-full rounded-2xl py-4 text-sm font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}
+            >
               {inCart ? "✓ Added to Cart — View in Cart ↑" : "Add to Cart 🛒"}
             </button>
 
+            {/* Free case */}
             {phone.free_case && isPreOwned && (
               <div className="mt-3 flex items-center gap-2.5 rounded-2xl border border-green-500/20 bg-green-500/5 px-4 py-3">
                 <span className="text-xl">🎁</span>
@@ -258,7 +281,7 @@ export default function ProductPage() {
               </div>
             )}
 
-            {/* Ustaad Ji */}
+            {/* Ustaad Ji trust badge */}
             <div className="mt-3 flex items-center gap-2.5 rounded-2xl border border-amber-300/20 bg-amber-300/5 px-4 py-3">
               <span className="text-xl">🧔</span>
               <div>
@@ -300,8 +323,8 @@ export default function ProductPage() {
         <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-6">
             <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/30 sm:mb-4 sm:text-xs">SIM Status</p>
-            <p className="text-base font-bold text-white sm:text-lg">{phone.sim_status ?? "Check category"}</p>
-            <p className="mt-1 text-xs leading-relaxed text-white/40">{categoryDescriptions[phone.category]}</p>
+            {/* FIXED: just show the sim_status value, no auto-generated 2-month text */}
+            <p className="text-base font-bold text-white sm:text-lg">{phone.sim_status ?? "—"}</p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-6">
             <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/30 sm:mb-4 sm:text-xs">In the Box</p>
@@ -323,7 +346,7 @@ export default function ProductPage() {
               {phone.category === "JV" ? "⚠️ JV Phone — SIM Locked" : "ℹ️ Non-PTA — PTA Registration Info"}
             </p>
             <p className="text-xs leading-relaxed text-white/50">
-              {phone.category === "JV" ? "Yeh phone permanently SIM-locked hai. WiFi aur secondary use ke liye perfect hai." : "Is phone ki SIM approximately 2 mahine chalegi. Baad mein PTA registration karni padegi."}
+              {phone.category === "JV" ? "Yeh phone permanently SIM-locked hai. WiFi aur secondary use ke liye perfect hai." : "Is phone ki SIM active hai lekin eventually PTA registration karni padegi."}
             </p>
             {phone.category === "Non-PTA" && (
               <a href="https://taxcalculator.pk/pta-tax" target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex text-xs font-semibold text-blue-400">
@@ -333,27 +356,45 @@ export default function ProductPage() {
           </div>
         )}
 
-        {/* Product Description — general, shown first */}
+        {/* ABOUT THIS PHONE — redesigned, premium, not an essay */}
         {phone.product_description && (
-          <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:mt-6 sm:p-6">
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/30">About This Phone</p>
-            <p className="text-sm leading-relaxed text-white/70">{phone.product_description}</p>
+          <div className="mt-4 sm:mt-6 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.04] to-white/[0.01]">
+            <div className="border-b border-white/5 px-5 py-3 sm:px-6">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">About This Phone</p>
+            </div>
+            <div className="px-5 py-4 sm:px-6 sm:py-5">
+              {/* Parse description into bullet points if it has sentences, else show clean paragraphs */}
+              <div className="space-y-2">
+                {phone.product_description
+                  .split(/\.\s+/)
+                  .filter(s => s.trim().length > 10)
+                  .slice(0, 6)
+                  .map((sentence, i) => (
+                    <div key={i} className="flex items-start gap-2.5">
+                      <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-400/60" />
+                      <p className="text-xs leading-relaxed text-white/65 sm:text-sm">
+                        {sentence.trim().endsWith(".") ? sentence.trim() : sentence.trim() + "."}
+                      </p>
+                    </div>
+                  ))}
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Ustaad Ji Notes — phone-specific condition notes, shown below description */}
+        {/* Ustaad Ji Notes */}
         {phone.description && (
-          <div className="mt-4 rounded-2xl border border-amber-300/20 bg-amber-300/5 p-4 sm:mt-6 sm:p-6">
+          <div className="mt-4 rounded-2xl border border-amber-400/15 bg-amber-400/[0.04] p-4 sm:mt-4 sm:p-6">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-base">🧔</span>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-200/60">Ustaad Ji Notes</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-400/60">Ustaad Ji Notes</p>
             </div>
-            <p className="text-sm leading-relaxed text-white/70">{phone.description}</p>
+            <p className="text-xs leading-relaxed text-white/70 sm:text-sm">{phone.description}</p>
           </div>
         )}
 
         {/* Delivery info */}
-        <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:mt-6 sm:p-6">
+        <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:mt-4 sm:p-6">
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/30">Delivery</p>
           <p className="text-sm font-bold text-white">Free Delivery — All Pakistan</p>
           <p className="mt-1 text-xs text-white/40">Order before 2pm for next day delivery in nearby cities. All Pakistan: 1-3 working days.</p>
@@ -397,7 +438,9 @@ export default function ProductPage() {
               {reviews.map((review) => (
                 <div key={review.id} className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 flex flex-col gap-2 sm:p-6 sm:gap-3">
                   <StarRating rating={review.rating} />
-                  {review.photo_url && <img src={review.photo_url} alt="Review" className="w-full h-40 object-cover rounded-xl border border-white/10" />}
+                  {review.photo_url && (
+                    <img src={review.photo_url} alt="Review" className="w-full h-40 object-cover rounded-xl border border-white/10" />
+                  )}
                   <p className="text-xs text-white/80 leading-relaxed sm:text-sm">"{review.review_text}"</p>
                   <div className="mt-auto flex items-center justify-between">
                     <div>
