@@ -84,6 +84,8 @@ export default function ProductPage() {
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [showDiscountBanner, setShowDiscountBanner] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
     const fetchPhone = async () => {
@@ -202,7 +204,7 @@ export default function ProductPage() {
           <div className="flex flex-col gap-3">
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] sm:rounded-3xl" style={{aspectRatio: "4/3"}}>
               {allImages.length > 0 ? (
-                <img src={allImages[activeImage]} alt={phone.model} className="absolute inset-0 h-full w-full object-cover transition duration-500" />
+                <img src={allImages[activeImage]} alt={phone.model} className="absolute inset-0 h-full w-full object-contain p-2 transition duration-500 cursor-zoom-in" onClick={() => setLightboxOpen(true); setLightboxIndex(activeImage);} />
               ) : (
                 <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-white/20">
                   <svg viewBox="0 0 24 24" fill="none" className="h-14 w-14" stroke="currentColor" strokeWidth="0.8">
@@ -222,7 +224,7 @@ export default function ProductPage() {
                 {allImages.map((img, i) => (
                   <button key={i} onClick={() => setActiveImage(i)}
                     className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border transition ${activeImage === i ? "border-blue-400/60" : "border-white/10 opacity-50"}`}>
-                    <img src={img} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                    <img src={img} alt="" className="absolute inset-0 h-full w-full object-contain p-1" />
                   </button>
                 ))}
               </div>
@@ -446,7 +448,7 @@ export default function ProductPage() {
                     <div key={acc.id} className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
                       <div className="relative h-24 overflow-hidden bg-white/5 sm:h-32">
                         {acc.images?.[0] ? (
-                          <img src={acc.images[0]} alt={acc.name} className="absolute inset-0 h-full w-full object-cover" />
+                          <img src={acc.images[0]} alt={acc.name} className="absolute inset-0 h-full w-full object-contain p-2" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center text-2xl">
                             {acc.category === "Charger" ? "🔌" : acc.category === "Cable" ? "🔗" : acc.category === "AirPods" ? "🎧" : "⌚"}
@@ -487,7 +489,7 @@ export default function ProductPage() {
                     <a key={p.id} href={`/shop/${p.id}`} className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3 transition hover:border-white/20 sm:flex-col sm:gap-0 sm:p-0">
                       <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-white/5 bg-white/[0.03] sm:h-36 sm:w-full sm:rounded-none sm:rounded-t-2xl">
                         {p.images?.[0] ? (
-                          <img src={p.images[0]} alt={p.model} className="absolute inset-0 h-full w-full object-cover" />
+                          <img src={p.images[0]} alt={p.model} className="absolute inset-0 h-full w-full object-contain p-1" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center">
                             <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-white/10" stroke="currentColor" strokeWidth="1">
@@ -627,6 +629,56 @@ export default function ProductPage() {
             )}
           </div>
         </div>
+
+        {/* ── LIGHTBOX ── */}
+        {lightboxOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm"
+            onClick={() => setLightboxOpen(false)}>
+            {/* Close */}
+            <button onClick={() => setLightboxOpen(false)}
+              className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white text-lg hover:bg-white/10 transition">
+              ✕
+            </button>
+            {/* Counter */}
+            <p className="absolute top-4 left-1/2 -translate-x-1/2 text-xs text-white/50">
+              {lightboxIndex + 1} / {allImages.length}
+            </p>
+            {/* Prev */}
+            {allImages.length > 1 && lightboxIndex > 0 && (
+              <button onClick={(e) => { e.stopPropagation(); setLightboxIndex(i => i - 1); }}
+                className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white hover:bg-white/10 transition text-lg">
+                ←
+              </button>
+            )}
+            {/* Next */}
+            {allImages.length > 1 && lightboxIndex < allImages.length - 1 && (
+              <button onClick={(e) => { e.stopPropagation(); setLightboxIndex(i => i + 1); }}
+                className="absolute right-14 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white hover:bg-white/10 transition text-lg">
+                →
+              </button>
+            )}
+            {/* Main image */}
+            <div className="flex h-full w-full items-center justify-center p-16" onClick={(e) => e.stopPropagation()}>
+              <img
+                src={allImages[lightboxIndex]}
+                alt={phone.model}
+                className="max-h-full max-w-full object-contain select-none"
+                style={{ touchAction: "pinch-zoom" }}
+              />
+            </div>
+            {/* Thumbnail strip */}
+            {allImages.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 overflow-x-auto max-w-xs sm:max-w-md px-2">
+                {allImages.map((img, i) => (
+                  <button key={i} onClick={(e) => { e.stopPropagation(); setLightboxIndex(i); }}
+                    className={`relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border-2 transition ${lightboxIndex === i ? "border-blue-400" : "border-white/20 opacity-50"}`}>
+                    <img src={img} alt="" className="h-full w-full object-contain p-0.5" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </main>
     </div>
   );

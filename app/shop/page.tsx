@@ -195,7 +195,7 @@ function ShopContent() {
                     <a href={`/shop/${phone.id}`} className="flex gap-3 p-3 sm:flex-col sm:gap-0 sm:p-0">
                       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-white/5 bg-white/[0.03] sm:h-48 sm:w-full sm:rounded-none sm:rounded-t-2xl">
                         {phone.images && phone.images.length > 0 ? (
-                          <img src={phone.images[0]} alt={phone.model} className="absolute inset-0 h-full w-full object-cover" />
+                          <img src={phone.images[0]} alt={phone.model} className="absolute inset-0 h-full w-full object-contain p-2 sm:p-3" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center">
                             <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-white/10 sm:h-12 sm:w-12" stroke="currentColor" strokeWidth="1">
