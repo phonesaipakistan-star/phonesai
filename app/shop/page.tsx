@@ -133,7 +133,7 @@ function ShopContent() {
           <h1 className="text-2xl font-extrabold tracking-tight text-white sm:text-4xl">
             {activeBrand === "All" ? "All Products" : activeBrand === "Accessories" ? "Accessories" : activeBrand === "iPad" ? "iPads" : `${activeBrand} Phones`}
           </h1>
-          <p className="mt-1 text-sm text-white/50">Verified, asli, aur 7-din warranty ke saath.</p>
+          <p className="mt-1 text-sm text-white/50">Verified, asli, aur warranty ke saath.</p>
         </div>
 
         {/* Brand Filter */}
@@ -193,15 +193,9 @@ function ShopContent() {
                 return (
                   <div key={phone.id} className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition duration-300 hover:border-white/20">
                     <a href={`/shop/${phone.id}`} className="flex gap-3 p-3 sm:flex-col sm:gap-0 sm:p-0">
-
-                      {/* IMAGE BOX — fixed aspect ratio, object-cover for clean fill */}
                       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-white/5 bg-white/[0.03] sm:h-48 sm:w-full sm:rounded-none sm:rounded-t-2xl">
                         {phone.images && phone.images.length > 0 ? (
-                          <img
-                            src={phone.images[0]}
-                            alt={phone.model}
-                            className="absolute inset-0 h-full w-full object-cover"
-                          />
+                          <img src={phone.images[0]} alt={phone.model} className="absolute inset-0 h-full w-full object-cover" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center">
                             <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-white/10 sm:h-12 sm:w-12" stroke="currentColor" strokeWidth="1">
@@ -211,15 +205,11 @@ function ShopContent() {
                             </svg>
                           </div>
                         )}
-
-                        {/* Badge — bottom left on mobile, top left on desktop */}
                         {phone.badge && (
                           <span className={`absolute bottom-2 left-2 rounded-full border px-2 py-0.5 text-[10px] font-medium sm:top-2 sm:bottom-auto ${badgeColors[phone.badge] ?? "bg-white/10 text-white/60 border-white/20"}`}>
                             {phone.badge}
                           </span>
                         )}
-
-                        {/* Free case badge — bottom right on mobile, top right on desktop */}
                         {phone.free_case && isPreOwned && (
                           <span className="absolute bottom-2 right-2 rounded-full border border-green-500/30 bg-green-500/20 px-2 py-0.5 text-[10px] text-green-300 sm:top-2 sm:bottom-auto">
                             🎁 Free Case
@@ -247,8 +237,6 @@ function ShopContent() {
                           {phone.battery_health && <span>🔋{phone.battery_health}%</span>}
                           {phone.face_id && <span>🔒FaceID</span>}
                         </div>
-
-                        {/* PRICE — discount pops */}
                         <div className="mt-2">
                           {phone.discount_price ? (
                             <div>
@@ -263,19 +251,16 @@ function ShopContent() {
                       </div>
                     </a>
 
-                    {/* Action Buttons */}
                     <div className="px-3 pb-3 flex gap-2 sm:px-4 sm:pb-4">
                       <button
                         onClick={() => addItem({ id: phone.id, model: phone.model, storage: phone.storage, color: phone.color, category: phone.category, brand: phone.brand, condition: phone.condition, price: phone.price, discount_price: phone.discount_price, image: phone.images?.[0] ?? null, free_case: phone.free_case })}
-                        className={`flex-1 rounded-xl py-2 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}
-                      >
+                        className={`flex-1 rounded-xl py-2 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}>
                         {inCart ? "✓ In Cart" : "Add to Cart"}
                       </button>
                       <button
                         onClick={() => toggleCompare(phone)}
                         disabled={!isInCompare && compareList.length >= 2}
-                        className={`rounded-xl border px-2.5 py-2 text-xs transition ${isInCompare ? "border-blue-400/60 bg-blue-500/20 text-blue-200" : compareList.length >= 2 ? "border-white/5 text-white/20 cursor-not-allowed" : "border-white/10 text-white/40 hover:text-white/70"}`}
-                      >⇄</button>
+                        className={`rounded-xl border px-2.5 py-2 text-xs transition ${isInCompare ? "border-blue-400/60 bg-blue-500/20 text-blue-200" : compareList.length >= 2 ? "border-white/5 text-white/20 cursor-not-allowed" : "border-white/10 text-white/40 hover:text-white/70"}`}>⇄</button>
                       <a href={`/shop/${phone.id}`} className="rounded-xl border border-white/10 px-3 py-2 text-xs text-white/40 transition hover:text-white">
                         View
                       </a>
@@ -293,37 +278,43 @@ function ShopContent() {
             {(activeBrand === "All" || activeBrand === "Accessories") && (
               <h2 className="mb-4 text-sm font-bold text-white/50 uppercase tracking-widest">Accessories</h2>
             )}
-            <div className="grid gap-3 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+            <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 sm:gap-4">
               {filteredAccessories.map((acc) => {
                 const inCart = isInCart(acc.id);
                 return (
-                  <div key={acc.id} className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
-                    <div className="relative h-28 overflow-hidden bg-white/5 sm:h-36">
+                  <div key={acc.id} className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition hover:border-white/20">
+
+                    {/* Image — square, symmetrical, object-contain */}
+                    <a href={`/shop/accessories/${acc.id}`} className="flex aspect-square w-full items-center justify-center bg-white/[0.03] p-4">
                       {acc.images && acc.images.length > 0 ? (
-                        <img src={acc.images[0]} alt={acc.name} className="absolute inset-0 h-full w-full object-cover" />
+                        <img src={acc.images[0]} alt={acc.name} className="h-full w-full object-contain" />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-3xl">
+                        <span className="text-4xl">
                           {acc.category === "Charger" ? "🔌" : acc.category === "Cable" ? "🔗" : acc.category === "AirPods" ? "🎧" : acc.category === "Apple Watch" ? "⌚" : "📦"}
-                        </div>
+                        </span>
                       )}
-                    </div>
+                    </a>
+
                     <div className="flex flex-1 flex-col p-3">
-                      <p className="text-xs font-bold text-white leading-tight">{acc.name}</p>
-                      <p className="text-xs text-white/40 mt-0.5">{acc.brand}</p>
-                      {acc.description && (
-                        <p className="text-[10px] text-white/30 mt-1 leading-relaxed line-clamp-2">{acc.description}</p>
-                      )}
-                      <p className="mt-2 text-sm font-extrabold text-white">
+                      <a href={`/shop/accessories/${acc.id}`}>
+                        <p className="text-xs font-bold text-white leading-tight line-clamp-2 hover:text-blue-300 transition">{acc.name}</p>
+                      </a>
+                      <p className="text-xs text-white/40 mt-0.5 capitalize">{acc.brand}</p>
+                      <div className="mt-auto pt-2">
                         {acc.discount_price ? (
-                          <><span className="text-[10px] text-white/30 line-through mr-1">Rs. {acc.price.toLocaleString()}</span>Rs. {acc.discount_price.toLocaleString()}</>
-                        ) : `Rs. ${acc.price.toLocaleString()}`}
-                      </p>
-                      <button
-                        onClick={() => addItem({ id: acc.id, model: acc.name, storage: "", color: "", category: acc.category, brand: acc.brand, condition: acc.condition, price: acc.price, discount_price: acc.discount_price, image: acc.images?.[0] ?? null, free_case: false })}
-                        className={`mt-2 w-full rounded-xl py-2 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}
-                      >
-                        {inCart ? "✓ In Cart" : "Add to Cart"}
-                      </button>
+                          <>
+                            <p className="text-[10px] text-white/30 line-through">Rs. {acc.price.toLocaleString()}</p>
+                            <p className="text-sm font-extrabold text-white">Rs. {acc.discount_price.toLocaleString()}</p>
+                          </>
+                        ) : (
+                          <p className="text-sm font-extrabold text-white">Rs. {acc.price.toLocaleString()}</p>
+                        )}
+                        <button
+                          onClick={() => addItem({ id: acc.id, model: acc.name, storage: "", color: "", category: acc.category, brand: acc.brand, condition: acc.condition, price: acc.price, discount_price: acc.discount_price, image: acc.images?.[0] ?? null, free_case: false })}
+                          className={`mt-2 w-full rounded-xl py-2 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}>
+                          {inCart ? "✓ In Cart" : "Add to Cart"}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
