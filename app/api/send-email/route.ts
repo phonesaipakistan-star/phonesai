@@ -25,6 +25,14 @@ type OrderEmailData = {
   couponApplied?: boolean;
 };
 
+// Spam notice shown at bottom of all customer emails
+const spamNotice = `
+  <div style="background:#1a1a1a;border:1px solid #2d2d2d;border-radius:12px;padding:16px;margin-top:24px;text-align:center;">
+    <p style="color:#6b7280;font-size:12px;margin:0 0 6px;">📬 <strong style="color:#9ca3af;">Yeh email spam mein gayi hai?</strong></p>
+    <p style="color:#6b7280;font-size:12px;margin:0;">Apni spam/junk folder check karein aur email ko <strong style="color:#9ca3af;">"Not Spam"</strong> mark karein taake future emails directly inbox mein aayein.</p>
+  </div>
+`;
+
 const getVerificationEmail = (email: string, token: string) => `
 <!DOCTYPE html>
 <html>
@@ -52,6 +60,7 @@ const getVerificationEmail = (email: string, token: string) => `
       </div>
     </div>
     <p style="color:#6b7280;font-size:12px;text-align:center;margin:0;">Yeh link 24 ghante mein expire ho jata hai. Agar aapne signup nahi kiya toh is email ko ignore karein.</p>
+    ${spamNotice}
     <div style="text-align:center;padding-top:24px;border-top:1px solid #1f2937;margin-top:24px;">
       <p style="color:#6b7280;font-size:12px;margin:0;">PhonesAI • <a href="https://phonesai.pk" style="color:#3b82f6;text-decoration:none;">phonesai.pk</a></p>
     </div>
@@ -119,7 +128,9 @@ const getOrderConfirmationEmail = (data: OrderEmailData) => `
       <p style="color:#9ca3af;font-size:13px;margin:0;">7-din warranty ke saath aapka phone verified hai.</p>
     </div>
 
-    <div style="text-align:center;padding-top:24px;border-top:1px solid #1f2937;">
+    ${spamNotice}
+
+    <div style="text-align:center;padding-top:24px;border-top:1px solid #1f2937;margin-top:24px;">
       <p style="color:#6b7280;font-size:12px;margin:0 0 4px;">PhonesAI • Wah Cantt, Punjab, Pakistan</p>
       <p style="color:#6b7280;font-size:12px;margin:0;">
         <a href="https://phonesai.pk" style="color:#3b82f6;text-decoration:none;">phonesai.pk</a>
@@ -225,7 +236,6 @@ export async function POST(req: Request) {
 
     const data: OrderEmailData = await req.json();
 
-    // Handle email verification
     if (data.type === "verify_email") {
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
@@ -250,6 +260,7 @@ export async function POST(req: Request) {
     // 1. Order confirmation to customer
     if (data.customerEmail) {
       const res1 = await fetch("https://api.resend.com/emails", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${RESEND_API_KEY}`,
