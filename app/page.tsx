@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 
 const openUstaadJi = () => {
@@ -27,7 +28,7 @@ const categories = [
     link: "/shop?brand=Apple",
     color: "from-blue-500/20 to-blue-600/10",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" stroke="currentColor" strokeWidth="1.5">
+      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
         <rect x="7" y="2" width="10" height="20" rx="2.5" />
         <path d="M10 5.5H14" strokeLinecap="round" />
         <circle cx="12" cy="18.5" r="1" fill="currentColor" stroke="none" />
@@ -40,7 +41,7 @@ const categories = [
     link: "/shop?brand=Samsung",
     color: "from-purple-500/20 to-purple-600/10",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" stroke="currentColor" strokeWidth="1.5">
+      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
         <rect x="7" y="2" width="10" height="20" rx="2.5" />
         <path d="M10 5.5H14" strokeLinecap="round" />
         <circle cx="12" cy="18.5" r="1" fill="currentColor" stroke="none" />
@@ -54,7 +55,7 @@ const categories = [
     link: "/shop?brand=iPad",
     color: "from-cyan-500/20 to-cyan-600/10",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" stroke="currentColor" strokeWidth="1.5">
+      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
         <rect x="4" y="3" width="16" height="18" rx="2.5" />
         <circle cx="12" cy="18" r="0.8" fill="currentColor" stroke="none" />
         <rect x="7" y="6" width="10" height="9" rx="1" />
@@ -67,7 +68,7 @@ const categories = [
     link: "/shop?brand=Accessories",
     color: "from-amber-500/20 to-amber-600/10",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" stroke="currentColor" strokeWidth="1.5">
+      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
         <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
@@ -75,9 +76,9 @@ const categories = [
 ];
 
 const StarRating = ({ rating }: { rating: number }) => (
-  <div className="flex gap-0.5">
+  <div className="flex gap-0.5" aria-label={`${rating} out of 5 stars`}>
     {[1, 2, 3, 4, 5].map((star) => (
-      <svg key={star} viewBox="0 0 20 20" fill={star <= rating ? "#FBBF24" : "none"} stroke="#FBBF24" strokeWidth="1" className="h-4 w-4">
+      <svg key={star} viewBox="0 0 20 20" fill={star <= rating ? "#FBBF24" : "none"} stroke="#FBBF24" strokeWidth="1" className="h-4 w-4" aria-hidden="true">
         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
       </svg>
     ))}
@@ -118,7 +119,7 @@ export default function Home() {
                   NOW WITH AI SHOPKEEPER
                 </p>
                 <div className="relative block">
-                  <span className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-blue-500/35 via-cyan-400/20 to-amber-300/25 blur-2xl" />
+                  <span className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-blue-500/35 via-cyan-400/20 to-amber-300/25 blur-2xl" aria-hidden="true" />
                   <h1 className="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-5xl font-extrabold tracking-[-0.02em] text-transparent sm:text-6xl lg:text-7xl xl:text-8xl">
                     PhonesAI
                   </h1>
@@ -126,7 +127,7 @@ export default function Home() {
                 <p className="block w-fit rounded-full border border-blue-300/40 bg-blue-400/15 px-3 py-1 text-xs font-semibold text-blue-200">5G Ready</p>
                 <p className="text-lg font-light leading-snug text-white sm:text-xl lg:text-3xl">Premium Shopping, Reinvented.</p>
                 <div className="flex flex-wrap gap-3">
-                  <button type="button" onClick={openUstaadJi}
+                  <button type="button" onClick={openUstaadJi} aria-label="Open Ustaad Ji AI shopkeeper"
                     className="inline-flex items-center justify-center rounded-full border border-blue-300/60 bg-gradient-to-r from-blue-500/35 to-cyan-400/30 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_0_35px_rgba(59,130,246,0.55)] transition hover:scale-[1.03]">
                     Talk to AI Shopkeeper
                   </button>
@@ -135,18 +136,28 @@ export default function Home() {
                   </a>
                 </div>
               </div>
+
+              {/* FIXED: Next.js Image with priority for LCP */}
               <div className="relative flex items-end justify-center sm:justify-end h-64 sm:h-80 lg:h-full lg:min-h-[600px] [mask-image:linear-gradient(to_bottom,black_70%,transparent_100%)]">
-                <img src="/iphone17.png" alt="iPhone 17 Pro"
-                  className="h-full w-auto max-h-64 object-contain object-bottom animate-[scaleReveal_1.4s_cubic-bezier(0.16,1,0.3,1)_forwards] [filter:brightness(0.9)_saturate(0.95)] sm:max-h-80 lg:max-h-[580px]" />
+                <div className="relative h-64 w-full sm:h-80 lg:h-[580px]">
+                  <Image
+                    src="/iphone17.png"
+                    alt="iPhone 17 Pro Max"
+                    fill
+                    sizes="(max-width: 640px) 100vw, 50vw"
+                    className="object-contain object-bottom animate-[scaleReveal_1.4s_cubic-bezier(0.16,1,0.3,1)_forwards] [filter:brightness(0.9)_saturate(0.95)]"
+                    priority
+                  />
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        <div className="mx-auto h-px w-full max-w-6xl bg-gradient-to-r from-transparent via-blue-400/70 to-transparent shadow-[0_0_20px_rgba(59,130,246,0.55)]" />
+        <div className="mx-auto h-px w-full max-w-6xl bg-gradient-to-r from-transparent via-blue-400/70 to-transparent shadow-[0_0_20px_rgba(59,130,246,0.55)]" aria-hidden="true" />
 
         {/* Category Cards */}
-        <section className="mx-auto mt-8 grid w-full max-w-6xl gap-3 px-4 grid-cols-2 sm:gap-4 sm:px-6 lg:grid-cols-4 lg:px-6">
+        <section className="mx-auto mt-8 grid w-full max-w-6xl gap-3 px-4 grid-cols-2 sm:gap-4 sm:px-6 lg:grid-cols-4 lg:px-6" aria-label="Product categories">
           {categories.map((category) => (
             <a key={category.name} href={category.link}
               className={`group rounded-2xl border border-white/15 bg-gradient-to-br ${category.color} p-4 sm:p-6 transition duration-300 hover:-translate-y-1 hover:border-white/30`}>
@@ -159,96 +170,93 @@ export default function Home() {
         </section>
 
         {/* Trust Strip */}
-        <section className="mx-auto mt-8 max-w-6xl px-4 sm:px-6">
+        <section className="mx-auto mt-8 max-w-6xl px-4 sm:px-6" aria-label="Our guarantees">
           <div className="grid grid-cols-3 gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-8">
             <div className="text-center">
-              <p className="text-xl sm:text-2xl">🧔</p>
+              <p className="text-xl sm:text-2xl" aria-hidden="true">🧔</p>
               <p className="mt-1 text-xs font-bold text-white sm:text-sm">Ustaad Ji Verified</p>
-              <p className="mt-0.5 text-[10px] text-white/40 hidden sm:block">Every device personally checked</p>
+              <p className="mt-0.5 text-[10px] text-white/50 hidden sm:block">Every device personally checked</p>
             </div>
             <div className="text-center">
-              <p className="text-xl sm:text-2xl">🛡️</p>
+              <p className="text-xl sm:text-2xl" aria-hidden="true">🛡️</p>
               <p className="mt-1 text-xs font-bold text-white sm:text-sm">7-Day Warranty</p>
-              <p className="mt-0.5 text-[10px] text-white/40 hidden sm:block">Box kholo, check karo</p>
+              <p className="mt-0.5 text-[10px] text-white/50 hidden sm:block">Box kholo, check karo</p>
             </div>
             <div className="text-center">
-              <p className="text-xl sm:text-2xl">🚚</p>
+              <p className="text-xl sm:text-2xl" aria-hidden="true">🚚</p>
               <p className="mt-1 text-xs font-bold text-white sm:text-sm">All Pakistan</p>
-              <p className="mt-0.5 text-[10px] text-white/40 hidden sm:block">1-3 day delivery</p>
+              <p className="mt-0.5 text-[10px] text-white/50 hidden sm:block">1-3 day delivery</p>
             </div>
           </div>
         </section>
 
-        {/* ── SERVICES SECTION — Trade-In + Repairs ── */}
-        <section className="mx-auto mt-10 max-w-6xl px-4 sm:px-6">
+        {/* Services Section */}
+        <section className="mx-auto mt-10 max-w-6xl px-4 sm:px-6" aria-label="Our services">
           <div className="mb-5">
-            <p className="text-xs font-semibold uppercase tracking-widest text-white/30">More Than Just Shopping</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-white/50">More Than Just Shopping</p>
             <h2 className="mt-1 text-2xl font-extrabold text-white sm:text-3xl">Our Services</h2>
           </div>
           <div className="grid gap-3 grid-cols-1 sm:grid-cols-3 sm:gap-4">
-
-            {/* Trade-In */}
             <a href="/trade-in" className="group relative overflow-hidden rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/15 to-blue-600/5 p-5 sm:p-6 transition hover:border-blue-400/40 hover:-translate-y-0.5">
-              <div className="mb-3 text-3xl">🔄</div>
+              <div className="mb-3 text-3xl" aria-hidden="true">🔄</div>
               <h3 className="text-base font-bold text-white mb-1">Trade-In Centre</h3>
-              <p className="text-xs text-white/50 leading-relaxed mb-3">iPhone, Samsung, Pixel — apna purana phone best rate pe trade karein. Physical store pe instant settlement.</p>
+              <p className="text-xs text-white/60 leading-relaxed mb-3">iPhone, Samsung, Pixel — apna purana phone best rate pe trade karein. Physical store pe instant settlement.</p>
               <div className="flex flex-wrap gap-1.5 mb-4">
                 {["Apple", "Samsung", "Google Pixel"].map(b => (
-                  <span key={b} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/50">{b}</span>
+                  <span key={b} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/60">{b}</span>
                 ))}
               </div>
               <p className="text-xs font-semibold text-blue-300 group-hover:text-blue-200">Get Quote →</p>
             </a>
 
-            {/* Repairs */}
             <a href="/repairs" className="group relative overflow-hidden rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/15 to-amber-600/5 p-5 sm:p-6 transition hover:border-amber-400/40 hover:-translate-y-0.5">
-              <div className="mb-3 text-3xl">🔧</div>
+              <div className="mb-3 text-3xl" aria-hidden="true">🔧</div>
               <h3 className="text-base font-bold text-white mb-1">Repair Centre</h3>
-              <p className="text-xs text-white/50 leading-relaxed mb-3">Screen, battery, camera — expert repairs by our team. Same day service available. 30-day warranty on all work.</p>
+              <p className="text-xs text-white/60 leading-relaxed mb-3">Screen, battery, camera — expert repairs by our team. Exclusive to PhonesAI customers.</p>
               <div className="flex flex-wrap gap-1.5 mb-4">
                 {["Screen Repair", "Battery", "Camera"].map(s => (
-                  <span key={s} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/50">{s}</span>
+                  <span key={s} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/60">{s}</span>
                 ))}
               </div>
               <p className="text-xs font-semibold text-amber-300 group-hover:text-amber-200">Book Repair →</p>
             </a>
 
-            {/* After-Sales */}
             <a href="/support" className="group relative overflow-hidden rounded-2xl border border-green-500/20 bg-gradient-to-br from-green-500/15 to-green-600/5 p-5 sm:p-6 transition hover:border-green-400/40 hover:-translate-y-0.5">
-              <div className="mb-3 text-3xl">🛡️</div>
+              <div className="mb-3 text-3xl" aria-hidden="true">🛡️</div>
               <h3 className="text-base font-bold text-white mb-1">After-Sales Support</h3>
-              <p className="text-xs text-white/50 leading-relaxed mb-3">Purchase ke baad bhi hum aapke saath hain. Warranty claims, unboxing guide, direct WhatsApp support.</p>
+              <p className="text-xs text-white/60 leading-relaxed mb-3">Purchase ke baad bhi hum aapke saath hain. Warranty claims, unboxing guide, direct WhatsApp support.</p>
               <div className="flex flex-wrap gap-1.5 mb-4">
                 {["Warranty", "Unboxing", "WhatsApp"].map(s => (
-                  <span key={s} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/50">{s}</span>
+                  <span key={s} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/60">{s}</span>
                 ))}
               </div>
               <p className="text-xs font-semibold text-green-300 group-hover:text-green-200">Learn More →</p>
             </a>
-
           </div>
         </section>
 
         {/* Reviews */}
         {reviews.length > 0 && (
-          <section className="mx-auto mt-10 max-w-6xl px-4 sm:px-6">
+          <section className="mx-auto mt-10 max-w-6xl px-4 sm:px-6" aria-label="Customer reviews">
             <div className="mb-6 flex items-end justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-white/30">Customer Reviews</p>
+                <p className="text-xs font-semibold uppercase tracking-widest text-white/50">Customer Reviews</p>
                 <h2 className="mt-1 text-2xl font-extrabold text-white sm:text-3xl">Real Reviews</h2>
                 {avgRating && (
                   <div className="mt-2 flex items-center gap-2">
                     <StarRating rating={Math.round(parseFloat(avgRating))} />
                     <span className="text-base font-extrabold text-white">{avgRating}</span>
-                    <span className="text-xs text-white/40">{reviews.length} reviews</span>
+                    <span className="text-xs text-white/50">{reviews.length} reviews</span>
                   </div>
                 )}
               </div>
               {reviews.length > 1 && (
                 <div className="flex gap-2">
                   <button onClick={() => setCurrentSlide(s => Math.max(0, s - 1))} disabled={currentSlide === 0}
+                    aria-label="Previous review"
                     className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/50 disabled:opacity-25 text-sm">←</button>
                   <button onClick={() => setCurrentSlide(s => Math.min(maxSlide, s + 1))} disabled={currentSlide >= maxSlide}
+                    aria-label="Next review"
                     className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/50 disabled:opacity-25 text-sm">→</button>
                 </div>
               )}
@@ -260,13 +268,17 @@ export default function Home() {
                   <div key={review.id}
                     className="w-full shrink-0 rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-3 sm:w-[calc(33.333%-10px)]">
                     <StarRating rating={review.rating} />
-                    {review.photo_url && <img src={review.photo_url} alt="Review" className="w-full h-40 object-cover rounded-xl border border-white/10" />}
+                    {review.photo_url && (
+                      <div className="relative h-40 w-full overflow-hidden rounded-xl border border-white/10">
+                        <Image src={review.photo_url} alt={`Review by ${review.customer_name}`} fill sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover" loading="lazy" />
+                      </div>
+                    )}
                     <p className="text-sm text-white/80 leading-relaxed flex-1">"{review.review_text}"</p>
-                    {review.product_model && <p className="text-xs text-blue-300/60">re: {review.product_model}</p>}
+                    {review.product_model && <p className="text-xs text-blue-300/70">re: {review.product_model}</p>}
                     <div className="flex items-center justify-between pt-2 border-t border-white/5">
                       <div>
                         <p className="text-sm font-bold text-white">{review.customer_name}</p>
-                        <p className="text-xs text-white/40">{review.customer_city}</p>
+                        <p className="text-xs text-white/50">{review.customer_city}</p>
                       </div>
                       {review.verified_buyer && (
                         <span className="rounded-full border border-green-500/30 bg-green-500/10 px-2.5 py-0.5 text-xs text-green-300">✓ Verified</span>
@@ -279,7 +291,7 @@ export default function Home() {
             {reviews.length > 1 && (
               <div className="mt-4 flex justify-center gap-1.5">
                 {reviews.map((_, i) => (
-                  <button key={i} onClick={() => setCurrentSlide(i)}
+                  <button key={i} onClick={() => setCurrentSlide(i)} aria-label={`Go to review ${i + 1}`}
                     className={`h-1.5 rounded-full transition-all duration-300 ${i === currentSlide ? "w-6 bg-blue-400" : "w-1.5 bg-white/20"}`} />
                 ))}
               </div>
