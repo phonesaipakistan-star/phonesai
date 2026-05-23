@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import Image from "next/image";
 import { useCart } from "@/app/components/CartContext";
 
 const SUPABASE_URL = "https://xadxdkbdwyulprfukrjb.supabase.co";
@@ -204,7 +205,7 @@ export default function ProductPage() {
           <div className="flex flex-col gap-3">
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] sm:rounded-3xl" style={{aspectRatio: "4/3"}}>
               {allImages.length > 0 ? (
-                <img src={allImages[activeImage]} alt={phone.model} className="absolute inset-0 h-full w-full object-contain p-2 transition duration-500 cursor-zoom-in" onClick={() => { setLightboxOpen(true); setLightboxIndex(activeImage); }} />
+                <Image src={allImages[activeImage]} alt={`${phone.model} ${phone.storage} ${phone.color} - image ${activeImage + 1}`} fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-contain p-2 transition duration-500 cursor-zoom-in" onClick={() => { setLightboxOpen(true); setLightboxIndex(activeImage); }} priority={activeImage === 0} />
               ) : (
                 <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-white/20">
                   <svg viewBox="0 0 24 24" fill="none" className="h-14 w-14" stroke="currentColor" strokeWidth="0.8">
@@ -224,7 +225,7 @@ export default function ProductPage() {
                 {allImages.map((img, i) => (
                   <button key={i} onClick={() => setActiveImage(i)}
                     className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border transition ${activeImage === i ? "border-blue-400/60" : "border-white/10 opacity-50"}`}>
-                    <img src={img} alt="" className="absolute inset-0 h-full w-full object-contain p-1" />
+                    <Image src={img} alt={`${phone.model} thumbnail ${i + 1}`} fill sizes="56px" className="object-contain p-1" loading="lazy" />
                   </button>
                 ))}
               </div>
@@ -308,7 +309,7 @@ export default function ProductPage() {
             <div className="mt-3 grid grid-cols-2 gap-2 sm:gap-3">
               {phone.battery_health && (
                 <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
-                  <p className="mb-1 text-[10px] text-white/40 sm:text-xs">Battery Health</p>
+                  <p className="mb-1 text-[10px] text-white/60 sm:text-xs">Battery Health</p>
                   <p className="text-xl font-extrabold text-white sm:text-2xl">{phone.battery_health}%</p>
                   <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
                     <div className="h-full rounded-full bg-gradient-to-r from-green-500 to-emerald-400" style={{ width: `${phone.battery_health}%` }} />
@@ -316,15 +317,15 @@ export default function ProductPage() {
                 </div>
               )}
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
-                <p className="mb-1 text-[10px] text-white/40 sm:text-xs">Condition</p>
+                <p className="mb-1 text-[10px] text-white/60 sm:text-xs">Condition</p>
                 <p className="text-xl font-extrabold text-white sm:text-2xl">{phone.physical_condition ?? "10/10"}</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
-                <p className="mb-1 text-[10px] text-white/40 sm:text-xs">Face ID</p>
+                <p className="mb-1 text-[10px] text-white/60 sm:text-xs">Face ID</p>
                 <p className="text-xl font-extrabold text-white sm:text-2xl">{phone.face_id ? "✅" : "❌"}</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
-                <p className="mb-1 text-[10px] text-white/40 sm:text-xs">5G</p>
+                <p className="mb-1 text-[10px] text-white/60 sm:text-xs">5G</p>
                 <p className="text-xl font-extrabold text-white sm:text-2xl">{phone.five_g ? "✅" : "❌"}</p>
               </div>
             </div>
@@ -426,7 +427,7 @@ export default function ProductPage() {
                 className="flex flex-col items-center gap-1.5 bg-black/40 px-3 py-4 text-center transition hover:bg-white/[0.04]">
                 <span className="text-xl">{item.icon}</span>
                 <p className="text-xs font-bold text-white">{item.label}</p>
-                <p className="text-[10px] text-white/35">{item.sub}</p>
+                <p className="text-[10px] text-white/50">{item.sub}</p>
               </a>
             ))}
           </div>
@@ -448,7 +449,7 @@ export default function ProductPage() {
                     <div key={acc.id} className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
                       <div className="relative h-24 overflow-hidden bg-white/5 sm:h-32">
                         {acc.images?.[0] ? (
-                          <img src={acc.images[0]} alt={acc.name} className="absolute inset-0 h-full w-full object-contain p-2" />
+                          <Image src={acc.images[0]} alt={acc.name} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-contain p-2" loading="lazy" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center text-2xl">
                             {acc.category === "Charger" ? "🔌" : acc.category === "Cable" ? "🔗" : acc.category === "AirPods" ? "🎧" : "⌚"}
@@ -489,7 +490,7 @@ export default function ProductPage() {
                     <a key={p.id} href={`/shop/${p.id}`} className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3 transition hover:border-white/20 sm:flex-col sm:gap-0 sm:p-0">
                       <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-white/5 bg-white/[0.03] sm:h-36 sm:w-full sm:rounded-none sm:rounded-t-2xl">
                         {p.images?.[0] ? (
-                          <img src={p.images[0]} alt={p.model} className="absolute inset-0 h-full w-full object-contain p-1" />
+                          <Image src={p.images[0]} alt={`${p.model} ${p.storage}`} fill sizes="(max-width: 640px) 80px, 33vw" className="object-contain p-1" loading="lazy" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center">
                             <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-white/10" stroke="currentColor" strokeWidth="1">
@@ -635,7 +636,7 @@ export default function ProductPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm"
             onClick={() => setLightboxOpen(false)}>
             {/* Close */}
-            <button onClick={() => setLightboxOpen(false)}
+            <button onClick={() => setLightboxOpen(false)} aria-label="Close image viewer"
               className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white text-lg hover:bg-white/10 transition">
               ✕
             </button>
@@ -646,14 +647,14 @@ export default function ProductPage() {
             {/* Prev */}
             {allImages.length > 1 && lightboxIndex > 0 && (
               <button onClick={(e) => { e.stopPropagation(); setLightboxIndex(i => i - 1); }}
-                className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white hover:bg-white/10 transition text-lg">
+                aria-label="Previous image" className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white hover:bg-white/10 transition text-lg">
                 ←
               </button>
             )}
             {/* Next */}
             {allImages.length > 1 && lightboxIndex < allImages.length - 1 && (
               <button onClick={(e) => { e.stopPropagation(); setLightboxIndex(i => i + 1); }}
-                className="absolute right-14 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white hover:bg-white/10 transition text-lg">
+                aria-label="Next image" className="absolute right-14 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white hover:bg-white/10 transition text-lg">
                 →
               </button>
             )}
