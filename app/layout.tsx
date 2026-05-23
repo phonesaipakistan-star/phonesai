@@ -18,7 +18,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "PhonesAI | Buy iPhone & Samsung in Pakistan — PTA, Non-PTA, JV",
   description:
-    "Pakistan ka #1 trusted phone store. Buy verified iPhones (PTA, Non-PTA, JV) and Samsung Galaxy S Ultra in Islamabad, Rawalpindi, Wah Cantt. 7-day warranty, free delivery, AI-powered shopping with Ustaad Ji.",
+    "Pakistan ka trusted premium phone store. Buy verified iPhones (PTA, Non-PTA, JV) and Samsung Galaxy S Ultra. 7-day warranty, free delivery all Pakistan, AI-powered shopping with Ustaad Ji.",
   keywords:
     "iPhone Pakistan, PTA approved iPhone, JV iPhone Pakistan, Non-PTA iPhone, buy iPhone online Pakistan, iPhone Islamabad, iPhone Rawalpindi, iPhone Wah Cantt, Samsung Galaxy S25 Ultra Pakistan, Samsung S24 Ultra price Pakistan, iPhone 16 Pro Max Pakistan, iPhone 17 Pro Max Pakistan, iPhone 15 Pro Pakistan, used iPhone Pakistan, new iPhone Pakistan, PhonesAI, verified iPhone Pakistan, 7 day warranty iPhone",
   authors: [{ name: "PhonesAI", url: "https://phonesai.pk" }],
@@ -28,10 +28,17 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://phonesai.pk",
   },
+  icons: {
+    icon: [
+      { url: "/logo.png", type: "image/png" },
+    ],
+    apple: "/logo.png",
+    shortcut: "/logo.png",
+  },
   openGraph: {
     title: "PhonesAI | Buy iPhone & Samsung in Pakistan — PTA, Non-PTA, JV",
     description:
-      "Pakistan ka #1 trusted phone store. Verified iPhones aur Samsung — PTA, Non-PTA, JV. 7-day warranty. Free delivery all Pakistan. Wah Cantt based.",
+      "Pakistan ka trusted premium phone store. Verified iPhones aur Samsung — PTA, Non-PTA, JV. 7-day warranty. Free delivery all Pakistan.",
     url: "https://phonesai.pk",
     siteName: "PhonesAI",
     locale: "en_PK",
@@ -85,9 +92,9 @@ export default function RootLayout({
                 "@type": "Store",
                 name: "PhonesAI",
                 description:
-                  "Pakistan ka trusted premium phone store — verified iPhones, Samsung flagships, iPads with 7-day warranty.",
+                  "Pakistan ka trusted premium phone store — verified iPhones, Samsung flagships, iPads with 7-day warranty. Free delivery all Pakistan.",
                 url: "https://phonesai.pk",
-                telephone: "+923001234567",
+                telephone: "+923041502560",
                 address: {
                   "@type": "PostalAddress",
                   addressLocality: "Wah Cantt",
@@ -99,7 +106,7 @@ export default function RootLayout({
                   latitude: "33.7665",
                   longitude: "72.7516",
                 },
-                openingHours: "Mo-Sa 10:00-20:00",
+                openingHours: "Mo-Su 12:00-22:00",
                 priceRange: "PKR 50,000 - PKR 500,000",
                 sameAs: ["https://phonesai.pk"],
                 hasOfferCatalog: {
