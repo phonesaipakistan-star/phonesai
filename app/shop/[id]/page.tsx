@@ -106,8 +106,11 @@ export default function ProductPage() {
     };
 
     const fetchRelated = async () => {
-      // Fetch accessories
-      const { data: accData } = await supabase.from("accessories").select("*").eq("in_stock", true).limit(4);
+      // FIXED: filter accessories by same brand as phone
+      const { data: accData } = await supabase.from("accessories").select("*")
+        .eq("in_stock", true)
+        .eq("brand", phone.brand)
+        .limit(4);
       if (accData) setRelatedAccessories(accData);
 
       // Fetch related phones — same brand, same category, different id
@@ -409,7 +412,7 @@ export default function ProductPage() {
           <p className="mt-1 text-xs text-white/40">Order before 2pm for next day delivery in nearby cities. All Pakistan: 1-3 working days.</p>
         </div>
 
-        {/* ── AFTER-SALES SUPPORT SECTION ── */}
+        {/* After-Sales */}
         <div className="mt-6 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-transparent overflow-hidden">
           <div className="border-b border-white/5 px-5 py-3 sm:px-6">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">After Purchase — We've Got You</p>
@@ -417,7 +420,7 @@ export default function ProductPage() {
           <div className="grid grid-cols-2 gap-px bg-white/5 sm:grid-cols-4">
             {[
               { icon: "🛡️", label: "7-Day Warranty", sub: "New & Pre-Owned", href: "/support#warranty" },
-              { icon: "🔧", label: "Repair Service", sub: "Same day available", href: "/repairs" },
+              { icon: "🔧", label: "Repair Service", sub: "Exclusive to customers", href: "/repairs" },
               { icon: "🔄", label: "Trade-In", sub: "Best rates", href: "/trade-in" },
               { icon: "💬", label: "WhatsApp Support", sub: "0304-1502560", href: "https://wa.me/923041502560" },
             ].map(item => (
@@ -433,13 +436,13 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* ── RELATED ACCESSORIES ── */}
+        {/* Frequently Bought Together */}
         {relatedAccessories.length > 0 && (
           <>
             <div className="my-10 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-extrabold text-white sm:text-xl">Complete Your Setup</h2>
+                <h2 className="text-lg font-extrabold text-white sm:text-xl">Frequently Bought Together</h2>
                 <a href="/shop?brand=Accessories" className="text-xs font-semibold text-blue-400 hover:text-blue-300">See All →</a>
               </div>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
@@ -473,7 +476,7 @@ export default function ProductPage() {
           </>
         )}
 
-        {/* ── RELATED PHONES ── */}
+        {/* Similar Phones */}
         {relatedPhones.length > 0 && (
           <>
             <div className="my-10 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
@@ -631,43 +634,32 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* ── LIGHTBOX ── */}
+        {/* Lightbox */}
         {lightboxOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm"
             onClick={() => setLightboxOpen(false)}>
-            {/* Close */}
             <button onClick={() => setLightboxOpen(false)} aria-label="Close image viewer"
               className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white text-lg hover:bg-white/10 transition">
               ✕
             </button>
-            {/* Counter */}
             <p className="absolute top-4 left-1/2 -translate-x-1/2 text-xs text-white/50">
               {lightboxIndex + 1} / {allImages.length}
             </p>
-            {/* Prev */}
             {allImages.length > 1 && lightboxIndex > 0 && (
               <button onClick={(e) => { e.stopPropagation(); setLightboxIndex(i => i - 1); }}
                 aria-label="Previous image" className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white hover:bg-white/10 transition text-lg">
                 ←
               </button>
             )}
-            {/* Next */}
             {allImages.length > 1 && lightboxIndex < allImages.length - 1 && (
               <button onClick={(e) => { e.stopPropagation(); setLightboxIndex(i => i + 1); }}
                 aria-label="Next image" className="absolute right-14 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white hover:bg-white/10 transition text-lg">
                 →
               </button>
             )}
-            {/* Main image */}
             <div className="flex h-full w-full items-center justify-center p-16" onClick={(e) => e.stopPropagation()}>
-              <img
-                src={allImages[lightboxIndex]}
-                alt={phone.model}
-                className="max-h-full max-w-full object-contain select-none"
-                style={{ touchAction: "pinch-zoom" }}
-              />
+              <img src={allImages[lightboxIndex]} alt={phone.model} className="max-h-full max-w-full object-contain select-none" style={{ touchAction: "pinch-zoom" }} />
             </div>
-            {/* Thumbnail strip */}
             {allImages.length > 1 && (
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 overflow-x-auto max-w-xs sm:max-w-md px-2">
                 {allImages.map((img, i) => (
