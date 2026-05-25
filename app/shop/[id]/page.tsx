@@ -109,7 +109,7 @@ export default function ProductPage() {
       // FIXED: filter accessories by same brand as phone
       const { data: accData } = await supabase.from("accessories").select("*")
         .eq("in_stock", true)
-        .eq("brand", phone.brand)
+        .eq("brand", phone.brand.toLowerCase())
         .limit(4);
       if (accData) setRelatedAccessories(accData);
 
