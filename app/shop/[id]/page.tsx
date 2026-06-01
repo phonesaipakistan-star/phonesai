@@ -8,9 +8,10 @@ import { useCart } from "@/app/components/CartContext";
 import {
   type PhoneVariant,
   type ConditionGrade,
-  CONDITION_GRADES,
+  PRE_OWNED_GRADES,
   CONDITION_TAGS,
   CONDITION_DESCRIPTIONS,
+  CONDITION_VISUAL,
   getVariantPrice,
   isVariantAvailable,
   getUniqueStorages,
@@ -18,6 +19,7 @@ import {
   findVariant,
   legacyPhoneToVariant,
   getFreeAccessoryText,
+  isNewPhone,
 } from "@/lib/variants";
 
 const SUPABASE_URL = "https://xadxdkbdwyulprfukrjb.supabase.co";
@@ -25,7 +27,7 @@ const SUPABASE_URL = "https://xadxdkbdwyulprfukrjb.supabase.co";
 type Phone = {
   id: string; model: string; storage: string; color: string; category: string; brand: string;
   condition: string; price: number; discount_price: number | null; battery_health: number;
-  physical_condition: string; five_g: boolean; face_id: boolean;
+  physical_condition: string; five_g: boolean; ip_rating: string | null;
   in_stock: boolean; featured: boolean; badge: string | null; images: string[];
   condition_video: string | null; description: string | null;
   product_description: string | null;
@@ -143,25 +145,29 @@ export default function ProductPage() {
     if (id) fetchPhone();
   }, [id]);
 
-  const initSelection = useCallback((vars: PhoneVariant[]) => {
+  const initSelection = useCallback((vars: PhoneVariant[], phoneCondition: string) => {
     const storages = getUniqueStorages(vars);
     const firstStorage = storages.find((s) => storageHasStock(vars, s)) ?? storages[0];
     if (!firstStorage) return;
     const colors = getUniqueColors(vars, firstStorage);
     const firstColor = colors.find((c) => colorHasStock(vars, firstStorage, c)) ?? colors[0];
-    const grades = CONDITION_GRADES.filter((g) => {
+    setSelectedStorage(firstStorage);
+    setSelectedColor(firstColor);
+    if (isNewPhone(phoneCondition)) {
+      setSelectedGrade(null);
+      return;
+    }
+    const grades = PRE_OWNED_GRADES.filter((g) => {
       const v = findVariant(vars, firstStorage, firstColor, g);
       return v && isVariantAvailable(v);
     });
-    const firstGrade = grades[0] ?? CONDITION_GRADES.find((g) => findVariant(vars, firstStorage, firstColor, g)) ?? null;
-    setSelectedStorage(firstStorage);
-    setSelectedColor(firstColor);
+    const firstGrade = grades[0] ?? PRE_OWNED_GRADES.find((g) => findVariant(vars, firstStorage, firstColor, g)) ?? null;
     setSelectedGrade(firstGrade);
   }, []);
 
   useEffect(() => {
-    if (variants.length > 0) initSelection(variants);
-  }, [variants, initSelection]);
+    if (variants.length > 0 && phone) initSelection(variants, phone.condition);
+  }, [variants, phone, initSelection]);
 
   useEffect(() => {
     if (!phone) return;
@@ -212,9 +218,18 @@ export default function ProductPage() {
   }, []);
 
   const selectedVariant = useMemo(() => {
-    if (!selectedStorage || !selectedColor || !selectedGrade) return null;
+    if (!selectedStorage || !selectedColor || !phone) return null;
+    if (isNewPhone(phone.condition)) {
+      const available = variants.find(
+        (v) => v.storage === selectedStorage && v.color === selectedColor && isVariantAvailable(v)
+      );
+      return available ?? variants.find(
+        (v) => v.storage === selectedStorage && v.color === selectedColor
+      ) ?? null;
+    }
+    if (!selectedGrade) return null;
     return findVariant(variants, selectedStorage, selectedColor, selectedGrade) ?? null;
-  }, [variants, selectedStorage, selectedColor, selectedGrade]);
+  }, [variants, selectedStorage, selectedColor, selectedGrade, phone]);
 
   const displayImages = useMemo(() => {
     if (selectedVariant?.images?.length) return selectedVariant.images;
@@ -237,19 +252,27 @@ export default function ProductPage() {
     const newColors = getUniqueColors(variants, storage);
     const nextColor = newColors.find((c) => colorHasStock(variants, storage, c)) ?? newColors[0];
     setSelectedColor(nextColor);
-    const nextGrade = CONDITION_GRADES.find((g) => {
+    if (phone && isNewPhone(phone.condition)) {
+      setSelectedGrade(null);
+      return;
+    }
+    const nextGrade = PRE_OWNED_GRADES.find((g) => {
       const v = findVariant(variants, storage, nextColor, g);
       return v && isVariantAvailable(v);
-    }) ?? CONDITION_GRADES.find((g) => findVariant(variants, storage, nextColor, g)) ?? null;
+    }) ?? PRE_OWNED_GRADES.find((g) => findVariant(variants, storage, nextColor, g)) ?? null;
     setSelectedGrade(nextGrade);
   };
 
   const handleColorSelect = (color: string) => {
     setSelectedColor(color);
-    const nextGrade = CONDITION_GRADES.find((g) => {
+    if (phone && isNewPhone(phone.condition)) {
+      setSelectedGrade(null);
+      return;
+    }
+    const nextGrade = PRE_OWNED_GRADES.find((g) => {
       const v = findVariant(variants, selectedStorage, color, g);
       return v && isVariantAvailable(v);
-    }) ?? CONDITION_GRADES.find((g) => findVariant(variants, selectedStorage, color, g)) ?? null;
+    }) ?? PRE_OWNED_GRADES.find((g) => findVariant(variants, selectedStorage, color, g)) ?? null;
     setSelectedGrade(nextGrade);
   };
 
@@ -321,10 +344,13 @@ export default function ProductPage() {
   const originalPrice = selectedVariant?.discount_price ? selectedVariant.price : null;
   const savings = originalPrice ? originalPrice - currentPrice : 0;
   const conditionTags = selectedGrade ? CONDITION_TAGS[selectedGrade] : [];
+  const phoneIsNew = isNewPhone(phone.condition);
 
   const whatsappLink = selectedVariant
-    ? `https://wa.me/923041502560?text=Assalam o Alaikum! Ustaad Ji ne bheja hai. Mujhe ${phone.model} ${selectedVariant.storage} ${selectedVariant.color} ${selectedVariant.condition_grade} (${phone.category}) mein interest hai.`
+    ? `https://wa.me/923041502560?text=Assalam o Alaikum! Ustaad Ji ne bheja hai. Mujhe ${phone.model} ${selectedVariant.storage} ${selectedVariant.color}${phoneIsNew ? "" : ` ${selectedVariant.condition_grade}`} (${phone.category}) mein interest hai.`
     : `https://wa.me/923041502560`;
+
+  const photoRequestLink = `https://wa.me/923041502560?text=${encodeURIComponent(`Assalam o Alaikum! Mujhe ${phone.model} ke exact unit ki photos chahiye please.`)}`;
 
   const getStorageLowestPrice = (storage: string) => {
     const vs = variants.filter((v) => v.storage === storage);
@@ -373,8 +399,15 @@ export default function ProductPage() {
                   <p className="text-xs">Photos coming soon</p>
                 </div>
               )}
-              {phone.badge && <span className="absolute left-3 top-3 rounded-full border border-purple-500/30 bg-purple-500/20 px-2.5 py-0.5 text-xs font-medium text-purple-300">{phone.badge}</span>}
-              <span className="absolute right-3 top-3 rounded-full border border-green-500/30 bg-green-500/20 px-2.5 py-0.5 text-xs text-green-300">{freeAccessory.badge}</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {phone.badge && (
+                <span className="rounded-full border border-purple-500/30 bg-purple-500/20 px-2.5 py-0.5 text-xs font-medium text-purple-300">{phone.badge}</span>
+              )}
+              <span className="rounded-full border border-green-500/30 bg-green-500/20 px-2.5 py-0.5 text-xs text-green-300">{freeAccessory.badge}</span>
+              {phoneIsNew && (
+                <span className="rounded-full border border-green-400/40 bg-green-500/15 px-2.5 py-0.5 text-xs font-semibold text-green-300">📦 Water Pack Sealed</span>
+              )}
             </div>
             {displayImages.length > 1 && (
               <div className="flex gap-2 overflow-x-auto pb-1">
@@ -460,55 +493,65 @@ export default function ProductPage() {
               </div>
             </div>
 
-            {/* 3. Select Condition Grade */}
-            <div className="mt-5">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-white/40">Select Condition Grade</p>
-              <div className="space-y-2">
-                {CONDITION_GRADES.map((grade) => {
-                  const variant = findVariant(variants, selectedStorage, selectedColor, grade);
-                  const available = variant ? isVariantAvailable(variant) : false;
-                  const isSelected = selectedGrade === grade;
-                  const price = variant ? getVariantPrice(variant) : null;
-                  return (
-                    <div key={grade}>
-                      <button type="button" disabled={!variant || !available}
-                        onClick={() => { if (variant && available) { setSelectedGrade(grade); setExpandedGrade(expandedGrade === grade ? null : grade); } }}
-                        className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition ${!variant || !available ? "border-white/5 bg-white/[0.01] opacity-40 cursor-not-allowed" : isSelected ? "border-blue-400/60 bg-blue-500/10" : "border-white/10 bg-white/[0.02] hover:border-white/25"}`}>
-                        <div className="flex items-center gap-3">
+            {/* 3. Condition — New badge or Pre-Owned grade selector */}
+            {phoneIsNew ? (
+              <div className="mt-5">
+                <div className="rounded-2xl border-2 border-green-400/40 bg-gradient-to-br from-green-500/15 to-green-500/5 px-5 py-4 text-center">
+                  <p className="text-lg font-extrabold text-green-300 sm:text-xl">Brand New — Sealed Box</p>
+                  <p className="mt-2 text-xs text-white/60 leading-relaxed sm:text-sm">
+                    📦 Water Pack Sealed — Pin Pack Original Box
+                  </p>
+                  <p className="mt-1 text-[11px] text-green-400/80">Untouched original packaging — condition is perfect</p>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-5">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-white/40">Select Condition Grade</p>
+                <div className="space-y-2">
+                  {PRE_OWNED_GRADES.map((grade) => {
+                    const variant = findVariant(variants, selectedStorage, selectedColor, grade);
+                    const available = variant ? isVariantAvailable(variant) : false;
+                    const isSelected = selectedGrade === grade;
+                    const price = variant ? getVariantPrice(variant) : null;
+                    const visual = CONDITION_VISUAL[grade];
+                    return (
+                      <div key={grade}>
+                        <button type="button" disabled={!variant || !available}
+                          onClick={() => { if (variant && available) { setSelectedGrade(grade); setExpandedGrade(expandedGrade === grade ? null : grade); } }}
+                          className={`flex w-full items-center gap-2 rounded-xl border px-3 py-3 text-left transition sm:gap-3 sm:px-4 ${!variant || !available ? "border-white/5 bg-white/[0.01] opacity-40 cursor-not-allowed" : isSelected ? `${visual.selectedBorder} ${visual.selectedBg}` : "border-white/10 bg-white/[0.02] hover:border-white/25"}`}>
                           <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${isSelected && available ? "border-blue-400 bg-blue-500" : "border-white/30"}`}>
                             {isSelected && available && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
                           </span>
-                          <div>
-                            <div className="flex items-center gap-2">
+                          <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
+                            <div className="flex shrink-0 items-center gap-1.5">
+                              <span className="text-base">{visual.icon}</span>
                               <span className={`text-sm font-semibold ${available ? "text-white" : "text-white/40"}`}>{grade}</span>
-                              {grade === "Excellent" && available && (
-                                <span className="rounded-full bg-purple-500/20 border border-purple-400/30 px-2 py-0.5 text-[10px] text-purple-300">Popular</span>
+                              {visual.popular && available && (
+                                <span className="rounded-full border border-blue-400/30 bg-blue-500/20 px-2 py-0.5 text-[10px] text-blue-300">Popular</span>
                               )}
                               {!available && variant && (
                                 <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-white/50">Sold out</span>
                               )}
                             </div>
-                            {isSelected && available && (
-                              <div className="mt-1 flex flex-wrap gap-1">
-                                {CONDITION_TAGS[grade].map((tag) => (
-                                  <span key={tag} className="text-[10px] text-white/45">{tag}</span>
-                                ))}
-                              </div>
-                            )}
+                            <div className="flex min-w-0 flex-1 flex-wrap gap-1">
+                              {CONDITION_TAGS[grade].map((tag) => (
+                                <span key={tag} className={`rounded-full border px-2 py-0.5 text-[9px] sm:text-[10px] ${visual.accent}`}>{tag}</span>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                        {price != null && available && (
-                          <span className="text-sm font-bold text-white shrink-0 ml-2">Rs. {price.toLocaleString()}</span>
+                          {price != null && available && (
+                            <span className="shrink-0 text-sm font-bold text-white">Rs. {price.toLocaleString()}</span>
+                          )}
+                        </button>
+                        {(expandedGrade === grade || (isSelected && available)) && variant && available && (
+                          <p className="mt-1.5 ml-7 text-[11px] leading-relaxed text-white/45">{CONDITION_DESCRIPTIONS[grade]}</p>
                         )}
-                      </button>
-                      {(expandedGrade === grade || (isSelected && available)) && variant && available && (
-                        <p className="mt-1.5 ml-7 text-[11px] leading-relaxed text-white/45">{CONDITION_DESCRIPTIONS[grade]}</p>
-                      )}
-                    </div>
-                  );
-                })}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Dynamic Price */}
             <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-4 sm:px-6 sm:py-5">
@@ -557,6 +600,20 @@ export default function ProductPage() {
               Order placed → we confirm availability within 24hrs via WhatsApp before payment
             </p>
 
+            <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-4 text-center">
+              <p className="text-xs text-white/70 leading-relaxed sm:text-sm">
+                📸 Want exact photos of your unit? WhatsApp us — we send real photos before you pay.
+              </p>
+              <a
+                href={photoRequestLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center justify-center rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-2.5 text-xs font-bold text-green-300 transition hover:bg-green-500/20 sm:text-sm"
+              >
+                Request Unit Photos → 0304-1502560
+              </a>
+            </div>
+
             {/* Free Accessories — Prominent */}
             <div className="mt-4 rounded-2xl border-2 border-green-500/30 bg-gradient-to-br from-green-500/10 to-green-500/[0.03] px-5 py-4">
               <p className="text-sm font-bold text-green-300">📦 {freeAccessory.title}</p>
@@ -574,8 +631,22 @@ export default function ProductPage() {
 
             <div className="mt-3 grid grid-cols-2 gap-2 sm:gap-3">
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
-                <p className="mb-1 text-[10px] text-white/60 sm:text-xs">Face ID</p>
-                <p className="text-xl font-extrabold text-white sm:text-2xl">{phone.face_id ? "✅" : "❌"}</p>
+                <p className="mb-1 text-[10px] text-white/60 sm:text-xs">Battery Health</p>
+                <p className="text-xl font-extrabold text-white sm:text-2xl">
+                  {selectedVariant?.battery_health != null ? `${selectedVariant.battery_health}%` : phoneIsNew ? "100%" : "—"}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
+                <p className="mb-1 text-[10px] text-white/60 sm:text-xs">Condition</p>
+                <p className="text-sm font-extrabold text-white sm:text-lg leading-tight">
+                  {phoneIsNew ? "Brand New" : selectedGrade ?? "—"}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
+                <p className="mb-1 text-[10px] text-white/60 sm:text-xs">IP Rating</p>
+                <p className="text-sm font-extrabold text-white sm:text-lg leading-tight">
+                  {phone.ip_rating ?? "—"}
+                </p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
                 <p className="mb-1 text-[10px] text-white/60 sm:text-xs">5G</p>

@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS phone_variants (
   phone_id uuid REFERENCES phones(id) ON DELETE CASCADE,
   storage text NOT NULL,
   color text NOT NULL,
-  condition_grade text NOT NULL CHECK (condition_grade IN ('Excellent', 'Good', 'Fair')),
+  condition_grade text NOT NULL CHECK (condition_grade IN ('Premium', 'Excellent', 'Good', 'Fair', 'New')),
   price integer NOT NULL,
   discount_price integer,
   quantity integer DEFAULT 1,

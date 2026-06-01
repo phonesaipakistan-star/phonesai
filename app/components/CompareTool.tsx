@@ -15,7 +15,7 @@ type Phone = {
   battery_health: number;
   physical_condition: string;
   five_g: boolean;
-  face_id: boolean;
+  ip_rating: string | null;
   images: string[];
   free_case: boolean;
 };
@@ -119,9 +119,9 @@ export default function CompareTool({ selectedPhones, onRemove, onClear }: Compa
                   a={a.battery_health ? `${a.battery_health}%` : "N/A"}
                   b={b.battery_health ? `${b.battery_health}%` : "N/A"} />
                 <Row label="Physical Condition" a={a.physical_condition ?? "N/A"} b={b.physical_condition ?? "N/A"} highlight />
-                <Row label="Face ID"
-                  a={a.face_id ? "✅ Working" : "❌ Not working"}
-                  b={b.face_id ? "✅ Working" : "❌ Not working"} />
+                <Row label="IP Rating"
+                  a={a.ip_rating ?? "Not rated"}
+                  b={b.ip_rating ?? "Not rated"} />
                 <Row label="5G"
                   a={a.five_g ? "✅ Ready" : "❌ No"}
                   b={b.five_g ? "✅ Ready" : "❌ No"}

@@ -1,4 +1,4 @@
-export type ConditionGrade = "Excellent" | "Good" | "Fair";
+export type ConditionGrade = "Premium" | "Excellent" | "Good" | "Fair" | "New";
 
 export type PhoneVariant = {
   id: string;
@@ -14,18 +14,62 @@ export type PhoneVariant = {
   in_stock: boolean;
 };
 
-export const CONDITION_GRADES: ConditionGrade[] = ["Fair", "Good", "Excellent"];
+export const PRE_OWNED_GRADES: ConditionGrade[] = ["Premium", "Excellent", "Good", "Fair"];
+
+/** Pre-owned condition grades shown in selectors (excludes New) */
+export const CONDITION_GRADES: ConditionGrade[] = PRE_OWNED_GRADES;
 
 export const CONDITION_TAGS: Record<ConditionGrade, string[]> = {
-  Fair: ["Visible signs of use", "Verified parts", "Battery for daily use"],
-  Good: ["Light signs of use", "Verified parts", "Battery for daily use"],
-  Excellent: ["Almost no signs of use", "Verified parts", "Battery for daily use"],
+  Premium: ["Zero scratches", "Flawless screen", "Like brand new", "Perfect for gifting"],
+  Excellent: ["Almost no signs of use", "Pristine screen", "Verified parts"],
+  Good: ["Light signs of use", "Clean screen", "Verified parts", "Battery for daily use"],
+  Fair: ["Visible signs of use", "100% functional", "Best value", "Verified parts"],
+  New: ["Pin pack sealed", "Original box", "Brand new"],
 };
 
 export const CONDITION_DESCRIPTIONS: Record<ConditionGrade, string> = {
-  Excellent: "Ekdum perfect. Koi scratches nahi. Bilkul naye jaisa.",
-  Good: "Halki scratches hain jo normal use se aati hain. Fully functional.",
-  Fair: "Visible scratches/marks hain. 100% working. Best value option.",
+  Premium: "Flawless. Zero scratches on screen or body. Looks brand new. Perfect for gifting.",
+  Excellent: "Almost perfect. Extremely minor signs only visible under direct light. Screen pristine.",
+  Good: "Light scratches on body, screen clean. Normal signs of careful use. Fully functional.",
+  Fair: "Visible scratches and marks. 100% working. Best value option.",
+  New: "Pin pack sealed — original box, untouched packaging.",
+};
+
+export const CONDITION_VISUAL: Record<
+  ConditionGrade,
+  { icon: string; accent: string; selectedBorder: string; selectedBg: string; popular?: boolean }
+> = {
+  Premium: {
+    icon: "⭐",
+    accent: "text-amber-300 border-amber-400/40 bg-amber-500/10",
+    selectedBorder: "border-amber-400/70",
+    selectedBg: "bg-amber-500/15",
+  },
+  Excellent: {
+    icon: "✨",
+    accent: "text-blue-300 border-blue-400/40 bg-blue-500/10",
+    selectedBorder: "border-blue-400/70",
+    selectedBg: "bg-blue-500/15",
+    popular: true,
+  },
+  Good: {
+    icon: "👍",
+    accent: "text-green-300 border-green-400/40 bg-green-500/10",
+    selectedBorder: "border-green-400/70",
+    selectedBg: "bg-green-500/15",
+  },
+  Fair: {
+    icon: "💰",
+    accent: "text-orange-300 border-orange-400/40 bg-orange-500/10",
+    selectedBorder: "border-orange-400/70",
+    selectedBg: "bg-orange-500/15",
+  },
+  New: {
+    icon: "📦",
+    accent: "text-green-300 border-green-400/40 bg-green-500/10",
+    selectedBorder: "border-green-400/70",
+    selectedBg: "bg-green-500/15",
+  },
 };
 
 export function getVariantPrice(v: PhoneVariant): number {
@@ -76,6 +120,10 @@ export function hasAnyStock(variants: PhoneVariant[]): boolean {
   return variants.some(isVariantAvailable);
 }
 
+export function isNewPhone(condition: string): boolean {
+  return condition === "New";
+}
+
 export function getFreeAccessoryText(condition: string): {
   title: string;
   subtitle: string;
@@ -111,11 +159,17 @@ export function legacyPhoneToVariant(phone: {
   images: string[];
   in_stock: boolean;
   physical_condition?: string | null;
+  condition?: string;
 }): PhoneVariant {
   let grade: ConditionGrade = "Good";
-  const pc = phone.physical_condition ?? "";
-  if (pc.includes("10/10") || pc.toLowerCase().includes("excellent")) grade = "Excellent";
-  else if (pc.includes("8") || pc.includes("7") || pc.toLowerCase().includes("fair")) grade = "Fair";
+  if (phone.condition === "New") {
+    grade = "New";
+  } else {
+    const pc = phone.physical_condition ?? "";
+    if (pc.toLowerCase().includes("premium")) grade = "Premium";
+    else if (pc.includes("10/10") || pc.toLowerCase().includes("excellent")) grade = "Excellent";
+    else if (pc.includes("8") || pc.includes("7") || pc.toLowerCase().includes("fair")) grade = "Fair";
+  }
 
   return {
     id: phone.id,

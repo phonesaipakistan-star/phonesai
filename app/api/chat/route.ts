@@ -40,9 +40,10 @@ OPENING GREETING (brief, exact, every time):
 
 BUDGET RULES (STRICT — most important):
 - Sirf us budget mein ya maximum 10% upar tak recommend karein
-- Agar customer ne 300k bola toh maximum 330k tak ka phone suggest karein — is se upar bilkul nahi
+- Budget matching variant prices se karein (discount_price agar ho toh woh use karein)
+- Agar customer ne 300k bola toh maximum 330k tak ka variant suggest karein — is se upar bilkul nahi
 - Agar customer ne budget strictly fix kiya ho ("fixed", "can't go above", "bas itna hai") toh us budget mein hi rehna hai — ek rupee bhi upar nahi
-- Agar us budget mein koi phone available nahi toh seedha batayein: "Is waqt is budget mein hamare paas suitable option nahi hai — lekin naye arrivals aa rahe hain, WhatsApp pe connect karein"
+- Agar us budget mein koi variant available nahi toh seedha batayein: "Is waqt is budget mein hamare paas suitable option nahi hai — lekin naye arrivals aa rahe hain, WhatsApp pe connect karein"
 - Budget se zyada push karna strictly mana hai
 
 SIM TYPE RULES (STRICT):
@@ -56,7 +57,6 @@ PRODUCT LINKS (important):
 - Jab bhi kisi specific phone ki images ya details customer maange, seedha product page link bhejein:
   "Yeh dekh sakte hain: phonesai.pk/shop/[phone-id]"
 - WhatsApp pe photos maangne ki zaroorat nahi — direct link se kaam ho jata hai
-- RECOMMEND_PHONE_ID tag ke saath product link bhi message mein dein
 
 CONVERSATION STYLE:
 - Ek waqt mein sirf ek sawal
@@ -70,6 +70,14 @@ QUALIFICATION (in order):
 4. Naya chahiye ya pre-owned?
 5. Storage preference?
 6. Colour?
+
+VARIANTS (CRITICAL):
+- Har phone ke multiple variants hain: storage, color, condition_grade, price, discount_price, quantity, battery_health
+- Sirf in-stock variants recommend karein (in_stock = true AND quantity > 0)
+- Recommend karte waqt available storage aur condition options ke saath prices mention karein
+- New phones: batayein ke pin pack sealed hai — condition ki koi tension nahi
+- Pre-owned phones: recommended variant ka condition grade explain karein (Premium/Excellent/Good/Fair)
+- Condition grades: Premium (flawless), Excellent (almost perfect), Good (light use), Fair (best value)
 
 PRODUCTS:
 
@@ -95,7 +103,7 @@ FREE ACCESSORIES POLICY:
 - New/sealed phones: Free case included
 
 TRUST:
-- Battery health %, physical condition, Face ID status mention karein
+- Battery health %, IP rating (water resistance), physical condition mention karein
 - <b>7 din ki warranty</b> — "Ustaad Ji ka wada"
 
 WARRANTY:
@@ -121,10 +129,10 @@ DELIVERY:
 
 CART FEATURE (very important):
 - Jab customer interest dikhaye ya confirm kare — jawab ke end mein yeh tag lagayein:
-  <RECOMMEND_PHONE_ID>phone-uuid-here</RECOMMEND_PHONE_ID>
+  <RECOMMEND_VARIANT_ID>variant-uuid-here</RECOMMEND_VARIANT_ID>
 - Saath mein product link bhi dein: "Poori details aur photos yahan dekh sakte hain: phonesai.pk/shop/[phone-id]"
 - Tag sirf tab lagayein jab customer clearly confirm kar raha ho
-- Tag mein exactly woh id daalen jo inventory mein hai
+- Tag mein exactly woh variant id daalen jo inventory mein hai aur in stock ho
 
 HANDOFF:
 - WhatsApp: "Boss ko message karein — 'Ustaad Ji ne bheja hai' — 0304-1502560"
@@ -144,7 +152,8 @@ NEVER:
 - Same day delivery promise
 - Email ek se zyada baar maangna
 - Randomly scarcity use karna
-- Ek hi option ko repeat karna`;
+- Ek hi option ko repeat karna
+- Out of stock variants recommend karna`;
 
 export async function POST(req: Request) {
   try {
@@ -159,17 +168,28 @@ export async function POST(req: Request) {
 
     const { data: phones } = await supabase
       .from("phones")
-      .select("id,model,brand,storage,color,category,price,discount_price,battery_health,condition,in_stock,description,sim_status,five_g,face_id,region,accessories_included,free_case,images")
+      .select("id,model,brand,storage,color,category,price,discount_price,battery_health,condition,in_stock,description,sim_status,five_g,ip_rating,region,accessories_included,free_case,images")
       .eq("in_stock", true);
+
+    const { data: variants } = await supabase
+      .from("phone_variants")
+      .select("id,phone_id,storage,color,condition_grade,price,discount_price,quantity,battery_health,in_stock,images")
+      .eq("in_stock", true)
+      .gt("quantity", 0);
 
     const { data: accessories } = await supabase
       .from("accessories")
       .select("name,brand,category,price,condition,in_stock,description,is_original")
       .eq("in_stock", true);
 
+    const phonesWithVariants = (phones ?? []).map((phone) => ({
+      ...phone,
+      variants: (variants ?? []).filter((v) => v.phone_id === phone.id),
+    }));
+
     const inventoryContext = `
-LIVE INVENTORY — PHONES (only recommend from this list, use exact id field when tagging):
-${JSON.stringify(phones ?? [], null, 2)}
+LIVE INVENTORY — PHONES WITH VARIANTS (only recommend in-stock variants, use exact variant id when tagging):
+${JSON.stringify(phonesWithVariants, null, 2)}
 
 LIVE INVENTORY — ACCESSORIES (only recommend from this list):
 ${JSON.stringify(accessories ?? [], null, 2)}
@@ -208,28 +228,40 @@ ${JSON.stringify(accessories ?? [], null, 2)}
       json?.content?.find((c: { type?: string; text?: string }) => c.type === "text")?.text ??
       "Maaf kijiye, abhi jawab generate nahi ho saka.";
 
-    const phoneIdMatch = rawReply.match(/<RECOMMEND_PHONE_ID>(.*?)<\/RECOMMEND_PHONE_ID>/);
-    const recommendedPhoneId = phoneIdMatch?.[1]?.trim() ?? null;
+    const variantIdMatch = rawReply.match(/<RECOMMEND_VARIANT_ID>(.*?)<\/RECOMMEND_VARIANT_ID>/);
+    const recommendedVariantId = variantIdMatch?.[1]?.trim() ?? null;
 
-    const cleanReply = rawReply.replace(/<RECOMMEND_PHONE_ID>.*?<\/RECOMMEND_PHONE_ID>/g, "").trim();
+    const cleanReply = rawReply
+      .replace(/<RECOMMEND_VARIANT_ID>.*?<\/RECOMMEND_VARIANT_ID>/g, "")
+      .replace(/<RECOMMEND_PHONE_ID>.*?<\/RECOMMEND_PHONE_ID>/g, "")
+      .trim();
 
     let recommendedPhone = null;
-    if (recommendedPhoneId && phones) {
-      const match = phones.find((p) => p.id === recommendedPhoneId);
-      if (match) {
-        recommendedPhone = {
-          id: match.id,
-          model: match.model,
-          storage: match.storage,
-          color: match.color,
-          category: match.category,
-          brand: match.brand,
-          condition: match.condition,
-          price: match.price,
-          discount_price: match.discount_price ?? null,
-          image: match.images?.[0] ?? null,
-          free_case: match.free_case ?? false,
-        };
+    if (recommendedVariantId && variants && phones) {
+      const variant = variants.find((v) => v.id === recommendedVariantId);
+      if (variant) {
+        const phone = phones.find((p) => p.id === variant.phone_id);
+        if (phone) {
+          recommendedPhone = {
+            id: variant.id,
+            phone_id: phone.id,
+            variant_id: variant.id,
+            model: phone.model,
+            storage: variant.storage,
+            color: variant.color,
+            selected_storage: variant.storage,
+            selected_color: variant.color,
+            selected_condition_grade: variant.condition_grade,
+            battery_health: variant.battery_health,
+            category: phone.category,
+            brand: phone.brand,
+            condition: phone.condition,
+            price: variant.price,
+            discount_price: variant.discount_price ?? null,
+            image: variant.images?.[0] ?? phone.images?.[0] ?? null,
+            free_case: phone.free_case ?? true,
+          };
+        }
       }
     }
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { type PhoneVariant, type ConditionGrade, CONDITION_GRADES } from "@/lib/variants";
+import { type PhoneVariant, type ConditionGrade, PRE_OWNED_GRADES } from "@/lib/variants";
 
 const ADMIN_PASSWORD = "PhonesAI321@";
 const SUPABASE_URL = "https://xadxdkbdwyulprfukrjb.supabase.co";
@@ -40,13 +40,13 @@ type Review = {
 
 const emptyPhoneForm = {
   model: "", brand: "Apple", category: "JV", condition: "New",
-  cost_price: "", face_id: true, five_g: true, region: "LLA", ios_version: "", sim_status: "", sim_type: "Dual SIM",
+  cost_price: "", ip_rating: "", five_g: true, region: "LLA", ios_version: "", sim_status: "", sim_type: "Dual SIM",
   accessories_included: "", product_description: "", description: "", badge: "", featured: false, in_stock: true,
   condition_video: "", imei_number: "", supplier: "",
 };
 
-const emptyVariantRow = (): VariantFormRow => ({
-  storage: "", color: "", condition_grade: "Good", price: "", discount_price: "",
+const emptyVariantRow = (phoneCondition = "New"): VariantFormRow => ({
+  storage: "", color: "", condition_grade: phoneCondition === "New" ? "New" : "Good", price: "", discount_price: "",
   quantity: "1", battery_health: "", images: [], in_stock: true,
 });
 
@@ -270,7 +270,7 @@ export default function AdminPage() {
         category: fullPhone.category,
         condition: fullPhone.condition ?? "New",
         cost_price: fullPhone.cost_price?.toString() ?? "",
-        face_id: fullPhone.face_id ?? true,
+        ip_rating: fullPhone.ip_rating ?? "",
         five_g: fullPhone.five_g ?? true,
         region: fullPhone.region ?? "LLA",
         ios_version: fullPhone.ios_version ?? "",
@@ -352,7 +352,7 @@ export default function AdminPage() {
       discount_price: activeVariants[0].discount_price ? parseInt(activeVariants[0].discount_price) : null,
       battery_health: activeVariants[0].battery_health ? parseInt(activeVariants[0].battery_health) : null,
       physical_condition: activeVariants[0].condition_grade,
-      face_id: phoneForm.face_id,
+      ip_rating: phoneForm.ip_rating || null,
       five_g: phoneForm.five_g,
       region: phoneForm.region,
       ios_version: phoneForm.ios_version || null,
@@ -397,7 +397,7 @@ export default function AdminPage() {
         phone_id: phoneId,
         storage: row.storage,
         color: row.color,
-        condition_grade: row.condition_grade,
+        condition_grade: phoneForm.condition === "New" ? "New" : row.condition_grade,
         price: parseInt(row.price),
         discount_price: row.discount_price ? parseInt(row.discount_price) : null,
         quantity: row.quantity ? parseInt(row.quantity) : 1,
@@ -678,7 +678,18 @@ export default function AdminPage() {
                   </div>
                   <div>
                     <label className="mb-1 block text-xs text-white/40">New / Pre-Owned *</label>
-                    <select value={phoneForm.condition} onChange={e => setPhoneForm({...phoneForm, condition: e.target.value})}
+                    <select value={phoneForm.condition} onChange={e => {
+                      const nextCondition = e.target.value;
+                      setPhoneForm({ ...phoneForm, condition: nextCondition });
+                      if (nextCondition === "New") {
+                        setVariantRows(variantRows.map(v => ({ ...v, condition_grade: "New" as ConditionGrade })));
+                      } else {
+                        setVariantRows(variantRows.map(v => ({
+                          ...v,
+                          condition_grade: v.condition_grade === "New" ? "Good" as ConditionGrade : v.condition_grade,
+                        })));
+                      }
+                    }}
                       className="w-full rounded-xl border border-white/10 bg-[#111] px-4 py-2.5 text-sm text-white outline-none">
                       <option value="New">New</option>
                       <option value="Pre-Owned">Pre-Owned</option>
@@ -751,18 +762,26 @@ export default function AdminPage() {
                 </div>
 
                 <div className="flex flex-wrap gap-6">
-                  {[
-                    { label: "Face ID / Fingerprint", key: "face_id" },
-                    { label: "5G", key: "five_g" },
-                    { label: "Featured", key: "featured" },
-                  ].map(({ label, key }) => (
-                    <label key={key} className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" checked={phoneForm[key as keyof typeof phoneForm] as boolean}
-                        onChange={e => setPhoneForm({...phoneForm, [key]: e.target.checked})}
-                        className="h-4 w-4 rounded accent-blue-500" />
-                      <span className="text-sm text-white/70">{label}</span>
-                    </label>
-                  ))}
+                  <div>
+                    <label className="mb-1 block text-xs text-white/40">IP Rating (Water Resistance)</label>
+                    <input value={phoneForm.ip_rating}
+                      onChange={e => setPhoneForm({ ...phoneForm, ip_rating: e.target.value })}
+                      placeholder="IP68, IP67, IP69, Not Rated"
+                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50" />
+                  </div>
+                  <div className="flex flex-wrap gap-6 sm:col-span-2">
+                    {[
+                      { label: "5G", key: "five_g" },
+                      { label: "Featured", key: "featured" },
+                    ].map(({ label, key }) => (
+                      <label key={key} className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked={phoneForm[key as keyof typeof phoneForm] as boolean}
+                          onChange={e => setPhoneForm({...phoneForm, [key]: e.target.checked})}
+                          className="h-4 w-4 rounded accent-blue-500" />
+                        <span className="text-sm text-white/70">{label}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -770,7 +789,7 @@ export default function AdminPage() {
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-bold uppercase tracking-widest text-green-300">Section 2 — Variants</h2>
-                  <button type="button" onClick={() => setVariantRows([...variantRows, emptyVariantRow()])}
+                  <button type="button" onClick={() => setVariantRows([...variantRows, emptyVariantRow(phoneForm.condition)])}
                     className="rounded-lg border border-green-500/30 bg-green-500/10 px-3 py-1.5 text-xs font-semibold text-green-300 hover:bg-green-500/20">
                     + Add Variant
                   </button>
@@ -803,14 +822,23 @@ export default function AdminPage() {
                             const updated = [...variantRows]; updated[realIdx] = { ...row, color: e.target.value }; setVariantRows(updated);
                           }} placeholder="Black Titanium" className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none focus:border-blue-400/50" />
                         </div>
-                        <div>
-                          <label className="mb-1 block text-[10px] text-white/40">Condition Grade *</label>
-                          <select value={row.condition_grade} onChange={e => {
-                            const updated = [...variantRows]; updated[realIdx] = { ...row, condition_grade: e.target.value as ConditionGrade }; setVariantRows(updated);
-                          }} className="w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-xs text-white outline-none">
-                            {CONDITION_GRADES.map(g => <option key={g} value={g}>{g}</option>)}
-                          </select>
-                        </div>
+                        {phoneForm.condition === "Pre-Owned" ? (
+                          <div>
+                            <label className="mb-1 block text-[10px] text-white/40">Condition Grade *</label>
+                            <select value={row.condition_grade} onChange={e => {
+                              const updated = [...variantRows]; updated[realIdx] = { ...row, condition_grade: e.target.value as ConditionGrade }; setVariantRows(updated);
+                            }} className="w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-xs text-white outline-none">
+                              {PRE_OWNED_GRADES.map(g => <option key={g} value={g}>{g}</option>)}
+                            </select>
+                          </div>
+                        ) : (
+                          <div>
+                            <label className="mb-1 block text-[10px] text-white/40">Condition</label>
+                            <div className="rounded-lg border border-green-500/30 bg-green-500/10 px-3 py-2 text-xs font-semibold text-green-300">
+                              New — Sealed (auto)
+                            </div>
+                          </div>
+                        )}
                         <div>
                           <label className="mb-1 block text-[10px] text-white/40">Price (PKR) *</label>
                           <input required value={row.price} type="number" onChange={e => {
