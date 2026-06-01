@@ -141,7 +141,11 @@ function CheckoutContent() {
 
   const sendOrderEmail = async (
     cleanForm: { name: string; email: string; phone: string; city: string },
-    orderItems: { model: string; storage: string; color: string; category: string; condition: string; price: number }[],
+    orderItems: {
+      model: string; storage: string; color: string; category: string;
+      condition: string; condition_grade?: string; price: number;
+      freeAccessoryLine?: string; quantityRemaining?: number | null;
+    }[],
     totalPrice: number,
     paymentMethod: string
   ) => {
@@ -166,6 +170,21 @@ function CheckoutContent() {
     }
   };
 
+  const decrementVariantQuantity = async (variantId: string) => {
+    const { data: variant } = await supabase
+      .from("phone_variants")
+      .select("quantity, in_stock")
+      .eq("id", variantId)
+      .single();
+    if (!variant) return null;
+    const newQty = Math.max(0, (variant.quantity ?? 1) - 1);
+    await supabase.from("phone_variants").update({
+      quantity: newQty,
+      in_stock: newQty > 0,
+    }).eq("id", variantId);
+    return newQty;
+  };
+
   const handleOrderSubmit = async () => {
     if (!selectedPayment) return;
     setSubmitting(true);
@@ -185,12 +204,22 @@ function CheckoutContent() {
         const itemPrice = couponApplied
           ? Math.round((item.discount_price ?? item.price) * (1 - COUPON_DISCOUNT))
           : (item.discount_price ?? item.price);
+
+        let quantityRemaining: number | null = null;
+        if (item.variant_id) {
+          quantityRemaining = await decrementVariantQuantity(item.variant_id);
+        }
+
         await supabase.from("orders").insert({
           customer_name: cleanForm.name,
           customer_email: cleanForm.email,
           customer_whatsapp: cleanForm.phone,
           customer_city: cleanForm.city,
-          phone_id: item.id,
+          phone_id: item.phone_id ?? item.id,
+          variant_id: item.variant_id ?? null,
+          selected_storage: item.selected_storage ?? item.storage,
+          selected_color: item.selected_color ?? item.color,
+          selected_condition: item.selected_condition_grade ?? null,
           total_price: itemPrice,
           payment_method: selectedPayment,
           payment_status: "pending",
@@ -199,11 +228,14 @@ function CheckoutContent() {
         });
         orderItems.push({
           model: item.model,
-          storage: item.storage,
-          color: item.color,
+          storage: item.selected_storage ?? item.storage,
+          color: item.selected_color ?? item.color,
           category: item.category,
           condition: item.condition,
+          condition_grade: item.selected_condition_grade,
           price: itemPrice,
+          freeAccessoryLine: item.condition === "Pre-Owned" || item.condition === "Used" ? "case + screen protector" : "case",
+          quantityRemaining,
         });
       }
       await sendOrderEmail(cleanForm, orderItems, finalPrice, selectedPayment);
@@ -271,21 +303,26 @@ function CheckoutContent() {
           <div className="flex flex-col items-center gap-6 py-20 text-center">
             <div className="flex h-20 w-20 items-center justify-center rounded-full border border-green-500/30 bg-green-500/10 text-4xl">✅</div>
             <h1 className="text-3xl font-extrabold text-white">Order Received!</h1>
-            <p className="max-w-md text-white/50 leading-relaxed">Shukriya Janab! Aapka order mil gaya. Confirmation email bhej di gayi hai. Payment screenshot WhatsApp par zaroor bhejein.</p>
-            <div className="rounded-2xl border border-purple-400/20 bg-purple-500/5 px-6 py-4 text-sm text-purple-200">
-              🎬 Ab apna unboxing video banao — warranty ka proof aur apne doston ko dikhao apna naya phone! Tag us @phonesai.pk
+            <p className="max-w-md text-white/50 leading-relaxed">
+              Order received! We will confirm availability within 24 hours via WhatsApp before you send payment. Please do not send payment until we confirm.
+            </p>
+            <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 px-6 py-4 text-sm text-amber-200 max-w-md">
+              ⏳ What happens next: Hum 24 ghante mein WhatsApp par stock confirm karenge. Payment tab bhejein jab hum confirm kar dein.
             </div>
-            <div className="rounded-2xl border border-amber-300/20 bg-amber-300/5 px-6 py-4 text-sm text-amber-200">
-              🧔 Ustaad Ji ka wada — 7-din warranty ke saath aapka phone verified hai.
+            <div className="rounded-2xl border border-green-500/30 bg-green-500/10 px-6 py-4 text-sm text-green-200 max-w-md">
+              📦 Your order includes free protective accessories — phone arrives ready to use, no extra trip to the market needed.
+            </div>
+            <div className="rounded-2xl border border-purple-400/20 bg-purple-500/5 px-6 py-4 text-sm text-purple-200">
+              🎬 Ab apna unboxing video banao — warranty ka proof aur apne doston ko dikhao apna naya phone!
             </div>
             <div className="rounded-2xl border border-blue-400/20 bg-blue-500/5 px-6 py-4 text-sm text-blue-200">
-              📧 Check karein aapki email — order confirmation aur unboxing guide bhej di gayi hai!
+              📧 Check karein aapki email — order confirmation bhej di gayi hai!
             </div>
             <div className="flex gap-3 flex-wrap justify-center">
-              <a href="https://wa.me/923041502560?text=Assalam o Alaikum! Maine order place kiya hai. Payment screenshot bhej raha/rahi hoon."
+              <a href="https://wa.me/923041502560?text=Assalam o Alaikum! Maine order place kiya hai. Availability confirm kar dein please."
                 target="_blank" rel="noopener noreferrer"
                 className="rounded-2xl bg-green-500 px-6 py-3 text-sm font-bold text-white hover:bg-green-400 transition">
-                Send Screenshot on WhatsApp
+                Confirm on WhatsApp → 0304-1502560
               </a>
               <a href="/shop" className="rounded-2xl border border-white/15 px-6 py-3 text-sm font-semibold text-white/60 hover:text-white transition">Browse More</a>
             </div>
@@ -496,7 +533,11 @@ function CheckoutContent() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-bold text-white truncate">{item.model}</p>
-                          <p className="text-xs text-white/40">{item.storage} • {item.category}</p>
+                          <p className="text-xs text-white/40">
+                            {item.selected_storage ?? item.storage} • {item.selected_color ?? item.color}
+                            {item.selected_condition_grade && ` • ${item.selected_condition_grade}`}
+                          </p>
+                          <p className="text-[10px] text-white/30">{item.category}</p>
                         </div>
                         <p className="text-sm font-bold text-white shrink-0">Rs. {(item.discount_price ?? item.price).toLocaleString()}</p>
                       </div>

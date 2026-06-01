@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { type PhoneVariant, type ConditionGrade, CONDITION_GRADES } from "@/lib/variants";
 
 const ADMIN_PASSWORD = "PhonesAI321@";
 const SUPABASE_URL = "https://xadxdkbdwyulprfukrjb.supabase.co";
@@ -10,6 +11,20 @@ type Phone = {
   id: string; model: string; storage: string; color: string; category: string;
   brand: string; condition: string; price: number; battery_health: number;
   in_stock: boolean; featured: boolean; badge: string | null; images: string[]; free_case: boolean;
+};
+
+type VariantFormRow = {
+  id?: string;
+  storage: string;
+  color: string;
+  condition_grade: ConditionGrade;
+  price: string;
+  discount_price: string;
+  quantity: string;
+  battery_health: string;
+  images: string[];
+  in_stock: boolean;
+  _delete?: boolean;
 };
 
 type Accessory = {
@@ -24,13 +39,16 @@ type Review = {
 };
 
 const emptyPhoneForm = {
-  model: "", storage: "", color: "", brand: "Apple", category: "JV", condition: "New",
-  price: "", cost_price: "", discount_price: "", battery_health: "", physical_condition: "10/10",
-  face_id: true, five_g: true, region: "LLA", ios_version: "", sim_status: "", sim_type: "Dual SIM",
+  model: "", brand: "Apple", category: "JV", condition: "New",
+  cost_price: "", face_id: true, five_g: true, region: "LLA", ios_version: "", sim_status: "", sim_type: "Dual SIM",
   accessories_included: "", product_description: "", description: "", badge: "", featured: false, in_stock: true,
-  free_case: false, images: [] as string[], condition_video: "", battery_screenshot: [] as string[],
-  imei_number: "", supplier: "",
+  condition_video: "", imei_number: "", supplier: "",
 };
+
+const emptyVariantRow = (): VariantFormRow => ({
+  storage: "", color: "", condition_grade: "Good", price: "", discount_price: "",
+  quantity: "1", battery_health: "", images: [], in_stock: true,
+});
 
 const emptyAccessoryForm = {
   name: "", brand: "Apple", category: "Charger", price: "", cost_price: "", discount_price: "",
@@ -170,6 +188,8 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [wrongPassword, setWrongPassword] = useState(false);
   const [phones, setPhones] = useState<Phone[]>([]);
+  const [phoneVariantsMap, setPhoneVariantsMap] = useState<Record<string, PhoneVariant[]>>({});
+  const [variantRows, setVariantRows] = useState<VariantFormRow[]>([emptyVariantRow()]);
   const [accessories, setAccessories] = useState<Accessory[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -188,12 +208,21 @@ export default function AdminPage() {
     const { data: phoneData, error: pe } = await supabase.from("phones")
       .select("id,model,storage,color,category,brand,condition,price,battery_health,in_stock,featured,badge,images,free_case")
       .order("created_at", { ascending: false });
+    const { data: variantData } = await supabase.from("phone_variants").select("*").order("created_at", { ascending: false });
     const { data: accessoryData } = await supabase.from("accessories")
       .select("id,name,brand,category,price,in_stock,featured,is_original,images")
       .order("created_at", { ascending: false });
     const { data: reviewData } = await supabase.from("reviews").select("*").order("created_at", { ascending: false });
     if (pe) console.error("Phone fetch error:", pe);
     if (phoneData) setPhones(phoneData);
+    if (variantData) {
+      const map: Record<string, PhoneVariant[]> = {};
+      for (const v of variantData) {
+        if (!map[v.phone_id]) map[v.phone_id] = [];
+        map[v.phone_id].push(v);
+      }
+      setPhoneVariantsMap(map);
+    }
     if (accessoryData) setAccessories(accessoryData);
     if (reviewData) setReviews(reviewData);
     setLoading(false);
@@ -228,16 +257,62 @@ export default function AdminPage() {
     fetchData();
   };
 
-  const handleEditPhone = (phone: Phone) => {
+  const handleEditPhone = async (phone: Phone) => {
     setEditId(phone.id);
-    setPhoneForm({
-      ...emptyPhoneForm,
-      model: phone.model, storage: phone.storage, color: phone.color,
-      brand: phone.brand ?? "Apple", category: phone.category, condition: phone.condition,
-      price: phone.price.toString(), battery_health: phone.battery_health?.toString() ?? "",
-      badge: phone.badge ?? "", featured: phone.featured, in_stock: phone.in_stock,
-      free_case: phone.free_case ?? false, images: phone.images ?? [],
-    });
+    const { data: fullPhone } = await supabase.from("phones").select("*").eq("id", phone.id).single();
+    const { data: variants } = await supabase.from("phone_variants").select("*").eq("phone_id", phone.id);
+
+    if (fullPhone) {
+      setPhoneForm({
+        ...emptyPhoneForm,
+        model: fullPhone.model,
+        brand: fullPhone.brand ?? "Apple",
+        category: fullPhone.category,
+        condition: fullPhone.condition ?? "New",
+        cost_price: fullPhone.cost_price?.toString() ?? "",
+        face_id: fullPhone.face_id ?? true,
+        five_g: fullPhone.five_g ?? true,
+        region: fullPhone.region ?? "LLA",
+        ios_version: fullPhone.ios_version ?? "",
+        sim_status: fullPhone.sim_status ?? "",
+        sim_type: fullPhone.sim_type ?? "Dual SIM",
+        accessories_included: fullPhone.accessories_included ?? "",
+        product_description: fullPhone.product_description ?? "",
+        description: fullPhone.description ?? "",
+        badge: fullPhone.badge ?? "",
+        featured: fullPhone.featured,
+        in_stock: fullPhone.in_stock,
+        condition_video: fullPhone.condition_video ?? "",
+        imei_number: fullPhone.imei_number ?? "",
+        supplier: fullPhone.supplier ?? "",
+      });
+    }
+
+    if (variants && variants.length > 0) {
+      setVariantRows(variants.map((v) => ({
+        id: v.id,
+        storage: v.storage,
+        color: v.color,
+        condition_grade: v.condition_grade,
+        price: v.price.toString(),
+        discount_price: v.discount_price?.toString() ?? "",
+        quantity: v.quantity?.toString() ?? "1",
+        battery_health: v.battery_health?.toString() ?? "",
+        images: v.images ?? [],
+        in_stock: v.in_stock,
+      })));
+    } else {
+      setVariantRows([{
+        ...emptyVariantRow(),
+        storage: phone.storage,
+        color: phone.color,
+        price: phone.price.toString(),
+        battery_health: phone.battery_health?.toString() ?? "",
+        images: phone.images ?? [],
+        in_stock: phone.in_stock,
+      }]);
+    }
+
     setActiveTab("phones");
     setView("edit");
   };
@@ -258,18 +333,25 @@ export default function AdminPage() {
     setSaving(true);
     setErrorMsg("");
 
+    const activeVariants = variantRows.filter((v) => !v._delete && v.storage && v.color && v.price);
+    if (activeVariants.length === 0) {
+      setErrorMsg("Add at least one variant with storage, color, and price.");
+      setSaving(false);
+      return;
+    }
+
     const payload = {
       model: phoneForm.model,
-      storage: phoneForm.storage,
-      color: phoneForm.color,
+      storage: activeVariants[0].storage,
+      color: activeVariants[0].color,
       brand: phoneForm.brand,
       category: phoneForm.category,
       condition: phoneForm.condition,
-      price: parseInt(phoneForm.price),
+      price: parseInt(activeVariants[0].price),
       cost_price: phoneForm.cost_price ? parseInt(phoneForm.cost_price) : null,
-      discount_price: phoneForm.discount_price ? parseInt(phoneForm.discount_price) : null,
-      battery_health: phoneForm.battery_health ? parseInt(phoneForm.battery_health) : null,
-      physical_condition: phoneForm.physical_condition,
+      discount_price: activeVariants[0].discount_price ? parseInt(activeVariants[0].discount_price) : null,
+      battery_health: activeVariants[0].battery_health ? parseInt(activeVariants[0].battery_health) : null,
+      physical_condition: activeVariants[0].condition_grade,
       face_id: phoneForm.face_id,
       five_g: phoneForm.five_g,
       region: phoneForm.region,
@@ -281,14 +363,16 @@ export default function AdminPage() {
       description: phoneForm.description || null,
       badge: phoneForm.badge || null,
       featured: phoneForm.featured,
-      in_stock: phoneForm.in_stock,
-      free_case: phoneForm.free_case,
-      images: phoneForm.images,
+      in_stock: activeVariants.some((v) => v.in_stock),
+      free_case: true,
+      images: activeVariants[0].images,
       condition_video: phoneForm.condition_video || null,
-      battery_screenshot: phoneForm.battery_screenshot,
+      battery_screenshot: [],
       imei_number: phoneForm.imei_number || null,
       supplier: phoneForm.supplier || null,
     };
+
+    let phoneId = editId;
 
     if (view === "edit" && editId) {
       const { error } = await supabase.from("phones").update(payload).eq("id", editId);
@@ -298,11 +382,40 @@ export default function AdminPage() {
       const { data, error } = await supabase.from("phones").insert(payload).select();
       if (error) { setErrorMsg(`Insert failed: ${error.message}`); setSaving(false); return; }
       if (!data || data.length === 0) { setErrorMsg("Insert returned no data — check RLS policies."); setSaving(false); return; }
+      phoneId = data[0].id;
       setSuccessMsg("Phone added!");
+    }
+
+    for (const row of variantRows) {
+      if (row._delete && row.id) {
+        await supabase.from("phone_variants").delete().eq("id", row.id);
+        continue;
+      }
+      if (!row.storage || !row.color || !row.price) continue;
+
+      const variantPayload = {
+        phone_id: phoneId,
+        storage: row.storage,
+        color: row.color,
+        condition_grade: row.condition_grade,
+        price: parseInt(row.price),
+        discount_price: row.discount_price ? parseInt(row.discount_price) : null,
+        quantity: row.quantity ? parseInt(row.quantity) : 1,
+        battery_health: row.battery_health ? parseInt(row.battery_health) : null,
+        images: row.images,
+        in_stock: row.in_stock,
+      };
+
+      if (row.id) {
+        await supabase.from("phone_variants").update(variantPayload).eq("id", row.id);
+      } else {
+        await supabase.from("phone_variants").insert(variantPayload);
+      }
     }
 
     setSaving(false);
     setPhoneForm(emptyPhoneForm);
+    setVariantRows([emptyVariantRow()]);
     setEditId(null);
     setView("list");
     await fetchData();
@@ -414,42 +527,57 @@ export default function AdminPage() {
                   {pendingCount > 0 && <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">{pendingCount}</span>}
                 </button>
               </div>
-              <button onClick={() => { setPhoneForm(emptyPhoneForm); setAccessoryForm(emptyAccessoryForm); setView(activeTab === "reviews" ? "add_review" : "add"); }}
+              <button onClick={() => { setPhoneForm(emptyPhoneForm); setVariantRows([emptyVariantRow()]); setAccessoryForm(emptyAccessoryForm); setView(activeTab === "reviews" ? "add_review" : "add"); }}
                 className="rounded-xl bg-blue-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-400">
                 + Add {activeTab === "phones" ? "Phone" : activeTab === "accessories" ? "Accessory" : "Review"}
               </button>
             </div>
 
             {loading ? <p className="animate-pulse text-white/30">Loading...</p> : activeTab === "phones" ? (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {phones.length === 0 && <p className="text-white/30">No phones yet.</p>}
-                {phones.map(phone => (
-                  <div key={phone.id} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/5">
-                      {phone.images?.[0] ? <img src={phone.images[0]} alt="" className="h-full w-full object-contain" /> : <span className="text-white/20 text-xs">📱</span>}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-white truncate">{phone.brand} {phone.model} • {phone.storage} • {phone.color}</p>
-                      <div className="mt-1 flex flex-wrap items-center gap-2">
-                        <span className={`rounded-full border px-2 py-0.5 text-xs ${phone.category === "PTA" ? "border-green-500/30 text-green-300" : phone.category === "Non-PTA" ? "border-blue-500/30 text-blue-300" : phone.category === "JV" ? "border-amber-500/30 text-amber-300" : "border-purple-500/30 text-purple-300"}`}>{phone.category}</span>
-                        <span className={`text-xs ${phone.condition === "Pre-Owned" ? "text-amber-300" : "text-green-300"}`}>{phone.condition}</span>
-                        {phone.battery_health && <span className="text-xs text-white/40">🔋 {phone.battery_health}%</span>}
-                        {phone.free_case && <span className="text-xs text-green-300">🎁 Free Case</span>}
+                {phones.map(phone => {
+                  const variants = phoneVariantsMap[phone.id] ?? [];
+                  const thumb = variants[0]?.images?.[0] ?? phone.images?.[0];
+                  return (
+                    <div key={phone.id} className="rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
+                      <div className="flex items-center gap-4 px-5 py-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/5">
+                          {thumb ? <img src={thumb} alt="" className="h-full w-full object-contain" /> : <span className="text-white/20 text-xs">📱</span>}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-white truncate">{phone.brand} {phone.model}</p>
+                          <div className="mt-1 flex flex-wrap items-center gap-2">
+                            <span className={`rounded-full border px-2 py-0.5 text-xs ${phone.category === "PTA" ? "border-green-500/30 text-green-300" : phone.category === "Non-PTA" ? "border-blue-500/30 text-blue-300" : phone.category === "JV" ? "border-amber-500/30 text-amber-300" : "border-purple-500/30 text-purple-300"}`}>{phone.category}</span>
+                            <span className={`text-xs ${phone.condition === "Pre-Owned" ? "text-amber-300" : "text-green-300"}`}>{phone.condition}</span>
+                            <span className="text-xs text-white/40">{variants.length > 0 ? `${variants.length} variants` : "Legacy (no variants)"}</span>
+                          </div>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <button onClick={() => handleToggle(phone.id, "featured", phone.featured, "phones")}
+                            className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${phone.featured ? "border-amber-500/30 bg-amber-500/10 text-amber-300" : "border-white/10 text-white/30 hover:text-white/60"}`}>⭐</button>
+                          <button onClick={() => handleEditPhone(phone)} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white/50 transition hover:text-white">Edit</button>
+                          <button onClick={() => handleDelete(phone.id, "phones")} className="rounded-lg border border-red-500/20 px-3 py-1.5 text-xs text-red-400 transition hover:bg-red-500/10">Delete</button>
+                        </div>
                       </div>
+                      {variants.length > 0 && (
+                        <div className="border-t border-white/5 bg-black/20 px-5 py-3 space-y-2">
+                          {variants.map(v => (
+                            <div key={v.id} className="flex flex-wrap items-center gap-3 text-xs">
+                              <span className="font-semibold text-white">{v.storage}</span>
+                              <span className="text-white/50">{v.color}</span>
+                              <span className="rounded-full border border-white/10 px-2 py-0.5 text-white/60">{v.condition_grade}</span>
+                              <span className="font-bold text-white">Rs. {(v.discount_price ?? v.price).toLocaleString()}</span>
+                              {v.battery_health && <span className="text-white/40">🔋 {v.battery_health}%</span>}
+                              <span className="text-white/40">Qty: {v.quantity}</span>
+                              <span className={`${v.in_stock && v.quantity > 0 ? "text-green-400" : "text-red-400"}`}>{v.in_stock && v.quantity > 0 ? "In Stock" : "Sold Out"}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    <p className="shrink-0 font-bold text-white">Rs. {phone.price.toLocaleString()}</p>
-                    <div className="flex shrink-0 items-center gap-2">
-                      <button onClick={() => handleToggle(phone.id, "in_stock", phone.in_stock, "phones")}
-                        className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${phone.in_stock ? "border-green-500/30 bg-green-500/10 text-green-300" : "border-red-500/30 bg-red-500/10 text-red-300"}`}>
-                        {phone.in_stock ? "In Stock" : "Sold"}
-                      </button>
-                      <button onClick={() => handleToggle(phone.id, "featured", phone.featured, "phones")}
-                        className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${phone.featured ? "border-amber-500/30 bg-amber-500/10 text-amber-300" : "border-white/10 text-white/30 hover:text-white/60"}`}>⭐</button>
-                      <button onClick={() => handleEditPhone(phone)} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white/50 transition hover:text-white">Edit</button>
-                      <button onClick={() => handleDelete(phone.id, "phones")} className="rounded-lg border border-red-500/20 px-3 py-1.5 text-xs text-red-400 transition hover:bg-red-500/10">Delete</button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : activeTab === "accessories" ? (
               <div className="space-y-3">
@@ -523,132 +651,211 @@ export default function AdminPage() {
           </>
         )}
 
-        {/* ── Phone Form ── */}
         {(view === "add" || view === "edit") && activeTab === "phones" && (
           <>
             <div className="mb-8"><h1 className="text-2xl font-extrabold text-white">{view === "edit" ? "Edit Phone" : "Add New Phone"}</h1></div>
-            <form onSubmit={handleSavePhone} className="space-y-5">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-1 block text-xs text-white/40">Brand *</label>
-                  <select value={phoneForm.brand} onChange={e => setPhoneForm({...phoneForm, brand: e.target.value, category: getCategoriesForBrand(e.target.value)[0]})}
-                    className="w-full rounded-xl border border-white/10 bg-[#111] px-4 py-2.5 text-sm text-white outline-none">
-                    <option value="Apple">Apple</option>
-                    <option value="Samsung">Samsung</option>
-                    <option value="iPad">iPad</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs text-white/40">Category *</label>
-                  <select value={phoneForm.category} onChange={e => setPhoneForm({...phoneForm, category: e.target.value})}
-                    className="w-full rounded-xl border border-white/10 bg-[#111] px-4 py-2.5 text-sm text-white outline-none">
-                    {getCategoriesForBrand(phoneForm.brand).map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs text-white/40">Condition *</label>
-                  <select value={phoneForm.condition} onChange={e => setPhoneForm({...phoneForm, condition: e.target.value})}
-                    className="w-full rounded-xl border border-white/10 bg-[#111] px-4 py-2.5 text-sm text-white outline-none">
-                    <option value="New">New</option>
-                    <option value="Pre-Owned">Pre-Owned</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs text-white/40">SIM Type</label>
-                  <select value={phoneForm.sim_type} onChange={e => setPhoneForm({...phoneForm, sim_type: e.target.value})}
-                    className="w-full rounded-xl border border-white/10 bg-[#111] px-4 py-2.5 text-sm text-white outline-none">
-                    <option value="Single SIM">Single SIM</option>
-                    <option value="Dual SIM">Dual SIM</option>
-                    <option value="eSIM">eSIM</option>
-                    <option value="Dual eSIM">Dual eSIM</option>
-                    <option value="SIM + eSIM">SIM + eSIM</option>
-                  </select>
-                </div>
-                {[
-                  { label: "Model *", key: "model", placeholder: "iPhone 16 Pro Max", required: true },
-                  { label: "Storage *", key: "storage", placeholder: "256GB", required: true },
-                  { label: "Color *", key: "color", placeholder: "Desert Titanium", required: true },
-                  { label: "Sale Price (PKR) *", key: "price", placeholder: "285000", type: "number", required: true },
-                  { label: "Discount Price (PKR)", key: "discount_price", placeholder: "265000", type: "number" },
-                  { label: "Cost Price (PKR) — private", key: "cost_price", placeholder: "240000", type: "number" },
-                  { label: "Battery Health (%)", key: "battery_health", placeholder: "91", type: "number" },
-                  { label: "Region", key: "region", placeholder: "LLA" },
-                  { label: "iOS/OS Version", key: "ios_version", placeholder: "iOS 18.4" },
-                  { label: "SIM Status", key: "sim_status", placeholder: "SIM Ready / SIM Locked" },
-                  { label: "In the Box", key: "accessories_included", placeholder: "Cable Only / Full Box" },
-                  { label: "Physical Condition", key: "physical_condition", placeholder: "10/10" },
-                  { label: "IMEI — private", key: "imei_number", placeholder: "352ABC..." },
-                  { label: "Supplier — private", key: "supplier", placeholder: "Dubai Supplier" },
-                ].map(({ label, key, placeholder, type, required }) => (
-                  <div key={key}>
-                    <label className="mb-1 block text-xs text-white/40">{label}</label>
-                    <input required={required} value={phoneForm[key as keyof typeof phoneForm] as string}
-                      onChange={e => setPhoneForm({...phoneForm, [key]: e.target.value})}
-                      placeholder={placeholder} type={type ?? "text"}
+            <form onSubmit={handleSavePhone} className="space-y-8">
+
+              {/* SECTION 1 — Base Phone Info */}
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6 space-y-5">
+                <h2 className="text-sm font-bold uppercase tracking-widest text-blue-300">Section 1 — Base Phone Info</h2>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1 block text-xs text-white/40">Brand *</label>
+                    <select value={phoneForm.brand} onChange={e => setPhoneForm({...phoneForm, brand: e.target.value, category: getCategoriesForBrand(e.target.value)[0]})}
+                      className="w-full rounded-xl border border-white/10 bg-[#111] px-4 py-2.5 text-sm text-white outline-none">
+                      <option value="Apple">Apple</option>
+                      <option value="Samsung">Samsung</option>
+                      <option value="iPad">iPad</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-white/40">Category *</label>
+                    <select value={phoneForm.category} onChange={e => setPhoneForm({...phoneForm, category: e.target.value})}
+                      className="w-full rounded-xl border border-white/10 bg-[#111] px-4 py-2.5 text-sm text-white outline-none">
+                      {getCategoriesForBrand(phoneForm.brand).map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-white/40">New / Pre-Owned *</label>
+                    <select value={phoneForm.condition} onChange={e => setPhoneForm({...phoneForm, condition: e.target.value})}
+                      className="w-full rounded-xl border border-white/10 bg-[#111] px-4 py-2.5 text-sm text-white outline-none">
+                      <option value="New">New</option>
+                      <option value="Pre-Owned">Pre-Owned</option>
+                    </select>
+                    <p className="mt-1 text-[10px] text-white/30">Controls free case vs case + screen protector</p>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-white/40">Model *</label>
+                    <input required value={phoneForm.model} onChange={e => setPhoneForm({...phoneForm, model: e.target.value})}
+                      placeholder="iPhone 16 Pro Max"
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50" />
                   </div>
-                ))}
+                  <div>
+                    <label className="mb-1 block text-xs text-white/40">SIM Type</label>
+                    <select value={phoneForm.sim_type} onChange={e => setPhoneForm({...phoneForm, sim_type: e.target.value})}
+                      className="w-full rounded-xl border border-white/10 bg-[#111] px-4 py-2.5 text-sm text-white outline-none">
+                      <option value="Single SIM">Single SIM</option>
+                      <option value="Dual SIM">Dual SIM</option>
+                      <option value="eSIM">eSIM</option>
+                      <option value="Dual eSIM">Dual eSIM</option>
+                      <option value="SIM + eSIM">SIM + eSIM</option>
+                    </select>
+                  </div>
+                  {[
+                    { label: "Region", key: "region", placeholder: "LLA" },
+                    { label: "iOS/OS Version", key: "ios_version", placeholder: "iOS 18.4" },
+                    { label: "SIM Status", key: "sim_status", placeholder: "SIM Ready / SIM Locked" },
+                    { label: "In the Box", key: "accessories_included", placeholder: "Cable Only / Full Box" },
+                    { label: "Cost Price (PKR) — private", key: "cost_price", placeholder: "240000", type: "number" },
+                    { label: "IMEI — private", key: "imei_number", placeholder: "352ABC..." },
+                    { label: "Supplier — private", key: "supplier", placeholder: "Dubai Supplier" },
+                  ].map(({ label, key, placeholder, type }) => (
+                    <div key={key}>
+                      <label className="mb-1 block text-xs text-white/40">{label}</label>
+                      <input value={phoneForm[key as keyof typeof phoneForm] as string}
+                        onChange={e => setPhoneForm({...phoneForm, [key]: e.target.value})}
+                        placeholder={placeholder} type={type ?? "text"}
+                        className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50" />
+                    </div>
+                  ))}
+                  <div>
+                    <label className="mb-1 block text-xs text-white/40">Badge</label>
+                    <select value={phoneForm.badge} onChange={e => setPhoneForm({...phoneForm, badge: e.target.value})}
+                      className="w-full rounded-xl border border-white/10 bg-[#111] px-4 py-2.5 text-sm text-white outline-none">
+                      <option value="">None</option>
+                      <option value="New Arrival">New Arrival</option>
+                      <option value="Hot Deal">Hot Deal</option>
+                      <option value="Best Value">Best Value</option>
+                      <option value="Last Unit">Last Unit</option>
+                    </select>
+                  </div>
+                </div>
+
+                <VideoUploader bucket="phone-images" existingUrl={phoneForm.condition_video}
+                  onUpload={(url) => setPhoneForm({...phoneForm, condition_video: url})}
+                  label="🎬 Condition Video — upload MP4 or MOV" />
+
                 <div>
-                  <label className="mb-1 block text-xs text-white/40">Badge</label>
-                  <select value={phoneForm.badge} onChange={e => setPhoneForm({...phoneForm, badge: e.target.value})}
-                    className="w-full rounded-xl border border-white/10 bg-[#111] px-4 py-2.5 text-sm text-white outline-none">
-                    <option value="">None</option>
-                    <option value="New Arrival">New Arrival</option>
-                    <option value="Hot Deal">Hot Deal</option>
-                    <option value="Best Value">Best Value</option>
-                    <option value="Last Unit">Last Unit</option>
-                  </select>
+                  <label className="mb-1 block text-xs text-white/40">Product Description — shown on product page</label>
+                  <textarea value={phoneForm.product_description} onChange={e => setPhoneForm({...phoneForm, product_description: e.target.value})}
+                    placeholder="iPhone 16 Pro Max with A18 Pro chip, 48MP main camera..." rows={3}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50 resize-none" />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs text-white/40">Ustaad Ji Notes — specific condition notes</label>
+                  <textarea value={phoneForm.description} onChange={e => setPhoneForm({...phoneForm, description: e.target.value})}
+                    placeholder="Pin-pack sealed unit. Screen 10/10." rows={3}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50 resize-none" />
+                </div>
+
+                <div className="flex flex-wrap gap-6">
+                  {[
+                    { label: "Face ID / Fingerprint", key: "face_id" },
+                    { label: "5G", key: "five_g" },
+                    { label: "Featured", key: "featured" },
+                  ].map(({ label, key }) => (
+                    <label key={key} className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={phoneForm[key as keyof typeof phoneForm] as boolean}
+                        onChange={e => setPhoneForm({...phoneForm, [key]: e.target.checked})}
+                        className="h-4 w-4 rounded accent-blue-500" />
+                      <span className="text-sm text-white/70">{label}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
 
-              <ImageUploader bucket="phone-images" existingUrls={phoneForm.images}
-                onUpload={(urls) => setPhoneForm({...phoneForm, images: urls})}
-                label="📸 Phone Photos — upload from laptop or phone (JPEG, HEIC, PNG)" />
+              {/* SECTION 2 — Variants */}
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-bold uppercase tracking-widest text-green-300">Section 2 — Variants</h2>
+                  <button type="button" onClick={() => setVariantRows([...variantRows, emptyVariantRow()])}
+                    className="rounded-lg border border-green-500/30 bg-green-500/10 px-3 py-1.5 text-xs font-semibold text-green-300 hover:bg-green-500/20">
+                    + Add Variant
+                  </button>
+                </div>
 
-              <VideoUploader bucket="phone-images" existingUrl={phoneForm.condition_video}
-                onUpload={(url) => setPhoneForm({...phoneForm, condition_video: url})}
-                label="🎬 Condition Video — upload MP4 or MOV" />
-
-              <ImageUploader bucket="phone-images" existingUrls={phoneForm.battery_screenshot}
-                onUpload={(urls) => setPhoneForm({...phoneForm, battery_screenshot: urls})}
-                label="🔋 Battery Health Screenshot" />
-
-              {/* Product Description — shown publicly on product page */}
-              <div>
-                <label className="mb-1 block text-xs text-white/40">Product Description — shown on product page</label>
-                <p className="mb-1.5 text-[10px] text-white/25">General description of the phone shown to customers e.g. "iPhone 16 Pro Max featuring A18 Pro chip, 48MP camera system..."</p>
-                <textarea value={phoneForm.product_description} onChange={e => setPhoneForm({...phoneForm, product_description: e.target.value})}
-                  placeholder="iPhone 16 Pro Max with A18 Pro chip, 48MP main camera, titanium build. Perfect for heavy users." rows={3}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50 resize-none" />
+                {variantRows.filter(v => !v._delete).map((row, idx) => {
+                  const realIdx = variantRows.indexOf(row);
+                  return (
+                    <div key={row.id ?? `new-${idx}`} className="rounded-xl border border-white/10 bg-black/30 p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-bold text-white/60">Variant {idx + 1}{row.id ? ` (saved)` : " (new)"}</p>
+                        <button type="button" onClick={() => {
+                          if (row.id) {
+                            setVariantRows(variantRows.map((v, i) => i === realIdx ? { ...v, _delete: true } : v));
+                          } else {
+                            setVariantRows(variantRows.filter((_, i) => i !== realIdx));
+                          }
+                        }} className="text-xs text-red-400 hover:text-red-300">Remove</button>
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                        <div>
+                          <label className="mb-1 block text-[10px] text-white/40">Storage *</label>
+                          <input required value={row.storage} onChange={e => {
+                            const updated = [...variantRows]; updated[realIdx] = { ...row, storage: e.target.value }; setVariantRows(updated);
+                          }} placeholder="256GB" className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none focus:border-blue-400/50" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[10px] text-white/40">Color *</label>
+                          <input required value={row.color} onChange={e => {
+                            const updated = [...variantRows]; updated[realIdx] = { ...row, color: e.target.value }; setVariantRows(updated);
+                          }} placeholder="Black Titanium" className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none focus:border-blue-400/50" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[10px] text-white/40">Condition Grade *</label>
+                          <select value={row.condition_grade} onChange={e => {
+                            const updated = [...variantRows]; updated[realIdx] = { ...row, condition_grade: e.target.value as ConditionGrade }; setVariantRows(updated);
+                          }} className="w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-xs text-white outline-none">
+                            {CONDITION_GRADES.map(g => <option key={g} value={g}>{g}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[10px] text-white/40">Price (PKR) *</label>
+                          <input required value={row.price} type="number" onChange={e => {
+                            const updated = [...variantRows]; updated[realIdx] = { ...row, price: e.target.value }; setVariantRows(updated);
+                          }} placeholder="285000" className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none focus:border-blue-400/50" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[10px] text-white/40">Discount Price</label>
+                          <input value={row.discount_price} type="number" onChange={e => {
+                            const updated = [...variantRows]; updated[realIdx] = { ...row, discount_price: e.target.value }; setVariantRows(updated);
+                          }} placeholder="265000" className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none focus:border-blue-400/50" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[10px] text-white/40">Quantity</label>
+                          <input value={row.quantity} type="number" onChange={e => {
+                            const updated = [...variantRows]; updated[realIdx] = { ...row, quantity: e.target.value }; setVariantRows(updated);
+                          }} placeholder="1" className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none focus:border-blue-400/50" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[10px] text-white/40">Battery Health (%)</label>
+                          <input value={row.battery_health} type="number" onChange={e => {
+                            const updated = [...variantRows]; updated[realIdx] = { ...row, battery_health: e.target.value }; setVariantRows(updated);
+                          }} placeholder="91" className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none focus:border-blue-400/50" />
+                        </div>
+                        <div className="flex items-end">
+                          <label className="flex items-center gap-2 cursor-pointer pb-2">
+                            <input type="checkbox" checked={row.in_stock} onChange={e => {
+                              const updated = [...variantRows]; updated[realIdx] = { ...row, in_stock: e.target.checked }; setVariantRows(updated);
+                            }} className="h-4 w-4 accent-blue-500" />
+                            <span className="text-xs text-white/70">In Stock</span>
+                          </label>
+                        </div>
+                      </div>
+                      <ImageUploader bucket="phone-images" existingUrls={row.images}
+                        onUpload={(urls) => {
+                          const updated = [...variantRows]; updated[realIdx] = { ...row, images: urls }; setVariantRows(updated);
+                        }}
+                        label="📸 Variant Photos" />
+                    </div>
+                  );
+                })}
               </div>
 
-              {/* Ustaad Ji Notes — internal notes shown on product page */}
-              <div>
-                <label className="mb-1 block text-xs text-white/40">Ustaad Ji Notes — specific condition notes</label>
-                <p className="mb-1.5 text-[10px] text-white/25">Phone-specific condition details e.g. "Pin-pack sealed. Screen 10/10. All buttons working. Unboxing video available."</p>
-                <textarea value={phoneForm.description} onChange={e => setPhoneForm({...phoneForm, description: e.target.value})}
-                  placeholder="Pin-pack sealed unit. Screen 10/10. All buttons working." rows={3}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50 resize-none" />
-              </div>
-
-              <div className="flex flex-wrap gap-6">
-                {[
-                  { label: "Face ID / Fingerprint", key: "face_id" },
-                  { label: "5G", key: "five_g" },
-                  { label: "In Stock", key: "in_stock" },
-                  { label: "Featured", key: "featured" },
-                  { label: "Free Case 🎁", key: "free_case" },
-                ].map(({ label, key }) => (
-                  <label key={key} className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={phoneForm[key as keyof typeof phoneForm] as boolean}
-                      onChange={e => setPhoneForm({...phoneForm, [key]: e.target.checked})}
-                      className="h-4 w-4 rounded accent-blue-500" />
-                    <span className="text-sm text-white/70">{label}</span>
-                  </label>
-                ))}
-              </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => { setView("list"); setPhoneForm(emptyPhoneForm); setEditId(null); }}
+                <button type="button" onClick={() => { setView("list"); setPhoneForm(emptyPhoneForm); setVariantRows([emptyVariantRow()]); setEditId(null); }}
                   className="rounded-xl border border-white/15 px-6 py-3 text-sm font-semibold text-white/60 hover:text-white transition">Cancel</button>
                 <button type="submit" disabled={saving}
                   className="flex-1 rounded-xl bg-blue-500 py-3 text-sm font-bold text-white transition hover:bg-blue-400 disabled:opacity-50">

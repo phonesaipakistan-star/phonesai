@@ -18,7 +18,10 @@ type OrderEmailData = {
     color: string;
     category: string;
     condition: string;
+    condition_grade?: string;
     price: number;
+    freeAccessoryLine?: string;
+    quantityRemaining?: number | null;
   }[];
   totalPrice?: number;
   paymentMethod?: string;
@@ -97,8 +100,9 @@ const getOrderConfirmationEmail = (data: OrderEmailData) => `
       ${(data.items ?? []).map(item => `
       <div style="padding:12px 0;border-bottom:1px solid #1f2937;">
         <p style="color:#ffffff;font-size:14px;font-weight:700;margin:0;">${item.model}</p>
-        <p style="color:#6b7280;font-size:12px;margin:4px 0 0;">${item.storage} • ${item.color} • ${item.category} • ${item.condition}</p>
+        <p style="color:#6b7280;font-size:12px;margin:4px 0 0;">${item.storage} • ${item.color} • ${item.category}${item.condition_grade ? ` • ${item.condition_grade}` : item.condition ? ` • ${item.condition}` : ""}</p>
         <p style="color:#ffffff;font-size:14px;font-weight:700;margin:4px 0 0;">Rs. ${item.price.toLocaleString()}</p>
+        ${item.freeAccessoryLine ? `<p style="color:#4ade80;font-size:11px;margin:4px 0 0;">📦 Free ${item.freeAccessoryLine} included</p>` : ""}
       </div>
       `).join("")}
       <div style="padding:16px 0 0;">
@@ -113,12 +117,23 @@ const getOrderConfirmationEmail = (data: OrderEmailData) => `
       <p style="color:#d1d5db;font-size:14px;margin:0;">🚚 Estimated: <strong style="color:#fff;">1-3 working days</strong></p>
     </div>
 
+    <div style="background:#1c1917;border:2px solid #d97706;border-radius:16px;padding:24px;margin-bottom:24px;text-align:center;">
+      <p style="color:#fcd34d;font-size:16px;font-weight:800;margin:0 0 8px;">⏳ What happens next</p>
+      <p style="color:#fbbf24;font-size:14px;margin:0 0 8px;line-height:1.6;">We will confirm availability within <strong>24 hours via WhatsApp (0304-1502560)</strong>.</p>
+      <p style="color:#f87171;font-size:14px;font-weight:700;margin:0;">Please do not send payment until we confirm.</p>
+    </div>
+
+    <div style="background:#052e16;border:1px solid #166534;border-radius:16px;padding:20px;margin-bottom:24px;text-align:center;">
+      <p style="color:#4ade80;font-size:14px;font-weight:700;margin:0 0 6px;">📦 Free Accessories Included</p>
+      <p style="color:#86efac;font-size:13px;margin:0;">Your order includes a free ${(data.items ?? [])[0]?.freeAccessoryLine ?? "case"} — arrives ready to use. No extra trip to the market needed!</p>
+    </div>
+
     <div style="background:#1c1917;border:1px solid #92400e;border-radius:16px;padding:24px;margin-bottom:24px;">
-      <p style="color:#fcd34d;font-size:14px;font-weight:700;margin:0 0 8px;">⚠️ Payment Screenshot Bhejein</p>
-      <p style="color:#fbbf24;font-size:13px;margin:0 0 16px;">Payment complete karne ke baad screenshot WhatsApp par bhejein.</p>
-      <a href="https://wa.me/923041502560?text=Assalam o Alaikum! Maine order place kiya hai. Payment screenshot bhej raha/rahi hoon."
+      <p style="color:#fcd34d;font-size:14px;font-weight:700;margin:0 0 8px;">⚠️ After We Confirm — Payment Screenshot</p>
+      <p style="color:#fbbf24;font-size:13px;margin:0 0 16px;">Jab hum availability confirm kar dein, tab payment complete karke screenshot WhatsApp par bhejein.</p>
+      <a href="https://wa.me/923041502560?text=Assalam o Alaikum! Maine order place kiya hai. Availability confirm kar dein please."
         style="display:inline-block;background:#16a34a;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:12px 24px;border-radius:12px;">
-        Send Screenshot on WhatsApp
+        Confirm on WhatsApp → 0304-1502560
       </a>
     </div>
 
@@ -205,10 +220,19 @@ const getAdminNotificationEmail = (data: OrderEmailData) => `
 <!DOCTYPE html>
 <html>
 <body style="font-family:sans-serif;background:#f3f4f6;padding:20px;">
-  <div style="max-width:500px;margin:0 auto;background:#ffffff;border-radius:12px;padding:24px;">
+  <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:12px;padding:24px;">
     <h2 style="color:#111827;margin:0 0 16px;">🛒 New Order — PhonesAI</h2>
+
+    <div style="background:#fef2f2;border:2px solid #ef4444;border-radius:12px;padding:20px;margin-bottom:20px;">
+      <p style="color:#dc2626;font-size:18px;font-weight:800;margin:0 0 8px;">🚨 ACTION REQUIRED</p>
+      <p style="color:#991b1b;font-size:14px;margin:0 0 8px;line-height:1.5;">Confirm stock availability within <strong>24 hours</strong> and send payment details to customer on WhatsApp:</p>
+      <p style="color:#111827;font-size:20px;font-weight:800;margin:0;">
+        <a href="https://wa.me/${(data.customerWhatsApp ?? "").replace(/[^0-9]/g, "")}" style="color:#16a34a;text-decoration:none;">${data.customerWhatsApp}</a>
+      </p>
+    </div>
+
     <p><strong>Customer:</strong> ${data.customerName}</p>
-    <p><strong>WhatsApp:</strong> <a href="https://wa.me/${data.customerWhatsApp}">${data.customerWhatsApp}</a></p>
+    <p><strong>WhatsApp:</strong> <a href="https://wa.me/${(data.customerWhatsApp ?? "").replace(/[^0-9]/g, "")}">${data.customerWhatsApp}</a></p>
     <p><strong>Email:</strong> ${data.customerEmail}</p>
     <p><strong>City:</strong> ${data.customerCity}</p>
     <p><strong>Payment:</strong> ${data.paymentMethod}</p>
@@ -217,9 +241,11 @@ const getAdminNotificationEmail = (data: OrderEmailData) => `
     <hr>
     <h3>Items:</h3>
     ${(data.items ?? []).map(item => `
-      <div style="background:#f9fafb;padding:12px;border-radius:8px;margin-bottom:8px;">
-        <p style="margin:0;font-weight:bold;">${item.model} — ${item.storage} — ${item.color}</p>
-        <p style="margin:4px 0 0;color:#6b7280;">${item.category} • ${item.condition} • Rs. ${item.price.toLocaleString()}</p>
+      <div style="background:#f9fafb;padding:12px;border-radius:8px;margin-bottom:8px;border-left:4px solid #3b82f6;">
+        <p style="margin:0;font-weight:bold;">${item.model}</p>
+        <p style="margin:4px 0 0;color:#374151;"><strong>Storage:</strong> ${item.storage} • <strong>Color:</strong> ${item.color}${item.condition_grade ? ` • <strong>Grade:</strong> ${item.condition_grade}` : ""}</p>
+        <p style="margin:4px 0 0;color:#6b7280;">${item.category} • Rs. ${item.price.toLocaleString()}</p>
+        ${item.quantityRemaining != null ? `<p style="margin:6px 0 0;color:#dc2626;font-weight:bold;">⚠️ Quantity remaining after this order: ${item.quantityRemaining}</p>` : ""}
       </div>
     `).join("")}
   </div>

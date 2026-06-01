@@ -83,7 +83,13 @@ export default function CartDrawer() {
                 {/* Details */}
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-white truncate">{item.model}</p>
-                  <p className="text-xs text-white/50 mt-0.5">{item.storage} • {item.color}</p>
+                  <p className="text-xs text-white/50 mt-0.5">
+                    {item.selected_storage || item.storage} • {item.selected_color || item.color}
+                    {item.selected_condition_grade && ` • ${item.selected_condition_grade}`}
+                  </p>
+                  {item.battery_health != null && (
+                    <p className="text-[10px] text-white/40 mt-0.5">🔋 {item.battery_health}% battery</p>
+                  )}
                   <div className="mt-1 flex items-center gap-2">
                     <span className={`rounded-full border px-2 py-0.5 text-xs ${
                       item.category === "PTA" ? "border-green-500/30 text-green-300" :
@@ -91,8 +97,8 @@ export default function CartDrawer() {
                       item.category === "JV" ? "border-amber-500/30 text-amber-300" :
                       "border-purple-500/30 text-purple-300"
                     }`}>{item.category}</span>
-                    {item.free_case && item.condition === "Used" && (
-                      <span className="text-xs text-green-300">🎁 Free Case</span>
+                    {!item.is_accessory && (
+                      <span className="text-xs text-green-300">🎁 Free {item.condition === "Pre-Owned" || item.condition === "Used" ? "Case + SP" : "Case"}</span>
                     )}
                   </div>
                   <p className="mt-2 text-sm font-bold text-white">

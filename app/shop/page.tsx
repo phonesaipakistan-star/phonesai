@@ -1,17 +1,33 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { useCart } from "@/app/components/CartContext";
 import CompareTool from "@/app/components/CompareTool";
+import {
+  type PhoneVariant,
+  getLowestVariantPrice,
+  getUniqueStorages,
+  hasAnyStock,
+  getFreeAccessoryText,
+  legacyPhoneToVariant,
+} from "@/lib/variants";
 
 type Phone = {
   id: string; model: string; storage: string; color: string; category: string; brand: string;
   condition: string; price: number; discount_price: number | null; battery_health: number;
   physical_condition: string; five_g: boolean; face_id: boolean; in_stock: boolean;
   featured: boolean; badge: string | null; images: string[]; free_case: boolean;
+};
+
+type ShopPhone = Phone & {
+  fromPrice: number;
+  storageOptions: string[];
+  cardImage: string | null;
+  allSoldOut: boolean;
+  hasVariants: boolean;
 };
 
 type Accessory = {
@@ -47,24 +63,54 @@ const getCategoriesForBrand = (brand: string) => {
   }
 };
 
+function enrichPhone(phone: Phone, variants: PhoneVariant[]): ShopPhone {
+  const phoneVariants = variants.filter((v) => v.phone_id === phone.id);
+  const hasVariants = phoneVariants.length > 0;
+  const effectiveVariants = hasVariants ? phoneVariants : [legacyPhoneToVariant(phone)];
+
+  const lowest = getLowestVariantPrice(effectiveVariants);
+  const fromPrice = lowest ?? phone.discount_price ?? phone.price;
+  const storageOptions = getUniqueStorages(effectiveVariants);
+  const inStock = hasVariants ? hasAnyStock(phoneVariants) : phone.in_stock;
+
+  const firstAvailable = effectiveVariants.find((v) => v.in_stock && v.quantity > 0);
+  const cardImage = firstAvailable?.images?.[0] ?? phone.images?.[0] ?? null;
+
+  return {
+    ...phone,
+    fromPrice,
+    storageOptions,
+    cardImage,
+    allSoldOut: !inStock,
+    hasVariants,
+  };
+}
+
 function ShopContent() {
   const searchParams = useSearchParams();
   const { addItem, isInCart } = useCart();
-  const [phones, setPhones] = useState<Phone[]>([]);
+  const [phones, setPhones] = useState<ShopPhone[]>([]);
   const [accessories, setAccessories] = useState<Accessory[]>([]);
   const [activeBrand, setActiveBrand] = useState(searchParams.get("brand") ?? "All");
   const [activeCategory, setActiveCategory] = useState(searchParams.get("category") ?? "All");
   const [activeCondition, setActiveCondition] = useState("All");
   const [loading, setLoading] = useState(true);
   const [compareList, setCompareList] = useState<Phone[]>([]);
+  const [showSoldOut, setShowSoldOut] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: phoneData } = await supabase.from("phones").select("*").eq("in_stock", true)
+      const { data: phoneData } = await supabase.from("phones").select("*")
         .order("featured", { ascending: false }).order("created_at", { ascending: false });
+      const { data: variantData } = await supabase.from("phone_variants").select("*");
       const { data: accessoryData } = await supabase.from("accessories").select("*").eq("in_stock", true)
         .order("featured", { ascending: false });
-      if (phoneData) setPhones(phoneData);
+
+      if (phoneData) {
+        const variants = variantData ?? [];
+        const enriched = phoneData.map((p) => enrichPhone(p, variants));
+        setPhones(enriched);
+      }
       if (accessoryData) setAccessories(accessoryData);
       setLoading(false);
     };
@@ -81,7 +127,7 @@ function ShopContent() {
     });
   };
 
-  const filteredPhones = phones.filter((p) => {
+  const filteredPhones = useMemo(() => phones.filter((p) => {
     if (activeBrand === "Accessories") return false;
     if (activeBrand !== "All") {
       if (activeBrand === "iPad" && (p.brand !== "Apple" || !["WiFi", "Cellular"].includes(p.category))) return false;
@@ -90,12 +136,34 @@ function ShopContent() {
     }
     if (activeCategory !== "All" && p.category !== activeCategory) return false;
     if (activeCondition !== "All" && p.condition !== activeCondition) return false;
+    if (p.allSoldOut && !showSoldOut) return false;
+    if (!p.hasVariants && !p.in_stock && !showSoldOut) return false;
     return true;
-  });
+  }), [phones, activeBrand, activeCategory, activeCondition, showSoldOut]);
 
   const filteredAccessories = activeBrand === "Accessories" || activeBrand === "All" ? accessories : [];
   const categories = getCategoriesForBrand(activeBrand);
   const showConditionFilter = activeBrand !== "Accessories";
+
+  const handleQuickAdd = (phone: ShopPhone) => {
+    if (phone.hasVariants) return;
+    addItem({
+      id: phone.id,
+      phone_id: phone.id,
+      model: phone.model,
+      storage: phone.storage,
+      color: phone.color,
+      selected_storage: phone.storage,
+      selected_color: phone.color,
+      category: phone.category,
+      brand: phone.brand,
+      condition: phone.condition,
+      price: phone.price,
+      discount_price: phone.discount_price,
+      image: phone.cardImage,
+      free_case: true,
+    });
+  };
 
   return (
     <div className="min-h-screen bg-black text-white pt-16 sm:pt-20">
@@ -128,7 +196,7 @@ function ShopContent() {
         )}
 
         {showConditionFilter && (
-          <div className="mb-5 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          <div className="mb-3 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             {conditions.map((cond) => (
               <button key={cond} onClick={() => setActiveCondition(cond)} aria-label={`Filter by ${cond}`}
                 className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition ${activeCondition === cond ? "border-green-400/60 bg-green-500/20 text-green-200" : "border-white/10 text-white/50 hover:text-white/70"}`}>
@@ -137,6 +205,11 @@ function ShopContent() {
             ))}
           </div>
         )}
+
+        <label className="mb-5 flex items-center gap-2 text-xs text-white/40 cursor-pointer">
+          <input type="checkbox" checked={showSoldOut} onChange={(e) => setShowSoldOut(e.target.checked)} className="accent-blue-500" />
+          Show sold out items
+        </label>
 
         {loading && <div className="flex items-center justify-center py-24"><p className="animate-pulse text-white/50">Loading...</p></div>}
 
@@ -153,41 +226,30 @@ function ShopContent() {
             <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-6">
               {filteredPhones.map((phone) => {
                 const isInCompare = compareList.find((p) => p.id === phone.id);
-                const inCart = isInCart(phone.id);
-                const isPreOwned = phone.condition === "Pre-Owned";
-                const isNew = phone.condition === "New";
-                const savings = phone.discount_price ? phone.price - phone.discount_price : 0;
+                const inCart = !phone.hasVariants && isInCart(phone.id);
+                const freeAccessory = getFreeAccessoryText(phone.condition);
                 return (
-                  <div key={phone.id} className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition duration-300 hover:border-white/20">
+                  <div key={phone.id} className={`group relative flex flex-col overflow-hidden rounded-2xl border bg-white/[0.02] transition duration-300 ${phone.allSoldOut ? "border-white/5 opacity-60" : "border-white/10 hover:border-white/20"}`}>
+                    {phone.allSoldOut && (
+                      <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40">
+                        <span className="rounded-full border border-white/20 bg-black/80 px-4 py-1.5 text-xs font-bold text-white/70">Sold Out</span>
+                      </div>
+                    )}
                     <a href={`/shop/${phone.id}`} className="flex gap-3 p-3 sm:flex-col sm:gap-0 sm:p-0">
                       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-white/5 bg-white/[0.03] sm:h-48 sm:w-full sm:rounded-none sm:rounded-t-2xl">
-                        {phone.images?.[0] ? (
-                          <Image
-                            src={phone.images[0]}
-                            alt={`${phone.model} ${phone.storage} ${phone.color}`}
-                            fill
-                            sizes="(max-width: 640px) 96px, (max-width: 1024px) 50vw, 33vw"
-                            className="object-contain p-2 sm:p-3"
-                            loading="lazy"
-                          />
+                        {phone.cardImage ? (
+                          <Image src={phone.cardImage} alt={phone.model} fill sizes="(max-width: 640px) 96px, (max-width: 1024px) 50vw, 33vw" className="object-contain p-2 sm:p-3" loading="lazy" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center">
                             <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-white/10 sm:h-12 sm:w-12" stroke="currentColor" strokeWidth="1" aria-hidden="true">
                               <rect x="7" y="2.5" width="10" height="19" rx="2.4" />
-                              <path d="M10 5.5H14" strokeLinecap="round" />
-                              <circle cx="12" cy="18.5" r="1" fill="currentColor" />
                             </svg>
                           </div>
                         )}
                         {phone.badge && (
                           <span className={`absolute bottom-2 left-2 rounded-full border px-2 py-0.5 text-[10px] font-medium sm:top-2 sm:bottom-auto ${badgeColors[phone.badge] ?? "bg-white/10 text-white/60 border-white/20"}`}>{phone.badge}</span>
                         )}
-                        {phone.free_case && isPreOwned && (
-                          <span className="absolute bottom-2 right-2 rounded-full border border-green-500/30 bg-green-500/20 px-2 py-0.5 text-[10px] text-green-300 sm:top-2 sm:bottom-auto">🎁 Free Case</span>
-                        )}
-                        {phone.free_case && isNew && (
-                          <span className="absolute bottom-2 right-2 rounded-full border border-green-500/30 bg-green-500/20 px-2 py-0.5 text-[10px] text-green-300 sm:top-2 sm:bottom-auto">🎁 Case</span>
-                        )}
+                        <span className="absolute bottom-2 right-2 rounded-full border border-green-500/30 bg-green-500/20 px-2 py-0.5 text-[10px] text-green-300 sm:top-2 sm:bottom-auto">{freeAccessory.badge}</span>
                       </div>
                       <div className="flex flex-1 flex-col justify-center sm:p-4">
                         <div className="flex flex-wrap gap-1 mb-1.5">
@@ -195,31 +257,33 @@ function ShopContent() {
                           {phone.five_g && <span className="rounded-full border border-blue-400/20 bg-blue-400/10 px-2 py-0.5 text-[10px] text-blue-300">5G</span>}
                         </div>
                         <h2 className="text-sm font-bold text-white leading-tight sm:text-base">{phone.model}</h2>
-                        <p className="text-xs text-white/50 mt-0.5">{phone.storage} • {phone.color}</p>
-                        <div className="mt-1 flex gap-3 text-xs text-white/50">
-                          {phone.battery_health && <span>🔋{phone.battery_health}%</span>}
-                          {phone.face_id && <span>🔒FaceID</span>}
+                        <div className="mt-1.5 flex flex-wrap gap-1">
+                          {phone.storageOptions.slice(0, 4).map((s) => (
+                            <span key={s} className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] text-white/50">{s}</span>
+                          ))}
+                          {phone.storageOptions.length > 4 && (
+                            <span className="text-[10px] text-white/30">+{phone.storageOptions.length - 4}</span>
+                          )}
                         </div>
                         <div className="mt-2">
-                          {phone.discount_price ? (
-                            <div>
-                              <p className="text-xs text-white/40 line-through">Rs. {phone.price.toLocaleString()}</p>
-                              <p className="text-base font-extrabold text-white sm:text-lg">Rs. {phone.discount_price.toLocaleString()}</p>
-                              <p className="text-[10px] font-semibold text-green-400 mt-0.5">Save Rs. {savings.toLocaleString()} ↓</p>
-                            </div>
-                          ) : (
-                            <p className="text-base font-extrabold text-white sm:text-lg">Rs. {phone.price.toLocaleString()}</p>
-                          )}
+                          <p className="text-base font-extrabold text-white sm:text-lg">From Rs. {phone.fromPrice.toLocaleString()}</p>
                         </div>
                       </div>
                     </a>
                     <div className="px-3 pb-3 flex gap-2 sm:px-4 sm:pb-4">
-                      <button
-                        onClick={() => addItem({ id: phone.id, model: phone.model, storage: phone.storage, color: phone.color, category: phone.category, brand: phone.brand, condition: phone.condition, price: phone.price, discount_price: phone.discount_price, image: phone.images?.[0] ?? null, free_case: phone.free_case })}
-                        aria-label={inCart ? `${phone.model} already in cart` : `Add ${phone.model} to cart`}
-                        className={`flex-1 rounded-xl py-2 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}>
-                        {inCart ? "✓ In Cart" : "Add to Cart"}
-                      </button>
+                      {phone.hasVariants ? (
+                        <a href={`/shop/${phone.id}`} className="flex-1 rounded-xl bg-blue-500 py-2 text-center text-xs font-bold text-white transition hover:bg-blue-400">
+                          Select Options →
+                        </a>
+                      ) : (
+                        <button
+                          onClick={() => handleQuickAdd(phone)}
+                          disabled={phone.allSoldOut}
+                          aria-label={inCart ? `${phone.model} already in cart` : `Add ${phone.model} to cart`}
+                          className={`flex-1 rounded-xl py-2 text-xs font-bold transition disabled:opacity-40 ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}>
+                          {inCart ? "✓ In Cart" : "Add to Cart"}
+                        </button>
+                      )}
                       <button
                         onClick={() => toggleCompare(phone)}
                         disabled={!isInCompare && compareList.length >= 2}
@@ -246,14 +310,7 @@ function ShopContent() {
                   <div key={acc.id} className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition hover:border-white/20">
                     <a href={`/shop/accessories/${acc.id}`} className="relative flex aspect-square w-full items-center justify-center bg-white/[0.03]" aria-label={`View ${acc.name}`}>
                       {acc.images?.[0] ? (
-                        <Image
-                          src={acc.images[0]}
-                          alt={acc.name}
-                          fill
-                          sizes="(max-width: 640px) 50vw, 25vw"
-                          className="object-contain p-4"
-                          loading="lazy"
-                        />
+                        <Image src={acc.images[0]} alt={acc.name} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-contain p-4" loading="lazy" />
                       ) : (
                         <span className="text-4xl" aria-hidden="true">
                           {acc.category === "Charger" ? "🔌" : acc.category === "Cable" ? "🔗" : acc.category === "AirPods" ? "🎧" : acc.category === "Apple Watch" ? "⌚" : "📦"}
@@ -275,7 +332,7 @@ function ShopContent() {
                           <p className="text-sm font-extrabold text-white">Rs. {acc.price.toLocaleString()}</p>
                         )}
                         <button
-                          onClick={() => addItem({ id: acc.id, model: acc.name, storage: "", color: "", category: acc.category, brand: acc.brand, condition: acc.condition, price: acc.price, discount_price: acc.discount_price, image: acc.images?.[0] ?? null, free_case: false })}
+                          onClick={() => addItem({ id: acc.id, model: acc.name, storage: "", color: "", category: acc.category, brand: acc.brand, condition: acc.condition, price: acc.price, discount_price: acc.discount_price, image: acc.images?.[0] ?? null, free_case: false, is_accessory: true })}
                           aria-label={inCart ? `${acc.name} already in cart` : `Add ${acc.name} to cart`}
                           className={`mt-2 w-full rounded-xl py-2 text-xs font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}>
                           {inCart ? "✓ In Cart" : "Add to Cart"}

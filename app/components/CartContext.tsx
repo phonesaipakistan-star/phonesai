@@ -4,16 +4,23 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 
 export type CartItem = {
   id: string;
+  phone_id?: string;
+  variant_id?: string;
   model: string;
   storage: string;
   color: string;
   category: string;
   brand: string;
   condition: string;
+  selected_storage?: string;
+  selected_color?: string;
+  selected_condition_grade?: string;
+  battery_health?: number | null;
   price: number;
   discount_price: number | null;
   image: string | null;
   free_case: boolean;
+  is_accessory?: boolean;
 };
 
 type CartContextType = {
