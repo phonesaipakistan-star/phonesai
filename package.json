@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "migrate:variants": "node scripts/migrate-phones-to-variants.mjs",
+    "migrate:variants:dry-run": "node scripts/migrate-phones-to-variants.mjs --dry-run"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.3",
