@@ -20,6 +20,61 @@ export default function WarrantyPage() {
             <p>Har phone hamare haath se guzarta hai — thoroughly tested, verified, aur aapke liye tayaar. Aapka kaam hai box khulte hi unboxing video banana — yeh aapki warranty ka proof bhi hai aur apne doston ko dikhane ka mauqa bhi!</p>
           </div>
 
+          {/* Condition grading & warranty */}
+          <div className="rounded-2xl border border-white/10 overflow-hidden">
+            <div className="border-b border-white/5 px-5 py-3">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Condition Grading & Warranty</p>
+            </div>
+            <div className="divide-y divide-white/5 px-5">
+              {[
+                {
+                  grade: "New (Water Pack Sealed)",
+                  detail: "Full 7-day software warranty. Original factory packaging intact — shrink wrap untouched, never opened. Free case included.",
+                },
+                {
+                  grade: "Premium / Excellent",
+                  detail: "7-day warranty. Best pre-owned units — Premium is flawless; Excellent is almost perfect with pristine screen.",
+                },
+                {
+                  grade: "Good",
+                  detail: "7-day warranty. Light signs of use on body, screen clean. Fully functional.",
+                },
+                {
+                  grade: "Fair",
+                  detail: "7-day warranty. Visible wear but 100% working. Best value option.",
+                },
+              ].map((row) => (
+                <div key={row.grade} className="py-4">
+                  <p className="text-xs font-bold text-white">{row.grade}</p>
+                  <p className="mt-1 text-xs text-white/60">{row.detail}</p>
+                </div>
+              ))}
+            </div>
+            <div className="border-t border-white/5 px-5 py-4 bg-white/[0.02]">
+              <p className="text-xs text-white/70">
+                All pre-owned grades include <span className="text-white font-semibold">free case + screen protector</span>. New phones include a <span className="text-white font-semibold">free case</span>.
+              </p>
+              <p className="mt-2 text-xs text-white/70">
+                Unboxing video required for <span className="text-white font-semibold">all warranty claims</span> regardless of grade.
+              </p>
+            </div>
+          </div>
+
+          {/* Water Pack vs IP Rating */}
+          <div className="rounded-2xl border border-cyan-400/20 bg-cyan-500/5 p-6">
+            <p className="text-cyan-200 font-bold text-base mb-3">💧 Water Pack vs IP Rating — Alag Cheezen</p>
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs font-bold text-white">Water Pack</p>
+                <p className="text-xs text-white/60 mt-1">Factory sealed packaging — shrink wrap intact, box never opened. Sirf New phones ke liye.</p>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-white">IP Rating (e.g. IP68)</p>
+                <p className="text-xs text-white/60 mt-1">Phone hardware ki water resistance specification — yeh Water Pack se bilkul alag cheez hai. Dono ko mix mat karein.</p>
+              </div>
+            </div>
+          </div>
+
           {/* Coverage summary table */}
           <div className="rounded-2xl border border-white/10 overflow-hidden">
             <div className="border-b border-white/5 px-5 py-3">
@@ -29,8 +84,8 @@ export default function WarrantyPage() {
               {/* Pin Pack */}
               <div className="grid grid-cols-3 items-center gap-4 px-5 py-4">
                 <div>
-                  <p className="text-xs font-bold text-white">Pin Pack / Sealed</p>
-                  <p className="text-[10px] text-white/40">Brand new, unopened</p>
+                  <p className="text-xs font-bold text-white">Pin Pack / Water Pack Sealed</p>
+                  <p className="text-[10px] text-white/40">Factory sealed — never opened</p>
                 </div>
                 <div className="col-span-2">
                   <p className="text-xs text-white/70">
@@ -70,8 +125,8 @@ export default function WarrantyPage() {
 
           {/* Pin Pack detail */}
           <div className="rounded-2xl border border-green-400/20 bg-green-500/5 p-6">
-            <p className="text-green-200 font-bold text-base mb-3">📦 Pin Pack / Sealed Phones — 1 Year Brand Warranty</p>
-            <p className="mb-3">Brand new sealed phones carry <span className="text-white font-semibold">1 year official warranty</span> directly through the brand's official care centre.</p>
+            <p className="text-green-200 font-bold text-base mb-3">📦 Water Pack Sealed Phones — 1 Year Brand Warranty</p>
+            <p className="mb-3">Water pack sealed phones carry original factory packaging intact — shrink wrap untouched, never opened. <span className="text-white font-semibold">1 year official warranty</span> directly through the brand&apos;s official care centre where applicable.</p>
             <div className="space-y-2 mt-3">
               <div className="flex items-start gap-2">
                 <span className="text-green-400 shrink-0 mt-0.5">✓</span>
@@ -147,8 +202,7 @@ export default function WarrantyPage() {
             <ul className="space-y-2">
               {[
                 "Sealed box dikhao",
-                "Slowly open karein",
-                "Face ID test karein on camera",
+                "Slowly open karein — sealed packaging check karein",
                 "Camera test — front aur back",
                 "Charging test",
                 "Speaker test",

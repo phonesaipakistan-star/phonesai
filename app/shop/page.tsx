@@ -232,11 +232,11 @@ function ShopContent() {
                       <div className="flex flex-wrap gap-1.5 px-3 pt-3">
                         <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${categoryColors[phone.category] ?? "bg-white/10 text-white/60 border-white/20"}`}>{phone.category}</span>
                         {phone.five_g && <span className="rounded-full border border-blue-400/20 bg-blue-400/10 px-2 py-0.5 text-[10px] text-blue-300">5G</span>}
-                        {phone.ip_rating && (
-                          <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-[10px] text-cyan-300">{phone.ip_rating}</span>
-                        )}
                         {isNew && (
-                          <span className="rounded-full border border-green-400/30 bg-green-500/15 px-2 py-0.5 text-[10px] font-semibold text-green-300">📦 Water Pack</span>
+                          <span className="rounded-full border border-green-400/30 bg-green-500/15 px-2 py-0.5 text-[10px] font-semibold text-green-300" title="Original factory sealed packaging — never opened">📦 Water Pack</span>
+                        )}
+                        {phone.ip_rating && (
+                          <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-[10px] text-cyan-300" title="Phone hardware water resistance rating">{phone.ip_rating}</span>
                         )}
                         {phone.badge && (
                           <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${badgeColors[phone.badge] ?? "bg-white/10 text-white/60 border-white/20"}`}>{phone.badge}</span>

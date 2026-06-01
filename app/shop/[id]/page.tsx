@@ -406,7 +406,7 @@ export default function ProductPage() {
               )}
               <span className="rounded-full border border-green-500/30 bg-green-500/20 px-2.5 py-0.5 text-xs text-green-300">{freeAccessory.badge}</span>
               {phoneIsNew && (
-                <span className="rounded-full border border-green-400/40 bg-green-500/15 px-2.5 py-0.5 text-xs font-semibold text-green-300">📦 Water Pack Sealed</span>
+                <span className="rounded-full border border-green-400/40 bg-green-500/15 px-2.5 py-0.5 text-xs font-semibold text-green-300" title="Original factory sealed packaging — shrink wrap intact, never opened">📦 Water Pack Sealed</span>
               )}
             </div>
             {displayImages.length > 1 && (
@@ -499,9 +499,9 @@ export default function ProductPage() {
                 <div className="rounded-2xl border-2 border-green-400/40 bg-gradient-to-br from-green-500/15 to-green-500/5 px-5 py-4 text-center">
                   <p className="text-lg font-extrabold text-green-300 sm:text-xl">Brand New — Sealed Box</p>
                   <p className="mt-2 text-xs text-white/60 leading-relaxed sm:text-sm">
-                    📦 Water Pack Sealed — Pin Pack Original Box
+                    📦 Water Pack Sealed — original factory packaging intact, shrink wrap untouched, never opened
                   </p>
-                  <p className="mt-1 text-[11px] text-green-400/80">Untouched original packaging — condition is perfect</p>
+                  <p className="mt-1 text-[11px] text-green-400/80">Water Pack means sealed packaging — not the same as IP water resistance rating</p>
                 </div>
               </div>
             ) : (
@@ -647,6 +647,7 @@ export default function ProductPage() {
                 <p className="text-sm font-extrabold text-white sm:text-lg leading-tight">
                   {phone.ip_rating ?? "—"}
                 </p>
+                <p className="mt-1 text-[9px] text-white/35 leading-snug">Hardware water resistance — separate from Water Pack packaging</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
                 <p className="mb-1 text-[10px] text-white/60 sm:text-xs">5G</p>

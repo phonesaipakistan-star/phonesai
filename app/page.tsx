@@ -171,11 +171,16 @@ export default function Home() {
 
         {/* Trust Strip */}
         <section className="mx-auto mt-8 max-w-6xl px-4 sm:px-6" aria-label="Our guarantees">
-          <div className="grid grid-cols-3 gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-8">
+          <div className="grid grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:grid-cols-4 sm:p-8">
             <div className="text-center">
               <p className="text-xl sm:text-2xl" aria-hidden="true">🧔</p>
               <p className="mt-1 text-xs font-bold text-white sm:text-sm">Ustaad Ji Verified</p>
-              <p className="mt-0.5 text-[10px] text-white/50 hidden sm:block">Every device personally checked</p>
+              <p className="mt-0.5 text-[10px] text-white/50 hidden sm:block">Graded and verified — Premium to Fair</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xl sm:text-2xl" aria-hidden="true">⭐</p>
+              <p className="mt-1 text-xs font-bold text-white sm:text-sm">Condition Graded</p>
+              <p className="mt-0.5 text-[10px] text-white/50 hidden sm:block">4-tier grading system — know exactly what you are getting</p>
             </div>
             <div className="text-center">
               <p className="text-xl sm:text-2xl" aria-hidden="true">🛡️</p>

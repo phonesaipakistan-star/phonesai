@@ -367,7 +367,6 @@ export default function AdminPage() {
       free_case: true,
       images: activeVariants[0].images,
       condition_video: phoneForm.condition_video || null,
-      battery_screenshot: [],
       imei_number: phoneForm.imei_number || null,
       supplier: phoneForm.supplier || null,
     };
@@ -763,7 +762,7 @@ export default function AdminPage() {
 
                 <div className="flex flex-wrap gap-6">
                   <div>
-                    <label className="mb-1 block text-xs text-white/40">IP Rating (Water Resistance)</label>
+                    <label className="mb-1 block text-xs text-white/40">IP Rating — phone hardware water resistance (not Water Pack)</label>
                     <input value={phoneForm.ip_rating}
                       onChange={e => setPhoneForm({ ...phoneForm, ip_rating: e.target.value })}
                       placeholder="IP68, IP67, IP69, Not Rated"

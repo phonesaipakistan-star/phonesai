@@ -245,9 +245,27 @@ export default function AccessoryPage() {
 
             {/* Add to Cart */}
             <button
-              onClick={() => addItem({ id: accessory.id, model: accessory.name, storage: "", color: "", category: accessory.category, brand: accessory.brand, condition: accessory.condition, price: accessory.price, discount_price: accessory.discount_price, image: allImages[0] ?? null, free_case: false })}
-              className={`mt-3 w-full rounded-2xl py-4 text-sm font-bold transition ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}>
-              {inCart ? "✓ Added to Cart — View in Cart ↑" : "Add to Cart 🛒"}
+              onClick={() => addItem({
+                id: accessory.id,
+                model: accessory.name,
+                storage: "",
+                color: "",
+                selected_storage: "",
+                selected_color: "",
+                selected_condition_grade: "",
+                battery_health: null,
+                category: accessory.category,
+                brand: accessory.brand,
+                condition: accessory.condition,
+                price: accessory.price,
+                discount_price: accessory.discount_price,
+                image: allImages[0] ?? null,
+                free_case: false,
+                is_accessory: true,
+              })}
+              disabled={!accessory.in_stock}
+              className={`mt-3 w-full rounded-2xl py-4 text-sm font-bold transition disabled:opacity-40 ${inCart ? "border border-green-500/30 bg-green-500/10 text-green-300" : "bg-blue-500 text-white hover:bg-blue-400"}`}>
+              {!accessory.in_stock ? "Sold Out" : inCart ? "✓ Added to Cart — View in Cart ↑" : "Add to Cart 🛒"}
             </button>
 
             {/* Ustaad Ji trust */}
