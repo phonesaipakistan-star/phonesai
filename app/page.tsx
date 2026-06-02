@@ -169,6 +169,24 @@ export default function Home() {
           ))}
         </section>
 
+        {/* Source on Request */}
+        <section className="mx-auto mt-8 max-w-6xl px-4 sm:px-6">
+          <div className="rounded-2xl border border-blue-400/25 bg-gradient-to-br from-blue-500/10 to-blue-600/5 px-5 py-6 text-center sm:px-8 sm:py-8">
+            <p className="text-lg font-extrabold text-white sm:text-xl">Apna Pasandida Phone Nahi Mila? 🔍</p>
+            <p className="mt-2 text-sm text-white/60 leading-relaxed max-w-lg mx-auto">
+              Koi bhi model, storage, color — hum source kar sakte hain. WhatsApp pe bataiye kya chahiye.
+            </p>
+            <a
+              href="https://wa.me/923041502560?text=Assalam%20o%20Alaikum!%20Mujhe%20ek%20specific%20phone%20source%20karwana%20hai."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center justify-center rounded-xl bg-green-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-green-400"
+            >
+              Request a Phone → 0304-1502560
+            </a>
+          </div>
+        </section>
+
         {/* Trust Strip */}
         <section className="mx-auto mt-8 max-w-6xl px-4 sm:px-6" aria-label="Our guarantees">
           <div className="grid grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:grid-cols-4 sm:p-8">
@@ -190,7 +208,7 @@ export default function Home() {
             <div className="text-center">
               <p className="text-xl sm:text-2xl" aria-hidden="true">🚚</p>
               <p className="mt-1 text-xs font-bold text-white sm:text-sm">All Pakistan</p>
-              <p className="mt-0.5 text-[10px] text-white/50 hidden sm:block">1-3 day delivery</p>
+              <p className="mt-0.5 text-[10px] text-white/50 hidden sm:block">Dispatched within 24hrs of payment</p>
             </div>
           </div>
         </section>

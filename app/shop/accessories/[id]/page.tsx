@@ -316,7 +316,7 @@ export default function AccessoryPage() {
             <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
               <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-white/30">Delivery</p>
               <p className="text-sm font-bold text-white">Free Delivery — All Pakistan</p>
-              <p className="mt-1 text-xs text-white/40">Order before 2pm for next day delivery in nearby cities. All Pakistan: 1-3 working days.</p>
+              <p className="mt-1 text-xs text-white/40">Once payment is confirmed, dispatched within 24 hours. Delivery: 1-3 working days all Pakistan.</p>
             </div>
           </div>
         </div>

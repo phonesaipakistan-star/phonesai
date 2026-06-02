@@ -76,7 +76,7 @@ const trustBadges = [
   { icon: "🧔", title: "Ustaad Ji Verified", desc: "Every device checked" },
   { icon: "🛡️", title: "7-Day Warranty", desc: "Full refund guarantee" },
   { icon: "📍", title: "Physical Store", desc: "Wah Cantt, Pakistan" },
-  { icon: "🚚", title: "Free Delivery", desc: "All Pakistan" },
+  { icon: "🚚", title: "Free Delivery", desc: "Dispatched within 24hrs of payment" },
 ];
 
 function CheckoutContent() {
@@ -307,7 +307,7 @@ function CheckoutContent() {
               Order received! We will confirm availability within 24 hours via WhatsApp before you send payment. Please do not send payment until we confirm.
             </p>
             <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 px-6 py-4 text-sm text-amber-200 max-w-md">
-              ⏳ What happens next: Hum 24 ghante mein WhatsApp par stock confirm karenge. Payment tab bhejein jab hum confirm kar dein.
+              ⏳ What happens next: Hum 24 ghante mein WhatsApp par stock confirm karenge. Payment tab bhejein jab hum confirm kar dein. Dispatch within 24 hours of payment — delivery 1-3 working days all Pakistan.
             </div>
             <div className="rounded-2xl border border-green-500/30 bg-green-500/10 px-6 py-4 text-sm text-green-200 max-w-md">
               📦 Your order includes free protective accessories — phone arrives ready to use, no extra trip to the market needed.

@@ -24,6 +24,10 @@ type VariantFormRow = {
   battery_health: string;
   images: string[];
   in_stock: boolean;
+  description: string;
+  accessories_included: string;
+  sim_type: string;
+  sim_status: string;
   _delete?: boolean;
 };
 
@@ -40,14 +44,15 @@ type Review = {
 
 const emptyPhoneForm = {
   model: "", brand: "Apple", category: "JV", condition: "New",
-  cost_price: "", ip_rating: "", five_g: true, region: "LLA", ios_version: "", sim_status: "", sim_type: "Dual SIM",
-  accessories_included: "", product_description: "", description: "", badge: "", featured: false, in_stock: true,
-  condition_video: "", imei_number: "", supplier: "",
+  cost_price: "", five_g: true, region: "LLA", ios_version: "",
+  product_description: "", badge: "", featured: false, in_stock: true,
+  condition_video: "",
 };
 
-const emptyVariantRow = (phoneCondition = "New"): VariantFormRow => ({
+const emptyVariantRow = (phoneCondition = "New", category = "JV"): VariantFormRow => ({
   storage: "", color: "", condition_grade: phoneCondition === "New" ? "New" : "Good", price: "", discount_price: "",
   quantity: "1", battery_health: "", images: [], in_stock: true,
+  description: "", accessories_included: "", sim_type: category === "JV" ? "" : "Dual SIM", sim_status: category === "JV" ? "" : "",
 });
 
 const emptyAccessoryForm = {
@@ -270,21 +275,14 @@ export default function AdminPage() {
         category: fullPhone.category,
         condition: fullPhone.condition ?? "New",
         cost_price: fullPhone.cost_price?.toString() ?? "",
-        ip_rating: fullPhone.ip_rating ?? "",
         five_g: fullPhone.five_g ?? true,
         region: fullPhone.region ?? "LLA",
         ios_version: fullPhone.ios_version ?? "",
-        sim_status: fullPhone.sim_status ?? "",
-        sim_type: fullPhone.sim_type ?? "Dual SIM",
-        accessories_included: fullPhone.accessories_included ?? "",
         product_description: fullPhone.product_description ?? "",
-        description: fullPhone.description ?? "",
         badge: fullPhone.badge ?? "",
         featured: fullPhone.featured,
         in_stock: fullPhone.in_stock,
         condition_video: fullPhone.condition_video ?? "",
-        imei_number: fullPhone.imei_number ?? "",
-        supplier: fullPhone.supplier ?? "",
       });
     }
 
@@ -300,10 +298,14 @@ export default function AdminPage() {
         battery_health: v.battery_health?.toString() ?? "",
         images: v.images ?? [],
         in_stock: v.in_stock,
+        description: v.description ?? "",
+        accessories_included: v.accessories_included ?? "",
+        sim_type: v.sim_type ?? "",
+        sim_status: v.sim_status ?? "",
       })));
     } else {
       setVariantRows([{
-        ...emptyVariantRow(),
+        ...emptyVariantRow(fullPhone?.condition ?? phone.condition, fullPhone?.category ?? phone.category),
         storage: phone.storage,
         color: phone.color,
         price: phone.price.toString(),
@@ -352,23 +354,20 @@ export default function AdminPage() {
       discount_price: activeVariants[0].discount_price ? parseInt(activeVariants[0].discount_price) : null,
       battery_health: activeVariants[0].battery_health ? parseInt(activeVariants[0].battery_health) : null,
       physical_condition: activeVariants[0].condition_grade,
-      ip_rating: phoneForm.ip_rating || null,
       five_g: phoneForm.five_g,
       region: phoneForm.region,
       ios_version: phoneForm.ios_version || null,
-      sim_status: phoneForm.sim_status || null,
-      sim_type: phoneForm.sim_type || null,
-      accessories_included: phoneForm.accessories_included || null,
+      sim_status: activeVariants[0].sim_status || null,
+      sim_type: activeVariants[0].sim_type || null,
+      accessories_included: activeVariants[0].accessories_included || null,
       product_description: phoneForm.product_description || null,
-      description: phoneForm.description || null,
+      description: activeVariants[0].description || null,
       badge: phoneForm.badge || null,
       featured: phoneForm.featured,
       in_stock: activeVariants.some((v) => v.in_stock),
       free_case: true,
       images: activeVariants[0].images,
       condition_video: phoneForm.condition_video || null,
-      imei_number: phoneForm.imei_number || null,
-      supplier: phoneForm.supplier || null,
     };
 
     let phoneId = editId;
@@ -403,6 +402,10 @@ export default function AdminPage() {
         battery_health: row.battery_health ? parseInt(row.battery_health) : null,
         images: row.images,
         in_stock: row.in_stock,
+        description: row.description || null,
+        accessories_included: row.accessories_included || null,
+        sim_type: phoneForm.category === "JV" ? null : (row.sim_type || null),
+        sim_status: phoneForm.category === "JV" ? null : (row.sim_status || null),
       };
 
       if (row.id) {
@@ -701,25 +704,10 @@ export default function AdminPage() {
                       placeholder="iPhone 16 Pro Max"
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50" />
                   </div>
-                  <div>
-                    <label className="mb-1 block text-xs text-white/40">SIM Type</label>
-                    <select value={phoneForm.sim_type} onChange={e => setPhoneForm({...phoneForm, sim_type: e.target.value})}
-                      className="w-full rounded-xl border border-white/10 bg-[#111] px-4 py-2.5 text-sm text-white outline-none">
-                      <option value="Single SIM">Single SIM</option>
-                      <option value="Dual SIM">Dual SIM</option>
-                      <option value="eSIM">eSIM</option>
-                      <option value="Dual eSIM">Dual eSIM</option>
-                      <option value="SIM + eSIM">SIM + eSIM</option>
-                    </select>
-                  </div>
                   {[
                     { label: "Region", key: "region", placeholder: "LLA" },
                     { label: "iOS/OS Version", key: "ios_version", placeholder: "iOS 18.4" },
-                    { label: "SIM Status", key: "sim_status", placeholder: "SIM Ready / SIM Locked" },
-                    { label: "In the Box", key: "accessories_included", placeholder: "Cable Only / Full Box" },
                     { label: "Cost Price (PKR) — private", key: "cost_price", placeholder: "240000", type: "number" },
-                    { label: "IMEI — private", key: "imei_number", placeholder: "352ABC..." },
-                    { label: "Supplier — private", key: "supplier", placeholder: "Dubai Supplier" },
                   ].map(({ label, key, placeholder, type }) => (
                     <div key={key}>
                       <label className="mb-1 block text-xs text-white/40">{label}</label>
@@ -753,34 +741,18 @@ export default function AdminPage() {
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50 resize-none" />
                 </div>
 
-                <div>
-                  <label className="mb-1 block text-xs text-white/40">Ustaad Ji Notes — specific condition notes</label>
-                  <textarea value={phoneForm.description} onChange={e => setPhoneForm({...phoneForm, description: e.target.value})}
-                    placeholder="Pin-pack sealed unit. Screen 10/10." rows={3}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50 resize-none" />
-                </div>
-
                 <div className="flex flex-wrap gap-6">
-                  <div>
-                    <label className="mb-1 block text-xs text-white/40">IP Rating — phone hardware water resistance (not Water Pack)</label>
-                    <input value={phoneForm.ip_rating}
-                      onChange={e => setPhoneForm({ ...phoneForm, ip_rating: e.target.value })}
-                      placeholder="IP68, IP67, IP69, Not Rated"
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none focus:border-blue-400/50" />
-                  </div>
-                  <div className="flex flex-wrap gap-6 sm:col-span-2">
-                    {[
-                      { label: "5G", key: "five_g" },
-                      { label: "Featured", key: "featured" },
-                    ].map(({ label, key }) => (
-                      <label key={key} className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" checked={phoneForm[key as keyof typeof phoneForm] as boolean}
-                          onChange={e => setPhoneForm({...phoneForm, [key]: e.target.checked})}
-                          className="h-4 w-4 rounded accent-blue-500" />
-                        <span className="text-sm text-white/70">{label}</span>
-                      </label>
-                    ))}
-                  </div>
+                  {[
+                    { label: "5G", key: "five_g" },
+                    { label: "Featured", key: "featured" },
+                  ].map(({ label, key }) => (
+                    <label key={key} className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={phoneForm[key as keyof typeof phoneForm] as boolean}
+                        onChange={e => setPhoneForm({...phoneForm, [key]: e.target.checked})}
+                        className="h-4 w-4 rounded accent-blue-500" />
+                      <span className="text-sm text-white/70">{label}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
 
@@ -788,7 +760,7 @@ export default function AdminPage() {
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-bold uppercase tracking-widest text-green-300">Section 2 — Variants</h2>
-                  <button type="button" onClick={() => setVariantRows([...variantRows, emptyVariantRow(phoneForm.condition)])}
+                  <button type="button" onClick={() => setVariantRows([...variantRows, emptyVariantRow(phoneForm.condition, phoneForm.category)])}
                     className="rounded-lg border border-green-500/30 bg-green-500/10 px-3 py-1.5 text-xs font-semibold text-green-300 hover:bg-green-500/20">
                     + Add Variant
                   </button>
@@ -870,6 +842,42 @@ export default function AdminPage() {
                             <span className="text-xs text-white/70">In Stock</span>
                           </label>
                         </div>
+                        {phoneForm.category !== "JV" && (
+                          <>
+                            <div>
+                              <label className="mb-1 block text-[10px] text-white/40">SIM Type</label>
+                              <select value={row.sim_type} onChange={e => {
+                                const updated = [...variantRows]; updated[realIdx] = { ...row, sim_type: e.target.value }; setVariantRows(updated);
+                              }} className="w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-xs text-white outline-none">
+                                <option value="">—</option>
+                                <option value="Single SIM">Single SIM</option>
+                                <option value="Dual SIM">Dual SIM</option>
+                                <option value="eSIM">eSIM</option>
+                                <option value="Dual eSIM">Dual eSIM</option>
+                                <option value="SIM + eSIM">SIM + eSIM</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="mb-1 block text-[10px] text-white/40">SIM Status</label>
+                              <input value={row.sim_status} onChange={e => {
+                                const updated = [...variantRows]; updated[realIdx] = { ...row, sim_status: e.target.value }; setVariantRows(updated);
+                              }} placeholder="SIM Ready / SIM Locked" className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none focus:border-blue-400/50" />
+                            </div>
+                          </>
+                        )}
+                        <div className={phoneForm.category === "JV" ? "sm:col-span-2" : ""}>
+                          <label className="mb-1 block text-[10px] text-white/40">In the Box</label>
+                          <input value={row.accessories_included} onChange={e => {
+                            const updated = [...variantRows]; updated[realIdx] = { ...row, accessories_included: e.target.value }; setVariantRows(updated);
+                          }} placeholder="Cable Only / Full Box" className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none focus:border-blue-400/50" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-[10px] text-white/40">Ustaad Ji Notes — this unit</label>
+                        <textarea value={row.description} onChange={e => {
+                          const updated = [...variantRows]; updated[realIdx] = { ...row, description: e.target.value }; setVariantRows(updated);
+                        }} placeholder="Pin-pack sealed unit. Screen 10/10." rows={2}
+                          className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/20 outline-none focus:border-blue-400/50 resize-none" />
                       </div>
                       <ImageUploader bucket="phone-images" existingUrls={row.images}
                         onUpload={(urls) => {

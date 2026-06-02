@@ -60,19 +60,12 @@ export default function WarrantyPage() {
             </div>
           </div>
 
-          {/* Water Pack vs IP Rating */}
+          {/* Water Pack */}
           <div className="rounded-2xl border border-cyan-400/20 bg-cyan-500/5 p-6">
-            <p className="text-cyan-200 font-bold text-base mb-3">💧 Water Pack vs IP Rating — Alag Cheezen</p>
-            <div className="space-y-3">
-              <div>
-                <p className="text-xs font-bold text-white">Water Pack</p>
-                <p className="text-xs text-white/60 mt-1">Factory sealed packaging — shrink wrap intact, box never opened. Sirf New phones ke liye.</p>
-              </div>
-              <div>
-                <p className="text-xs font-bold text-white">IP Rating (e.g. IP68)</p>
-                <p className="text-xs text-white/60 mt-1">Phone hardware ki water resistance specification — yeh Water Pack se bilkul alag cheez hai. Dono ko mix mat karein.</p>
-              </div>
-            </div>
+            <p className="text-cyan-200 font-bold text-base mb-3">💧 Water Pack Sealed</p>
+            <p className="text-xs text-white/60">
+              Factory sealed packaging — shrink wrap intact, box never opened. Sirf New phones ke liye. Perfect condition guaranteed — koi condition concerns nahi.
+            </p>
           </div>
 
           {/* Coverage summary table */}

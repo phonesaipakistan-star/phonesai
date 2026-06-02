@@ -114,7 +114,7 @@ const getOrderConfirmationEmail = (data: OrderEmailData) => `
     <div style="background:#111111;border:1px solid #1f2937;border-radius:16px;padding:24px;margin-bottom:24px;">
       <p style="color:#d1d5db;font-size:14px;margin:0 0 8px;">💳 Payment: <strong style="color:#fff;">${data.paymentMethod}</strong></p>
       <p style="color:#d1d5db;font-size:14px;margin:0 0 8px;">📍 Delivery to: <strong style="color:#fff;">${data.customerCity}</strong></p>
-      <p style="color:#d1d5db;font-size:14px;margin:0;">🚚 Estimated: <strong style="color:#fff;">1-3 working days</strong></p>
+      <p style="color:#d1d5db;font-size:14px;margin:0;">🚚 After payment confirmed: dispatched within 24 hours. Delivery 1-3 working days all Pakistan.</p>
     </div>
 
     <div style="background:#1c1917;border:2px solid #d97706;border-radius:16px;padding:24px;margin-bottom:24px;text-align:center;">
@@ -179,7 +179,7 @@ const getUnboxingGuideEmail = (data: OrderEmailData) => `
         "Achhi lighting mein record karein",
         "Pehle sealed box dikhao",
         "Slowly open karein",
-        "Face ID test karein on camera",
+        "Screen aur touch test karein",
         "Camera test karein — front aur back",
         "Charging test karein",
         "Speaker test karein",

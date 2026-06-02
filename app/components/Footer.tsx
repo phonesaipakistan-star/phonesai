@@ -10,7 +10,7 @@ export default function Footer() {
               Premium Shopping, Reinvented. Pakistan ka most trusted smart store — verified devices, AI-powered experience.
             </p>
             <p className="mt-4 text-xs text-white/50">📍 Wah Cantt, Pakistan</p>
-            <p className="mt-1 text-xs text-white/50">🚚 Order before 2pm — next day delivery nearby. 1-3 days all Pakistan.</p>
+            <p className="mt-1 text-xs text-white/50">🚚 Dispatched within 24hrs of payment. Delivery 1-3 working days all Pakistan.</p>
           </div>
 
           <div>

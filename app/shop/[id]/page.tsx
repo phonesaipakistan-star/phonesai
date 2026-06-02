@@ -17,22 +17,24 @@ import {
   getUniqueStorages,
   getUniqueColors,
   findVariant,
+  resolveVariantSelection,
   legacyPhoneToVariant,
   getFreeAccessoryText,
   isNewPhone,
 } from "@/lib/variants";
+import { DELIVERY_SUMMARY, ORDER_FLOW_STEPS, ORDER_PLACED_NOTE } from "@/lib/delivery";
+import { PHONE_IMAGE_FRAME, PHONE_IMAGE_CLASS } from "@/lib/ui";
 
 const SUPABASE_URL = "https://xadxdkbdwyulprfukrjb.supabase.co";
 
 type Phone = {
   id: string; model: string; storage: string; color: string; category: string; brand: string;
   condition: string; price: number; discount_price: number | null; battery_health: number;
-  physical_condition: string; five_g: boolean; ip_rating: string | null;
+  physical_condition: string; five_g: boolean;
   in_stock: boolean; featured: boolean; badge: string | null; images: string[];
-  condition_video: string | null; description: string | null;
+  condition_video: string | null;
   product_description: string | null;
-  sim_status: string | null; sim_type: string | null;
-  accessories_included: string | null; region: string | null;
+  region: string | null;
   ios_version: string | null; free_case: boolean;
 };
 
@@ -145,25 +147,33 @@ export default function ProductPage() {
     if (id) fetchPhone();
   }, [id]);
 
-  const initSelection = useCallback((vars: PhoneVariant[], phoneCondition: string) => {
-    const storages = getUniqueStorages(vars);
-    const firstStorage = storages.find((s) => storageHasStock(vars, s)) ?? storages[0];
-    if (!firstStorage) return;
-    const colors = getUniqueColors(vars, firstStorage);
-    const firstColor = colors.find((c) => colorHasStock(vars, firstStorage, c)) ?? colors[0];
-    setSelectedStorage(firstStorage);
-    setSelectedColor(firstColor);
-    if (isNewPhone(phoneCondition)) {
-      setSelectedGrade(null);
-      return;
-    }
-    const grades = PRE_OWNED_GRADES.filter((g) => {
-      const v = findVariant(vars, firstStorage, firstColor, g);
-      return v && isVariantAvailable(v);
-    });
-    const firstGrade = grades[0] ?? PRE_OWNED_GRADES.find((g) => findVariant(vars, firstStorage, firstColor, g)) ?? null;
-    setSelectedGrade(firstGrade);
-  }, []);
+  const applySelection = useCallback(
+    (vars: PhoneVariant[], phoneCondition: string, storage: string, color: string, grade: ConditionGrade | null) => {
+      const resolved = resolveVariantSelection(vars, phoneCondition, storage, color, grade);
+      setSelectedStorage(resolved.storage);
+      setSelectedColor(resolved.color);
+      setSelectedGrade(isNewPhone(phoneCondition) ? null : resolved.grade);
+    },
+    []
+  );
+
+  const initSelection = useCallback(
+    (vars: PhoneVariant[], phoneCondition: string) => {
+      const storages = getUniqueStorages(vars);
+      const firstStorage = storages.find((s) => storageHasStock(vars, s)) ?? storages[0];
+      if (!firstStorage) return;
+      const colors = getUniqueColors(vars, firstStorage);
+      const firstColor = colors.find((c) => colorHasStock(vars, firstStorage, c)) ?? colors[0];
+      const preferredGrade = isNewPhone(phoneCondition)
+        ? null
+        : PRE_OWNED_GRADES.find((g) => {
+            const v = findVariant(vars, firstStorage, firstColor, g);
+            return v && isVariantAvailable(v);
+          }) ?? PRE_OWNED_GRADES.find((g) => findVariant(vars, firstStorage, firstColor, g)) ?? null;
+      applySelection(vars, phoneCondition, firstStorage, firstColor, preferredGrade);
+    },
+    [applySelection]
+  );
 
   useEffect(() => {
     if (variants.length > 0 && phone) initSelection(variants, phone.condition);
@@ -219,16 +229,13 @@ export default function ProductPage() {
 
   const selectedVariant = useMemo(() => {
     if (!selectedStorage || !selectedColor || !phone) return null;
-    if (isNewPhone(phone.condition)) {
-      const available = variants.find(
-        (v) => v.storage === selectedStorage && v.color === selectedColor && isVariantAvailable(v)
-      );
-      return available ?? variants.find(
-        (v) => v.storage === selectedStorage && v.color === selectedColor
-      ) ?? null;
-    }
-    if (!selectedGrade) return null;
-    return findVariant(variants, selectedStorage, selectedColor, selectedGrade) ?? null;
+    return resolveVariantSelection(
+      variants,
+      phone.condition,
+      selectedStorage,
+      selectedColor,
+      isNewPhone(phone.condition) ? "New" : selectedGrade
+    ).variant;
   }, [variants, selectedStorage, selectedColor, selectedGrade, phone]);
 
   const displayImages = useMemo(() => {
@@ -248,32 +255,21 @@ export default function ProductPage() {
   );
 
   const handleStorageSelect = (storage: string) => {
-    setSelectedStorage(storage);
+    if (!phone) return;
     const newColors = getUniqueColors(variants, storage);
     const nextColor = newColors.find((c) => colorHasStock(variants, storage, c)) ?? newColors[0];
-    setSelectedColor(nextColor);
-    if (phone && isNewPhone(phone.condition)) {
-      setSelectedGrade(null);
-      return;
-    }
-    const nextGrade = PRE_OWNED_GRADES.find((g) => {
-      const v = findVariant(variants, storage, nextColor, g);
-      return v && isVariantAvailable(v);
-    }) ?? PRE_OWNED_GRADES.find((g) => findVariant(variants, storage, nextColor, g)) ?? null;
-    setSelectedGrade(nextGrade);
+    applySelection(variants, phone.condition, storage, nextColor, selectedGrade);
   };
 
   const handleColorSelect = (color: string) => {
-    setSelectedColor(color);
-    if (phone && isNewPhone(phone.condition)) {
-      setSelectedGrade(null);
-      return;
-    }
-    const nextGrade = PRE_OWNED_GRADES.find((g) => {
-      const v = findVariant(variants, selectedStorage, color, g);
-      return v && isVariantAvailable(v);
-    }) ?? PRE_OWNED_GRADES.find((g) => findVariant(variants, selectedStorage, color, g)) ?? null;
-    setSelectedGrade(nextGrade);
+    if (!phone) return;
+    applySelection(variants, phone.condition, selectedStorage, color, selectedGrade);
+  };
+
+  const handleGradeSelect = (grade: ConditionGrade) => {
+    if (!phone) return;
+    applySelection(variants, phone.condition, selectedStorage, selectedColor, grade);
+    setExpandedGrade(expandedGrade === grade ? null : grade);
   };
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -345,6 +341,12 @@ export default function ProductPage() {
   const savings = originalPrice ? originalPrice - currentPrice : 0;
   const conditionTags = selectedGrade ? CONDITION_TAGS[selectedGrade] : [];
   const phoneIsNew = isNewPhone(phone.condition);
+  const isJv = phone.category === "JV";
+  const variantUnavailable = selectedVariant && !isVariantAvailable(selectedVariant);
+  const sourcingLink = `https://wa.me/923041502560?text=${encodeURIComponent(
+    `Assalam o Alaikum! Mujhe ${phone.model} ${selectedStorage} ${selectedColor}${selectedGrade ? ` ${selectedGrade}` : ""} source karwana hai.`
+  )}`;
+  const nonPtaSimLink = `https://wa.me/923041502560?text=${encodeURIComponent("Assalam o Alaikum! Non-PTA phone ki SIM status confirm karni hai.")}`;
 
   const whatsappLink = selectedVariant
     ? `https://wa.me/923041502560?text=Assalam o Alaikum! Ustaad Ji ne bheja hai. Mujhe ${phone.model} ${selectedVariant.storage} ${selectedVariant.color}${phoneIsNew ? "" : ` ${selectedVariant.condition_grade}`} (${phone.category}) mein interest hai.`
@@ -386,9 +388,9 @@ export default function ProductPage() {
 
           {/* LEFT — Image Gallery + Condition Tags */}
           <div className="flex flex-col gap-3">
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] sm:rounded-3xl" style={{ aspectRatio: "4/3" }}>
+            <div className={`${PHONE_IMAGE_FRAME} rounded-2xl border border-white/10 sm:rounded-3xl`} style={{ aspectRatio: "4/3" }}>
               {displayImages.length > 0 ? (
-                <Image src={displayImages[activeImage]} alt={`${phone.model} - image ${activeImage + 1}`} fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-contain p-2 transition duration-500 cursor-zoom-in" onClick={() => { setLightboxOpen(true); setLightboxIndex(activeImage); }} priority={activeImage === 0} />
+                <Image src={displayImages[activeImage]} alt={`${phone.model} - image ${activeImage + 1}`} fill sizes="(max-width: 1024px) 100vw, 50vw" className={`${PHONE_IMAGE_CLASS} transition duration-500 cursor-zoom-in`} onClick={() => { setLightboxOpen(true); setLightboxIndex(activeImage); }} priority={activeImage === 0} />
               ) : (
                 <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-white/20">
                   <svg viewBox="0 0 24 24" fill="none" className="h-14 w-14" stroke="currentColor" strokeWidth="0.8">
@@ -413,8 +415,8 @@ export default function ProductPage() {
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {displayImages.map((img, i) => (
                   <button key={i} onClick={() => setActiveImage(i)}
-                    className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border transition ${activeImage === i ? "border-blue-400/60" : "border-white/10 opacity-50"}`}>
-                    <Image src={img} alt={`${phone.model} thumbnail ${i + 1}`} fill sizes="56px" className="object-contain p-1" loading="lazy" />
+                    className={`relative aspect-square h-14 w-14 shrink-0 overflow-hidden rounded-xl border transition ${PHONE_IMAGE_FRAME} ${activeImage === i ? "border-blue-400/60" : "border-white/10 opacity-50"}`}>
+                    <Image src={img} alt={`${phone.model} thumbnail ${i + 1}`} fill sizes="56px" className="object-contain p-1.5" loading="lazy" />
                   </button>
                 ))}
               </div>
@@ -482,11 +484,22 @@ export default function ProductPage() {
                 {colors.map((color) => {
                   const hasStock = colorHasStock(variants, selectedStorage, color);
                   const isSelected = selectedColor === color;
+                  const colorVariant = resolveVariantSelection(
+                    variants,
+                    phone.condition,
+                    selectedStorage,
+                    color,
+                    phoneIsNew ? "New" : selectedGrade
+                  ).variant;
+                  const colorPrice = colorVariant ? getVariantPrice(colorVariant) : null;
                   return (
                     <button key={color} type="button" disabled={!hasStock}
                       onClick={() => hasStock && handleColorSelect(color)}
                       className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${!hasStock ? "border-white/5 text-white/30 opacity-50 cursor-not-allowed" : isSelected ? "border-blue-400/60 bg-blue-500/20 text-blue-200" : "border-white/15 text-white/70 hover:border-white/30"}`}>
-                      {color}{!hasStock && " — Sold out"}
+                      <span>{color}{!hasStock && " — Sold out"}</span>
+                      {colorPrice != null && hasStock && (
+                        <span className="ml-1.5 text-[10px] opacity-80">Rs. {colorPrice.toLocaleString()}</span>
+                      )}
                     </button>
                   );
                 })}
@@ -501,7 +514,7 @@ export default function ProductPage() {
                   <p className="mt-2 text-xs text-white/60 leading-relaxed sm:text-sm">
                     📦 Water Pack Sealed — original factory packaging intact, shrink wrap untouched, never opened
                   </p>
-                  <p className="mt-1 text-[11px] text-green-400/80">Water Pack means sealed packaging — not the same as IP water resistance rating</p>
+                  <p className="mt-1 text-[11px] text-green-400/80">Original factory packaging — shrink wrap intact, never opened</p>
                 </div>
               </div>
             ) : (
@@ -517,7 +530,7 @@ export default function ProductPage() {
                     return (
                       <div key={grade}>
                         <button type="button" disabled={!variant || !available}
-                          onClick={() => { if (variant && available) { setSelectedGrade(grade); setExpandedGrade(expandedGrade === grade ? null : grade); } }}
+                          onClick={() => { if (variant && available) handleGradeSelect(grade); }}
                           className={`flex w-full items-center gap-2 rounded-xl border px-3 py-3 text-left transition sm:gap-3 sm:px-4 ${!variant || !available ? "border-white/5 bg-white/[0.01] opacity-40 cursor-not-allowed" : isSelected ? `${visual.selectedBorder} ${visual.selectedBg}` : "border-white/10 bg-white/[0.02] hover:border-white/25"}`}>
                           <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${isSelected && available ? "border-blue-400 bg-blue-500" : "border-white/30"}`}>
                             {isSelected && available && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
@@ -597,22 +610,40 @@ export default function ProductPage() {
             </button>
 
             <p className="mt-2 text-center text-[11px] text-white/40 leading-relaxed">
-              Order placed → we confirm availability within 24hrs via WhatsApp before payment
+              {ORDER_PLACED_NOTE}
             </p>
 
-            <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-4 text-center">
-              <p className="text-xs text-white/70 leading-relaxed sm:text-sm">
-                📸 Want exact photos of your unit? WhatsApp us — we send real photos before you pay.
-              </p>
-              <a
-                href={photoRequestLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-3 inline-flex items-center justify-center rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-2.5 text-xs font-bold text-green-300 transition hover:bg-green-500/20 sm:text-sm"
-              >
-                Request Unit Photos → 0304-1502560
-              </a>
-            </div>
+            {!phoneIsNew && (
+              <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-4 text-center">
+                <p className="text-xs text-white/70 leading-relaxed sm:text-sm">
+                  📸 Want exact photos of your unit? WhatsApp us — we send real photos before you pay.
+                </p>
+                <a
+                  href={photoRequestLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-flex items-center justify-center rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-2.5 text-xs font-bold text-green-300 transition hover:bg-green-500/20 sm:text-sm"
+                >
+                  Request Unit Photos → 0304-1502560
+                </a>
+              </div>
+            )}
+
+            {variantUnavailable && (
+              <div className="mt-4 rounded-2xl border border-amber-400/25 bg-amber-500/10 px-4 py-4 text-center">
+                <p className="text-xs text-amber-200 leading-relaxed sm:text-sm">
+                  Yeh variant abhi available nahi — lekin hum source kar sakte hain.
+                </p>
+                <a
+                  href={sourcingLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-flex items-center justify-center rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-2.5 text-xs font-bold text-green-300 transition hover:bg-green-500/20 sm:text-sm"
+                >
+                  Request Sourcing → 0304-1502560
+                </a>
+              </div>
+            )}
 
             {/* Free Accessories — Prominent */}
             <div className="mt-4 rounded-2xl border-2 border-green-500/30 bg-gradient-to-br from-green-500/10 to-green-500/[0.03] px-5 py-4">
@@ -629,7 +660,7 @@ export default function ProductPage() {
               </div>
             </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:gap-3">
+            <div className="mt-3 grid grid-cols-3 gap-2 sm:gap-3">
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
                 <p className="mb-1 text-[10px] text-white/60 sm:text-xs">Battery Health</p>
                 <p className="text-xl font-extrabold text-white sm:text-2xl">
@@ -639,15 +670,8 @@ export default function ProductPage() {
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
                 <p className="mb-1 text-[10px] text-white/60 sm:text-xs">Condition</p>
                 <p className="text-sm font-extrabold text-white sm:text-lg leading-tight">
-                  {phoneIsNew ? "Brand New" : selectedGrade ?? "—"}
+                  {phoneIsNew ? "Brand New" : selectedVariant?.condition_grade ?? selectedGrade ?? "—"}
                 </p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
-                <p className="mb-1 text-[10px] text-white/60 sm:text-xs">IP Rating</p>
-                <p className="text-sm font-extrabold text-white sm:text-lg leading-tight">
-                  {phone.ip_rating ?? "—"}
-                </p>
-                <p className="mt-1 text-[9px] text-white/35 leading-snug">Hardware water resistance — separate from Water Pack packaging</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
                 <p className="mb-1 text-[10px] text-white/60 sm:text-xs">5G</p>
@@ -661,38 +685,62 @@ export default function ProductPage() {
 
         {/* Specs */}
         <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-6">
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/30 sm:mb-4 sm:text-xs">SIM Status</p>
-            <p className="text-base font-bold text-white sm:text-lg">{phone.sim_status ?? "—"}</p>
-          </div>
+          {isJv ? (
+            <div className="rounded-2xl border border-amber-400/20 bg-amber-500/5 p-4 sm:p-6 sm:col-span-2 lg:col-span-1">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-amber-300/60 sm:mb-4 sm:text-xs">SIM</p>
+              <p className="text-base font-bold text-amber-200 sm:text-lg">Permanently SIM Locked</p>
+              <p className="mt-1 text-xs text-white/50">WiFi and secondary use — SIM fields not applicable</p>
+            </div>
+          ) : (
+            <>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-6">
+                <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/30 sm:mb-4 sm:text-xs">SIM Status</p>
+                <p className="text-base font-bold text-white sm:text-lg">{selectedVariant?.sim_status ?? "—"}</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-6">
+                <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/30 sm:mb-4 sm:text-xs">SIM Type</p>
+                <p className="text-base font-bold text-white sm:text-lg">{selectedVariant?.sim_type ?? "—"}</p>
+              </div>
+            </>
+          )}
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-6">
             <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/30 sm:mb-4 sm:text-xs">In the Box</p>
-            <p className="text-base font-bold text-white sm:text-lg">{phone.accessories_included ?? "Phone only"}</p>
+            <p className="text-base font-bold text-white sm:text-lg">{selectedVariant?.accessories_included ?? "Phone only"}</p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-6">
             <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/30 sm:mb-4 sm:text-xs">Model Info</p>
             <div className="space-y-1.5">
               {phone.region && <div className="flex justify-between"><span className="text-xs text-white/40">Region</span><span className="text-xs font-semibold text-white">{phone.region}</span></div>}
               {phone.ios_version && <div className="flex justify-between"><span className="text-xs text-white/40">OS</span><span className="text-xs font-semibold text-white">{phone.ios_version}</span></div>}
-              {phone.sim_type && <div className="flex justify-between"><span className="text-xs text-white/40">SIM Type</span><span className="text-xs font-semibold text-white">{phone.sim_type}</span></div>}
               {phone.five_g && <div className="flex justify-between"><span className="text-xs text-white/40">5G</span><span className="text-xs font-semibold text-blue-300">Ready ✓</span></div>}
             </div>
           </div>
         </div>
 
-        {(phone.category === "Non-PTA" || phone.category === "JV") && (
+        {phone.category === "Non-PTA" && (
           <div className="mt-4 rounded-2xl border border-blue-400/20 bg-blue-500/5 p-4 sm:mt-6 sm:p-6">
-            <p className="mb-1.5 text-xs font-bold text-blue-300 sm:text-sm">
-              {phone.category === "JV" ? "⚠️ JV Phone — SIM Locked" : "ℹ️ Non-PTA — PTA Registration Info"}
-            </p>
+            <p className="mb-1.5 text-xs font-bold text-blue-300 sm:text-sm">ℹ️ Non-PTA — PTA Registration Info</p>
             <p className="text-xs leading-relaxed text-white/50">
-              {phone.category === "JV" ? "Yeh phone permanently SIM-locked hai. WiFi aur secondary use ke liye perfect hai." : "Is phone ki SIM active hai lekin eventually PTA registration karni padegi."}
+              Non-PTA phones mein PTA registration eventually zaroori hoti hai. Is specific unit ki current SIM status confirm karne ke liye WhatsApp karein.
             </p>
-            {phone.category === "Non-PTA" && (
-              <a href="https://taxcalculator.pk/pta-tax" target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex text-xs font-semibold text-blue-400">
+            <div className="mt-3 flex flex-wrap gap-3">
+              <a href={nonPtaSimLink} target="_blank" rel="noopener noreferrer"
+                className="inline-flex rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-2 text-xs font-bold text-green-300 transition hover:bg-green-500/20">
+                Confirm SIM Status → 0304-1502560
+              </a>
+              <a href="https://taxcalculator.pk/pta-tax" target="_blank" rel="noopener noreferrer" className="inline-flex text-xs font-semibold text-blue-400 items-center">
                 Check PTA Tax → taxcalculator.pk/pta-tax
               </a>
-            )}
+            </div>
+          </div>
+        )}
+
+        {phone.category === "JV" && (
+          <div className="mt-4 rounded-2xl border border-amber-400/20 bg-amber-500/5 p-4 sm:mt-6 sm:p-6">
+            <p className="mb-1.5 text-xs font-bold text-amber-300 sm:text-sm">⚠️ JV Phone — SIM Locked</p>
+            <p className="text-xs leading-relaxed text-white/50">
+              Yeh phone permanently SIM-locked hai. WiFi aur secondary use ke liye perfect hai.
+            </p>
           </div>
         )}
 
@@ -716,20 +764,28 @@ export default function ProductPage() {
           </div>
         )}
 
-        {phone.description && (
+        {selectedVariant?.description && (
           <div className="mt-4 rounded-2xl border border-amber-400/15 bg-amber-400/[0.04] p-4 sm:p-6">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-base">🧔</span>
               <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-400/60">Ustaad Ji Notes</p>
             </div>
-            <p className="text-xs leading-relaxed text-white/70 sm:text-sm">{phone.description}</p>
+            <p className="text-xs leading-relaxed text-white/70 sm:text-sm">{selectedVariant.description}</p>
           </div>
         )}
 
         <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-6">
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/30">Delivery</p>
           <p className="text-sm font-bold text-white">Free Delivery — All Pakistan</p>
-          <p className="mt-1 text-xs text-white/40">Order before 2pm for next day delivery in nearby cities. All Pakistan: 1-3 working days.</p>
+          <p className="mt-2 text-xs text-white/50 leading-relaxed">{DELIVERY_SUMMARY}</p>
+          <ol className="mt-3 space-y-1.5">
+            {ORDER_FLOW_STEPS.map((step, i) => (
+              <li key={step} className="flex items-start gap-2 text-xs text-white/45">
+                <span className="shrink-0 font-bold text-white/30">{i + 1}.</span>
+                <span>{step}</span>
+              </li>
+            ))}
+          </ol>
         </div>
 
         <div className="mt-6 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-transparent overflow-hidden">

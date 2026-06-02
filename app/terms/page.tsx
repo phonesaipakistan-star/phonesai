@@ -24,7 +24,7 @@ export default function TermsPage() {
           </div>
           <div>
             <h2 className="text-white font-bold text-lg mb-3">5. Delivery</h2>
-            <p>Islamabad, Rawalpindi, and Wah Cantt orders are delivered same day. Other cities take 2-3 working days via courier. Delivery is free on all orders. Risk passes to the customer upon handover to courier.</p>
+            <p>Once payment is confirmed, your order is dispatched within 24 hours. Delivery: 1-3 working days all Pakistan via courier. Delivery is free on all orders. Risk passes to the customer upon handover to courier.</p>
           </div>
           <div>
             <h2 className="text-white font-bold text-lg mb-3">6. Warranty</h2>

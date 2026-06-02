@@ -12,6 +12,10 @@ export type PhoneVariant = {
   images: string[];
   battery_health: number | null;
   in_stock: boolean;
+  description?: string | null;
+  accessories_included?: string | null;
+  sim_type?: string | null;
+  sim_status?: string | null;
 };
 
 export const PRE_OWNED_GRADES: ConditionGrade[] = ["Premium", "Excellent", "Good", "Fair"];
@@ -116,6 +120,63 @@ export function findVariant(
   );
 }
 
+function variantsForStorageColor(
+  variants: PhoneVariant[],
+  storage: string,
+  color: string
+): PhoneVariant[] {
+  return variants.filter((v) => v.storage === storage && v.color === color);
+}
+
+/** Resolve best variant for storage + color + optional grade (handles missing combos) */
+export function resolveVariantSelection(
+  variants: PhoneVariant[],
+  phoneCondition: string,
+  storage: string,
+  color: string,
+  preferredGrade: ConditionGrade | null
+): {
+  variant: PhoneVariant | null;
+  storage: string;
+  color: string;
+  grade: ConditionGrade | null;
+} {
+  const pool = variantsForStorageColor(variants, storage, color);
+  if (pool.length === 0) {
+    return { variant: null, storage, color, grade: preferredGrade };
+  }
+
+  if (isNewPhone(phoneCondition)) {
+    const available = pool.find(isVariantAvailable);
+    const variant = available ?? pool[0];
+    return { variant, storage, color, grade: "New" };
+  }
+
+  if (preferredGrade) {
+    const exact = pool.find((v) => v.condition_grade === preferredGrade);
+    if (exact) {
+      return { variant: exact, storage, color, grade: preferredGrade };
+    }
+  }
+
+  const gradeOrder = preferredGrade
+    ? [preferredGrade, ...PRE_OWNED_GRADES.filter((g) => g !== preferredGrade)]
+    : PRE_OWNED_GRADES;
+
+  for (const grade of gradeOrder) {
+    const match = pool.find((v) => v.condition_grade === grade && isVariantAvailable(v));
+    if (match) return { variant: match, storage, color, grade };
+  }
+
+  for (const grade of gradeOrder) {
+    const match = pool.find((v) => v.condition_grade === grade);
+    if (match) return { variant: match, storage, color, grade };
+  }
+
+  const fallback = pool[0];
+  return { variant: fallback, storage, color, grade: fallback.condition_grade };
+}
+
 export function hasAnyStock(variants: PhoneVariant[]): boolean {
   return variants.some(isVariantAvailable);
 }
@@ -160,6 +221,10 @@ export function legacyPhoneToVariant(phone: {
   in_stock: boolean;
   physical_condition?: string | null;
   condition?: string;
+  description?: string | null;
+  accessories_included?: string | null;
+  sim_type?: string | null;
+  sim_status?: string | null;
 }): PhoneVariant {
   let grade: ConditionGrade = "Good";
   if (phone.condition === "New") {
@@ -183,5 +248,9 @@ export function legacyPhoneToVariant(phone: {
     images: phone.images ?? [],
     battery_health: phone.battery_health,
     in_stock: phone.in_stock,
+    description: phone.description ?? null,
+    accessories_included: phone.accessories_included ?? null,
+    sim_type: phone.sim_type ?? null,
+    sim_status: phone.sim_status ?? null,
   };
 }

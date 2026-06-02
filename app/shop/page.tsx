@@ -16,11 +16,12 @@ import {
   legacyPhoneToVariant,
   isNewPhone,
 } from "@/lib/variants";
+import { PHONE_IMAGE_FRAME, PHONE_IMAGE_CLASS } from "@/lib/ui";
 
 type Phone = {
   id: string; model: string; storage: string; color: string; category: string; brand: string;
   condition: string; price: number; discount_price: number | null; battery_health: number;
-  physical_condition: string; five_g: boolean; ip_rating: string | null; in_stock: boolean;
+  physical_condition: string; five_g: boolean; in_stock: boolean;
   featured: boolean; badge: string | null; images: string[]; free_case: boolean;
 };
 
@@ -205,7 +206,7 @@ function ShopContent() {
         {filteredPhones.length > 0 && (
           <>
             {activeBrand === "All" && <h2 className="mb-4 text-sm font-bold text-white/60 uppercase tracking-widest">Phones & Tablets</h2>}
-            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-6">
+            <div className="grid gap-3 grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-6">
               {filteredPhones.map((phone) => {
                 const isInCompare = compareList.find((p) => p.id === phone.id);
                 const freeAccessory = getFreeAccessoryText(phone.condition);
@@ -218,9 +219,9 @@ function ShopContent() {
                       </div>
                     )}
                     <Link href={`/shop/${phone.id}`} className="flex flex-col">
-                      <div className="relative h-36 w-full overflow-hidden border-b border-white/5 bg-white/[0.03] sm:h-48">
+                      <div className={`${PHONE_IMAGE_FRAME} aspect-square w-full border-b border-white/5`}>
                         {phone.cardImage ? (
-                          <Image src={phone.cardImage} alt={phone.model} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-contain p-3" loading="lazy" />
+                          <Image src={phone.cardImage} alt={phone.model} fill sizes="(max-width: 640px) 50vw, 33vw" className={PHONE_IMAGE_CLASS} loading="lazy" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center">
                             <svg viewBox="0 0 24 24" fill="none" className="h-12 w-12 text-white/10" stroke="currentColor" strokeWidth="1" aria-hidden="true">
@@ -234,9 +235,6 @@ function ShopContent() {
                         {phone.five_g && <span className="rounded-full border border-blue-400/20 bg-blue-400/10 px-2 py-0.5 text-[10px] text-blue-300">5G</span>}
                         {isNew && (
                           <span className="rounded-full border border-green-400/30 bg-green-500/15 px-2 py-0.5 text-[10px] font-semibold text-green-300" title="Original factory sealed packaging — never opened">📦 Water Pack</span>
-                        )}
-                        {phone.ip_rating && (
-                          <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-[10px] text-cyan-300" title="Phone hardware water resistance rating">{phone.ip_rating}</span>
                         )}
                         {phone.badge && (
                           <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${badgeColors[phone.badge] ?? "bg-white/10 text-white/60 border-white/20"}`}>{phone.badge}</span>
