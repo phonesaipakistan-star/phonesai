@@ -24,6 +24,7 @@ import {
 } from "@/lib/variants";
 import { DELIVERY_SUMMARY, ORDER_FLOW_STEPS, ORDER_PLACED_NOTE } from "@/lib/delivery";
 import { PHONE_IMAGE_FRAME, PHONE_IMAGE_CLASS } from "@/lib/ui";
+import { WATER_PACK_DESCRIPTION } from "@/lib/waterPack";
 
 const SUPABASE_URL = "https://xadxdkbdwyulprfukrjb.supabase.co";
 
@@ -408,7 +409,7 @@ export default function ProductPage() {
               )}
               <span className="rounded-full border border-green-500/30 bg-green-500/20 px-2.5 py-0.5 text-xs text-green-300">{freeAccessory.badge}</span>
               {phoneIsNew && (
-                <span className="rounded-full border border-green-400/40 bg-green-500/15 px-2.5 py-0.5 text-xs font-semibold text-green-300" title="Original factory sealed packaging — shrink wrap intact, never opened">📦 Water Pack Sealed</span>
+                <span className="rounded-full border border-green-400/40 bg-green-500/15 px-2.5 py-0.5 text-xs font-semibold text-green-300" title={WATER_PACK_DESCRIPTION}>📦 Water Pack</span>
               )}
             </div>
             {displayImages.length > 1 && (
@@ -510,11 +511,10 @@ export default function ProductPage() {
             {phoneIsNew ? (
               <div className="mt-5">
                 <div className="rounded-2xl border-2 border-green-400/40 bg-gradient-to-br from-green-500/15 to-green-500/5 px-5 py-4 text-center">
-                  <p className="text-lg font-extrabold text-green-300 sm:text-xl">Brand New — Sealed Box</p>
+                  <p className="text-lg font-extrabold text-green-300 sm:text-xl">Brand New — Water Pack</p>
                   <p className="mt-2 text-xs text-white/60 leading-relaxed sm:text-sm">
-                    📦 Water Pack Sealed — original factory packaging intact, shrink wrap untouched, never opened
+                    📦 {WATER_PACK_DESCRIPTION}
                   </p>
-                  <p className="mt-1 text-[11px] text-green-400/80">Original factory packaging — shrink wrap intact, never opened</p>
                 </div>
               </div>
             ) : (

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
+import { WATER_PACK_DESCRIPTION } from "@/lib/waterPack";
 
 const openUstaadJi = () => {
   if (typeof window !== "undefined") {
@@ -24,7 +25,7 @@ type Review = {
 const categories = [
   {
     name: "iPhones",
-    description: "PTA Approved, Non-PTA, and JV — verified units with 7-day warranty.",
+    description: "PTA, Non-PTA, and JV — verified. New: Water Pack (factory seal intact, never opened).",
     link: "/shop?brand=Apple",
     color: "from-blue-500/20 to-blue-600/10",
     icon: (
@@ -187,6 +188,13 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Water Pack */}
+        <section className="mx-auto mt-6 max-w-6xl px-4 sm:px-6">
+          <p className="text-center text-xs text-white/50 leading-relaxed max-w-2xl mx-auto sm:text-sm">
+            💧 <span className="text-green-300/90">{WATER_PACK_DESCRIPTION}</span>
+          </p>
+        </section>
+
         {/* Trust Strip */}
         <section className="mx-auto mt-8 max-w-6xl px-4 sm:px-6" aria-label="Our guarantees">
           <div className="grid grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:grid-cols-4 sm:p-8">
@@ -198,7 +206,7 @@ export default function Home() {
             <div className="text-center">
               <p className="text-xl sm:text-2xl" aria-hidden="true">⭐</p>
               <p className="mt-1 text-xs font-bold text-white sm:text-sm">Condition Graded</p>
-              <p className="mt-0.5 text-[10px] text-white/50 hidden sm:block">4-tier grading system — know exactly what you are getting</p>
+              <p className="mt-0.5 text-[10px] text-white/50 hidden sm:block">Pre-owned: Premium to Fair. New: Water Pack sealed.</p>
             </div>
             <div className="text-center">
               <p className="text-xl sm:text-2xl" aria-hidden="true">🛡️</p>

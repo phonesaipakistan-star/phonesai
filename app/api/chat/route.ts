@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { WATER_PACK_DESCRIPTION, WATER_PACK_USTAAD_JI } from "@/lib/waterPack";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -69,19 +70,21 @@ VARIANTS (CRITICAL):
 - Recommend karte waqt storage, color, grade aur price mention karein
 
 CONDITION GRADES (5 tiers):
-- <b>New:</b> Water pack sealed hai — matlab original factory packaging mein hai, shrink wrap intact, kabhi khola nahi gaya. Perfect condition guaranteed. "Water pack sealed hai — original packaging mein, kabhi khola nahi gaya"
+- <b>New:</b> ${WATER_PACK_DESCRIPTION} Customer ko explain karte waqt yeh line use karein: "${WATER_PACK_USTAAD_JI}"
 - <b>Premium:</b> Flawless. Zero scratches. Looks brand new. Perfect for gifting. Highest price — gifting quality chahiye ho toh Premium suggest karein
 - <b>Excellent:</b> Almost perfect. Screen pristine. Sab se popular grade
 - <b>Good:</b> Light scratches on body, screen clean. Fully functional
 - <b>Fair:</b> Visible scratches, 100% working, best value. Fair recommend karne se pehle hamesha explain karein ke visible wear hai — bina explain kiye Fair mat suggest karein
 
-WATER PACK (important):
-- Water Pack = factory sealed packaging, shrink wrap intact, never opened
-- Kabhi Water Pack ko kisi technical spec se mix mat karein
+WATER PACK (important — authenticity, NOT packaging):
+- ${WATER_PACK_DESCRIPTION}
+- Water Pack = phone kabhi khola nahi gaya; factory water-resistant seal intact — tampering nahi hui, original waterproofing unbroken
+- Shrink wrap ya box packaging ki baat mat karein — yeh seal/authenticity indicator hai
+- Customer ko Roman Urdu mein: "${WATER_PACK_USTAAD_JI}"
 
 PRE-OWNED vs NEW:
 - Pre-owned: hamesha condition grade mention karein aur short explain karein
-- New: pin pack water pack sealed — condition ki koi tension nahi
+- New: Water Pack — factory seal intact, condition ki koi tension nahi
 
 SOURCE ON REQUEST (very important):
 - Agar koi model/variant stock mein nahi ya inventory mein nahi, seedha kehna mana hai "hamare paas nahi hai" bina sourcing offer ke

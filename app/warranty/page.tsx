@@ -1,7 +1,9 @@
+import { WATER_PACK_DESCRIPTION } from "@/lib/waterPack";
+
 export const metadata = {
   title: "Warranty Policy | PhonesAI Pakistan",
   description:
-    "PhonesAI ki complete warranty policy — Pin Pack aur Pre-Owned phones ke liye coverage. Ustaad Ji ka wada.",
+    "PhonesAI ki complete warranty policy — Water Pack (New) aur Pre-Owned phones ke liye coverage. Ustaad Ji ka wada.",
 };
 
 export default function WarrantyPage() {
@@ -28,8 +30,8 @@ export default function WarrantyPage() {
             <div className="divide-y divide-white/5 px-5">
               {[
                 {
-                  grade: "New (Water Pack Sealed)",
-                  detail: "Full 7-day software warranty. Original factory packaging intact — shrink wrap untouched, never opened. Free case included.",
+                  grade: "New (Water Pack)",
+                  detail: `Full 7-day software warranty. ${WATER_PACK_DESCRIPTION} Free case included.`,
                 },
                 {
                   grade: "Premium / Excellent",
@@ -62,9 +64,9 @@ export default function WarrantyPage() {
 
           {/* Water Pack */}
           <div className="rounded-2xl border border-cyan-400/20 bg-cyan-500/5 p-6">
-            <p className="text-cyan-200 font-bold text-base mb-3">💧 Water Pack Sealed</p>
+            <p className="text-cyan-200 font-bold text-base mb-3">💧 Water Pack</p>
             <p className="text-xs text-white/60">
-              Factory sealed packaging — shrink wrap intact, box never opened. Sirf New phones ke liye. Perfect condition guaranteed — koi condition concerns nahi.
+              {WATER_PACK_DESCRIPTION} Sirf New phones ke liye — authenticity guarantee: phone kabhi khola nahi gaya, factory waterproofing seal intact.
             </p>
           </div>
 
@@ -77,8 +79,8 @@ export default function WarrantyPage() {
               {/* Pin Pack */}
               <div className="grid grid-cols-3 items-center gap-4 px-5 py-4">
                 <div>
-                  <p className="text-xs font-bold text-white">Pin Pack / Water Pack Sealed</p>
-                  <p className="text-[10px] text-white/40">Factory sealed — never opened</p>
+                  <p className="text-xs font-bold text-white">Water Pack (New)</p>
+                  <p className="text-[10px] text-white/40">Factory seal intact — never opened</p>
                 </div>
                 <div className="col-span-2">
                   <p className="text-xs text-white/70">
@@ -118,8 +120,8 @@ export default function WarrantyPage() {
 
           {/* Pin Pack detail */}
           <div className="rounded-2xl border border-green-400/20 bg-green-500/5 p-6">
-            <p className="text-green-200 font-bold text-base mb-3">📦 Water Pack Sealed Phones — 1 Year Brand Warranty</p>
-            <p className="mb-3">Water pack sealed phones carry original factory packaging intact — shrink wrap untouched, never opened. <span className="text-white font-semibold">1 year official warranty</span> directly through the brand&apos;s official care centre where applicable.</p>
+            <p className="text-green-200 font-bold text-base mb-3">📦 Water Pack Phones — 1 Year Brand Warranty</p>
+            <p className="mb-3">{WATER_PACK_DESCRIPTION} <span className="text-white font-semibold">1 year official warranty</span> directly through the brand&apos;s official care centre where applicable (PTA units).</p>
             <div className="space-y-2 mt-3">
               <div className="flex items-start gap-2">
                 <span className="text-green-400 shrink-0 mt-0.5">✓</span>
@@ -143,7 +145,7 @@ export default function WarrantyPage() {
           {/* 7-Day software warranty — all phones */}
           <div className="rounded-2xl border border-blue-400/20 bg-blue-500/5 p-6">
             <p className="text-blue-200 font-bold text-base mb-3">🛡️ 7-Day Software Warranty — All Phones</p>
-            <p className="mb-3">Har phone pe — Pin Pack, Pre-Owned, ya JV — PhonesAI <span className="text-white font-semibold">7-din ki software warranty</span> deta hai delivery ke baad.</p>
+            <p className="mb-3">Har phone pe — Water Pack (New), Pre-Owned, ya JV — PhonesAI <span className="text-white font-semibold">7-din ki software warranty</span> deta hai delivery ke baad.</p>
             <div className="space-y-2">
               <div className="flex items-start gap-2">
                 <span className="text-green-400 shrink-0 mt-0.5">✓</span>
@@ -195,7 +197,7 @@ export default function WarrantyPage() {
             <ul className="space-y-2">
               {[
                 "Sealed box dikhao",
-                "Slowly open karein — sealed packaging check karein",
+                "Slowly open karein — factory water pack / seal intact check karein",
                 "Camera test — front aur back",
                 "Charging test",
                 "Speaker test",
@@ -219,7 +221,7 @@ export default function WarrantyPage() {
                 "Apni unboxing video bhejein — bina video ke claim accept nahi hoga",
                 "Issue ka clear video/photo bhejein",
                 "Hum review karenge aur solution denge",
-                "Pin pack PTA phones ke liye: brand care centre ka process follow karein — hum guide karenge",
+                "Water Pack PTA phones ke liye: brand care centre ka process follow karein — hum guide karenge",
               ].map((step, i) => (
                 <li key={i} className="flex items-start gap-2.5">
                   <span className="text-blue-400 shrink-0 font-bold text-xs mt-0.5">{i + 1}.</span>

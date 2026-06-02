@@ -28,7 +28,7 @@ export const CONDITION_TAGS: Record<ConditionGrade, string[]> = {
   Excellent: ["Almost no signs of use", "Pristine screen", "Verified parts"],
   Good: ["Light signs of use", "Clean screen", "Verified parts", "Battery for daily use"],
   Fair: ["Visible signs of use", "100% functional", "Best value", "Verified parts"],
-  New: ["Pin pack sealed", "Original box", "Brand new"],
+  New: ["Factory seal intact", "Never opened", "Water Pack"],
 };
 
 export const CONDITION_DESCRIPTIONS: Record<ConditionGrade, string> = {
@@ -36,7 +36,7 @@ export const CONDITION_DESCRIPTIONS: Record<ConditionGrade, string> = {
   Excellent: "Almost perfect. Extremely minor signs only visible under direct light. Screen pristine.",
   Good: "Light scratches on body, screen clean. Normal signs of careful use. Fully functional.",
   Fair: "Visible scratches and marks. 100% working. Best value option.",
-  New: "Pin pack sealed — original box, untouched packaging.",
+  New: "Water Pack — factory seal intact, never opened, original waterproofing unbroken.",
 };
 
 export const CONDITION_VISUAL: Record<

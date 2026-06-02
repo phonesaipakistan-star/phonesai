@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { WATER_PACK_DESCRIPTION } from "@/lib/waterPack";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = "orders@phonesai.pk";
@@ -123,6 +124,13 @@ const getOrderConfirmationEmail = (data: OrderEmailData) => `
       <p style="color:#f87171;font-size:14px;font-weight:700;margin:0;">Please do not send payment until we confirm.</p>
     </div>
 
+    ${(data.items ?? []).some((i) => i.condition === "New") ? `
+    <div style="background:#052e16;border:1px solid #166534;border-radius:16px;padding:20px;margin-bottom:24px;">
+      <p style="color:#4ade80;font-size:14px;font-weight:700;margin:0 0 8px;">💧 Water Pack</p>
+      <p style="color:#86efac;font-size:13px;margin:0;line-height:1.5;">${WATER_PACK_DESCRIPTION}</p>
+    </div>
+    ` : ""}
+
     <div style="background:#052e16;border:1px solid #166534;border-radius:16px;padding:20px;margin-bottom:24px;text-align:center;">
       <p style="color:#4ade80;font-size:14px;font-weight:700;margin:0 0 6px;">📦 Free Accessories Included</p>
       <p style="color:#86efac;font-size:13px;margin:0;">Your order includes a free ${(data.items ?? [])[0]?.freeAccessoryLine ?? "case"} — arrives ready to use. No extra trip to the market needed!</p>
@@ -177,8 +185,8 @@ const getUnboxingGuideEmail = (data: OrderEmailData) => `
       <h3 style="color:#ffffff;font-size:16px;font-weight:700;margin:0 0 16px;">Perfect Unboxing Video Kaise Banayein</h3>
       ${[
         "Achhi lighting mein record karein",
-        "Pehle sealed box dikhao",
-        "Slowly open karein",
+        "Pehle factory water pack / seal intact dikhao (never opened proof)",
+        "Slowly open karein — seal break check karein",
         "Screen aur touch test karein",
         "Camera test karein — front aur back",
         "Charging test karein",

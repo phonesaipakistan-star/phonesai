@@ -876,7 +876,7 @@ export default function AdminPage() {
                         <label className="mb-1 block text-[10px] text-white/40">Ustaad Ji Notes — this unit</label>
                         <textarea value={row.description} onChange={e => {
                           const updated = [...variantRows]; updated[realIdx] = { ...row, description: e.target.value }; setVariantRows(updated);
-                        }} placeholder="Pin-pack sealed unit. Screen 10/10." rows={2}
+                        }} placeholder="Water Pack — factory seal intact, never opened." rows={2}
                           className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/20 outline-none focus:border-blue-400/50 resize-none" />
                       </div>
                       <ImageUploader bucket="phone-images" existingUrls={row.images}

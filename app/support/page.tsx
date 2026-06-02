@@ -43,10 +43,10 @@ export default function SupportPage() {
             </div>
             <div className="px-5 py-4 sm:px-6 sm:py-5 space-y-3">
 
-              {/* Pin pack */}
+              {/* Water Pack */}
               <div className="rounded-xl border border-green-500/20 bg-green-500/5 p-3">
-                <p className="text-xs font-bold text-green-300 mb-1">📦 Pin Pack / Sealed — 1 Year Brand + 7-Day Software</p>
-                <p className="text-xs text-white/55 leading-relaxed">Official brand warranty (Apple/Samsung care centre) — 1 year for PTA phones. PhonesAI additionally covers software issues for 7 days.</p>
+                <p className="text-xs font-bold text-green-300 mb-1">💧 Water Pack (New) — 1 Year Brand + 7-Day Software</p>
+                <p className="text-xs text-white/55 leading-relaxed">Factory seal intact — never opened, original waterproofing unbroken. Official brand warranty (Apple/Samsung care centre) — 1 year for PTA phones. PhonesAI additionally covers software issues for 7 days.</p>
                 <p className="text-[10px] text-amber-400/70 mt-1.5">⚠️ JV iPhones — brand warranty does not apply. 7-day software warranty via PhonesAI only.</p>
               </div>
 
