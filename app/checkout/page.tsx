@@ -39,9 +39,6 @@ const sanitizePhone = (value: string): string => {
   return value.replace(/[^0-9+\-() ]/g, "").slice(0, 20);
 };
 
-const COUPON_CODE = "SPECIAL5";
-const COUPON_DISCOUNT = 0.05;
-
 const paymentMethods = [
   { id: "bank", label: "Bank Transfer", icon: "🏦" },
   { id: "easypaisa", label: "EasyPaisa", icon: "🟢" },
@@ -93,10 +90,6 @@ function CheckoutContent() {
   const [submitting, setSubmitting] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", email: "", city: "", address: "", notes: "" });
-  const [couponInput, setCouponInput] = useState("");
-  const [couponApplied, setCouponApplied] = useState(false);
-  const [couponError, setCouponError] = useState("");
-
   useEffect(() => {
     const fetchPhone = async () => {
       if (!phoneId) { setLoading(false); return; }
@@ -116,18 +109,7 @@ function CheckoutContent() {
   }, [isCartCheckout]);
 
   const basePrice = isCartCheckout ? total : (phone?.discount_price ?? phone?.price ?? 0);
-  const finalPrice = couponApplied ? Math.round(basePrice * (1 - COUPON_DISCOUNT)) : basePrice;
-  const discount = basePrice - finalPrice;
-
-  const applyCoupon = () => {
-    if (couponInput.trim().toUpperCase() === COUPON_CODE) {
-      setCouponApplied(true);
-      setCouponError("");
-    } else {
-      setCouponError("Invalid coupon code");
-      setCouponApplied(false);
-    }
-  };
+  const finalPrice = basePrice;
 
   const handleDetailsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -144,7 +126,7 @@ function CheckoutContent() {
     cleanForm: { name: string; email: string; phone: string; city: string },
     orderItems: {
       model: string; storage: string; color: string; category: string;
-      condition: string; condition_grade?: string; price: number;
+      condition: string; condition_grade?: string; water_pack_sealed?: boolean; price: number;
       freeAccessoryLine?: string; quantityRemaining?: number | null;
     }[],
     totalPrice: number,
@@ -163,7 +145,6 @@ function CheckoutContent() {
           items: orderItems,
           totalPrice,
           paymentMethod,
-          couponApplied,
         }),
       });
     } catch (err) {
@@ -202,9 +183,7 @@ function CheckoutContent() {
     if (isCartCheckout && items.length > 0) {
       const orderItems = [];
       for (const item of items) {
-        const itemPrice = couponApplied
-          ? Math.round((item.discount_price ?? item.price) * (1 - COUPON_DISCOUNT))
-          : (item.discount_price ?? item.price);
+        const itemPrice = item.discount_price ?? item.price;
 
         let quantityRemaining: number | null = null;
         if (item.variant_id) {
@@ -237,6 +216,7 @@ function CheckoutContent() {
           price: itemPrice,
           freeAccessoryLine: item.condition === "Pre-Owned" || item.condition === "Used" ? "case + screen protector" : "case",
           quantityRemaining,
+          water_pack_sealed: item.water_pack_sealed,
         });
       }
       await sendOrderEmail(cleanForm, orderItems, finalPrice, selectedPayment);
@@ -424,30 +404,6 @@ function CheckoutContent() {
                     />
                   </div>
 
-                  {/* Coupon Code */}
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-white/50">Coupon Code (optional)</label>
-                    <div className="flex gap-2">
-                      <input
-                        value={couponInput}
-                        onChange={e => { setCouponInput(e.target.value.toUpperCase()); setCouponError(""); setCouponApplied(false); }}
-                        placeholder="Enter coupon code"
-                        maxLength={20}
-                        className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/25 outline-none focus:border-blue-400/50 uppercase"
-                      />
-                      <button type="button" onClick={applyCoupon}
-                        className="rounded-xl border border-white/20 px-4 py-3 text-xs font-bold text-white transition hover:border-white/40">
-                        Apply
-                      </button>
-                    </div>
-                    {couponApplied && (
-                      <p className="mt-1.5 text-xs text-green-400">✓ SPECIAL5 applied — 5% discount!</p>
-                    )}
-                    {couponError && (
-                      <p className="mt-1.5 text-xs text-red-400">{couponError}</p>
-                    )}
-                  </div>
-
                   {/* Terms & Conditions Checkbox */}
                   <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
                     <input
@@ -545,9 +501,6 @@ function CheckoutContent() {
                     ))}
                     <div className="border-t border-white/10 pt-3 mt-3 space-y-1">
                       <div className="flex justify-between"><span className="text-sm text-white/50">Delivery</span><span className="text-sm font-bold text-green-400">Free</span></div>
-                      {couponApplied && (
-                        <div className="flex justify-between"><span className="text-sm text-green-400">Coupon (SPECIAL5)</span><span className="text-sm font-bold text-green-400">-Rs. {discount.toLocaleString()}</span></div>
-                      )}
                       <div className="flex justify-between"><span className="font-bold text-white">Total ({count} items)</span><span className="font-extrabold text-white">Rs. {finalPrice.toLocaleString()}</span></div>
                     </div>
                   </div>
@@ -561,9 +514,6 @@ function CheckoutContent() {
                     <div className="mt-4 border-t border-white/10 pt-4 space-y-1">
                       <div className="flex justify-between"><span className="text-sm text-white/50">Price</span><span className="text-sm font-bold text-white">Rs. {basePrice.toLocaleString()}</span></div>
                       <div className="flex justify-between"><span className="text-sm text-white/50">Delivery</span><span className="text-sm font-bold text-green-400">Free</span></div>
-                      {couponApplied && (
-                        <div className="flex justify-between"><span className="text-sm text-green-400">Coupon (SPECIAL5)</span><span className="text-sm font-bold text-green-400">-Rs. {discount.toLocaleString()}</span></div>
-                      )}
                       <div className="flex justify-between border-t border-white/10 pt-2 mt-2"><span className="font-bold text-white">Total</span><span className="font-extrabold text-white">Rs. {finalPrice.toLocaleString()}</span></div>
                     </div>
                   </>

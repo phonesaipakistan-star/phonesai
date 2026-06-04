@@ -46,7 +46,7 @@ const emptyPhoneForm = {
   model: "", brand: "Apple", category: "JV", condition: "New",
   cost_price: "", five_g: true, region: "LLA", ios_version: "",
   product_description: "", badge: "", featured: false, in_stock: true,
-  condition_video: "",
+  condition_video: "", water_pack_sealed: false,
 };
 
 const emptyVariantRow = (phoneCondition = "New", category = "JV"): VariantFormRow => ({
@@ -283,6 +283,7 @@ export default function AdminPage() {
         featured: fullPhone.featured,
         in_stock: fullPhone.in_stock,
         condition_video: fullPhone.condition_video ?? "",
+        water_pack_sealed: fullPhone.water_pack_sealed ?? false,
       });
     }
 
@@ -368,6 +369,7 @@ export default function AdminPage() {
       free_case: true,
       images: activeVariants[0].images,
       condition_video: phoneForm.condition_video || null,
+      water_pack_sealed: phoneForm.water_pack_sealed,
     };
 
     let phoneId = editId;
@@ -745,6 +747,7 @@ export default function AdminPage() {
                   {[
                     { label: "5G", key: "five_g" },
                     { label: "Featured", key: "featured" },
+                    { label: "Water Pack Sealed (internal waterproofing seal intact)", key: "water_pack_sealed" },
                   ].map(({ label, key }) => (
                     <label key={key} className="flex items-center gap-2 cursor-pointer">
                       <input type="checkbox" checked={phoneForm[key as keyof typeof phoneForm] as boolean}
@@ -876,7 +879,7 @@ export default function AdminPage() {
                         <label className="mb-1 block text-[10px] text-white/40">Ustaad Ji Notes — this unit</label>
                         <textarea value={row.description} onChange={e => {
                           const updated = [...variantRows]; updated[realIdx] = { ...row, description: e.target.value }; setVariantRows(updated);
-                        }} placeholder="Water Pack — factory seal intact, never opened." rows={2}
+                        }} placeholder="Unit-specific notes (optional)." rows={2}
                           className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/20 outline-none focus:border-blue-400/50 resize-none" />
                       </div>
                       <ImageUploader bucket="phone-images" existingUrls={row.images}

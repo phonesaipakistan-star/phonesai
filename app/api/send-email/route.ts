@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { WATER_PACK_DESCRIPTION } from "@/lib/waterPack";
+import { WATER_PACK_WARRANTY_DESCRIPTION } from "@/lib/waterPack";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = "orders@phonesai.pk";
@@ -20,13 +20,13 @@ type OrderEmailData = {
     category: string;
     condition: string;
     condition_grade?: string;
+    water_pack_sealed?: boolean;
     price: number;
     freeAccessoryLine?: string;
     quantityRemaining?: number | null;
   }[];
   totalPrice?: number;
   paymentMethod?: string;
-  couponApplied?: boolean;
 };
 
 // Spam notice shown at bottom of all customer emails
@@ -48,20 +48,16 @@ const getVerificationEmail = (email: string, token: string) => `
       <p style="color:#6B7280;font-size:14px;margin:8px 0 0;">Premium Shopping, Reinvented.</p>
     </div>
     <div style="background:#0c1a3a;border:1px solid #1e40af;border-radius:16px;padding:32px;text-align:center;margin-bottom:24px;">
-      <p style="font-size:40px;margin:0 0 12px;">🎁</p>
+      <p style="font-size:40px;margin:0 0 12px;">📲</p>
       <h2 style="color:#93c5fd;font-size:22px;font-weight:800;margin:0 0 8px;">Email Verify Karein</h2>
-      <p style="color:#bfdbfe;font-size:14px;margin:0 0 24px;">Apna SPECIAL5 discount code hasil karne ke liye neeche button dabayein.</p>
+      <p style="color:#bfdbfe;font-size:14px;margin:0 0 24px;">Exclusive deals, new arrivals, aur restock alerts ke liye apni email verify karein.</p>
       <a href="${SITE_URL}/api/verify-email?token=${token}"
         style="display:inline-block;background:#3b82f6;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;">
-        ✅ Email Verify Karein — Discount Lein
+        ✅ Email Verify Karein
       </a>
     </div>
-    <div style="background:#111111;border:1px solid #1f2937;border-radius:16px;padding:24px;margin-bottom:24px;">
-      <p style="color:#9ca3af;font-size:13px;margin:0 0 8px;">Verify karne ke baad milega:</p>
-      <div style="background:#1a2a1a;border:1px solid #166534;border-radius:12px;padding:16px;text-align:center;">
-        <p style="color:#4ade80;font-size:24px;font-weight:800;letter-spacing:0.1em;margin:0;">SPECIAL5</p>
-        <p style="color:#86efac;font-size:12px;margin:4px 0 0;">5% off your first order</p>
-      </div>
+    <div style="background:#111111;border:1px solid #1f2937;border-radius:16px;padding:24px;margin-bottom:24px;text-align:center;">
+      <p style="color:#d1d5db;font-size:14px;margin:0;line-height:1.6;">Aap ab haari exclusive list mein hain — new arrivals, restock alerts, aur special deals seedha aapke inbox mein aayenge.</p>
     </div>
     <p style="color:#6b7280;font-size:12px;text-align:center;margin:0;">Yeh link 24 ghante mein expire ho jata hai. Agar aapne signup nahi kiya toh is email ko ignore karein.</p>
     ${spamNotice}
@@ -108,7 +104,6 @@ const getOrderConfirmationEmail = (data: OrderEmailData) => `
       `).join("")}
       <div style="padding:16px 0 0;">
         <p style="color:#ffffff;font-size:16px;font-weight:800;margin:0;">Total: Rs. ${data.totalPrice?.toLocaleString()}</p>
-        ${data.couponApplied ? `<p style="color:#4ade80;font-size:12px;margin:8px 0 0;">✓ SPECIAL5 discount applied</p>` : ""}
       </div>
     </div>
 
@@ -124,10 +119,10 @@ const getOrderConfirmationEmail = (data: OrderEmailData) => `
       <p style="color:#f87171;font-size:14px;font-weight:700;margin:0;">Please do not send payment until we confirm.</p>
     </div>
 
-    ${(data.items ?? []).some((i) => i.condition === "New") ? `
+    ${(data.items ?? []).some((i) => i.water_pack_sealed) ? `
     <div style="background:#052e16;border:1px solid #166534;border-radius:16px;padding:20px;margin-bottom:24px;">
       <p style="color:#4ade80;font-size:14px;font-weight:700;margin:0 0 8px;">💧 Water Pack</p>
-      <p style="color:#86efac;font-size:13px;margin:0;line-height:1.5;">${WATER_PACK_DESCRIPTION}</p>
+      <p style="color:#86efac;font-size:13px;margin:0;line-height:1.5;">${WATER_PACK_WARRANTY_DESCRIPTION}</p>
     </div>
     ` : ""}
 
@@ -185,7 +180,7 @@ const getUnboxingGuideEmail = (data: OrderEmailData) => `
       <h3 style="color:#ffffff;font-size:16px;font-weight:700;margin:0 0 16px;">Perfect Unboxing Video Kaise Banayein</h3>
       ${[
         "Achhi lighting mein record karein",
-        "Pehle factory water pack / seal intact dikhao (never opened proof)",
+        "Pehle Water Pack / internal waterproofing seal intact dikhao (never tampered internally proof)",
         "Slowly open karein — seal break check karein",
         "Screen aur touch test karein",
         "Camera test karein — front aur back",
@@ -245,7 +240,6 @@ const getAdminNotificationEmail = (data: OrderEmailData) => `
     <p><strong>City:</strong> ${data.customerCity}</p>
     <p><strong>Payment:</strong> ${data.paymentMethod}</p>
     <p><strong>Total:</strong> Rs. ${data.totalPrice?.toLocaleString()}</p>
-    ${data.couponApplied ? `<p><strong>Coupon:</strong> SPECIAL5 applied</p>` : ""}
     <hr>
     <h3>Items:</h3>
     ${(data.items ?? []).map(item => `
@@ -280,7 +274,7 @@ export async function POST(req: Request) {
         body: JSON.stringify({
           from: `PhonesAI <${FROM_EMAIL}>`,
           to: [data.customerEmail],
-          subject: "Email Verify Karein — SPECIAL5 Discount Pao 🎁",
+          subject: "PhonesAI — Verify Your Email for Early Access",
           html: getVerificationEmail(data.customerEmail, data.verificationToken!),
         }),
       });

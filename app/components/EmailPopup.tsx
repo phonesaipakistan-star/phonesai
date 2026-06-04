@@ -36,9 +36,9 @@ export default function EmailPopup() {
     e.preventDefault();
     if (!email) return;
     setSending(true);
-  
+
     const token = generateToken();
-  
+
     try {
       const { error } = await supabase.from("customer_leads").insert({
         email,
@@ -46,12 +46,11 @@ export default function EmailPopup() {
         verified: false,
         discount_used: false,
       });
-  
+
       if (error) {
         console.error("Supabase insert error:", error);
       }
-  
-      // Send verification email regardless
+
       await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -64,7 +63,7 @@ export default function EmailPopup() {
     } catch (err) {
       console.error("Email signup error:", err);
     }
-  
+
     setSending(false);
     setSubmitted(true);
     setTimeout(() => {
@@ -82,28 +81,32 @@ export default function EmailPopup() {
         {!submitted ? (
           <>
             <div className="mb-5 text-center">
-              <p className="text-2xl mb-2">🎁</p>
-              <h2 className="text-xl font-extrabold text-white">Special Discount — First Order!</h2>
-              <p className="mt-2 text-sm text-white/50">Apna email dein aur pehli purchase pe special discount pao.</p>
+              <p className="text-2xl mb-2">📲</p>
+              <h2 className="text-xl font-extrabold text-white">Stay in the Loop 📲</h2>
+              <p className="mt-2 text-sm text-white/50 leading-relaxed">
+                Sign up for exclusive deals, new arrivals, and restock alerts — be the first to know when a phone you want comes in.
+              </p>
             </div>
             <form onSubmit={handleEmailSubmit} className="space-y-3">
               <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder="aapka@email.com"
                 className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/25 outline-none focus:border-blue-400/50" />
               <button type="submit" disabled={sending} className="w-full rounded-xl bg-blue-500 py-3 text-sm font-bold text-white hover:bg-blue-400 disabled:opacity-50">
-                {sending ? "Bhej rahe hain..." : "Claim My Discount →"}
+                {sending ? "Bhej rahe hain..." : "Get Early Access →"}
               </button>
             </form>
             <button onClick={handleDismiss} className="mt-3 w-full text-center text-xs text-white/25 hover:text-white/50">
-              No thanks, I'll pay full price
+              No thanks
             </button>
           </>
         ) : (
           <div className="text-center py-4">
             <p className="text-4xl mb-3">📧</p>
             <h2 className="text-xl font-extrabold text-white">Email Check Karein!</h2>
-            <p className="mt-2 text-sm text-white/50">Aapki email pe ek verification link bheja gaya hai.</p>
-            <p className="mt-2 text-xs text-white/30">Link click karein aur SPECIAL5 discount code hasil karein!</p>
+            <p className="mt-2 text-sm text-white/50">Aapki email pe verification link bheja gaya hai.</p>
+            <p className="mt-2 text-xs text-white/40 leading-relaxed">
+              Link click karein — phir aap exclusive list mein shamil ho jayenge.
+            </p>
             <div className="mt-4 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
               <p className="text-xs text-white/40">Spam folder bhi check karein agar email na aaye.</p>
             </div>

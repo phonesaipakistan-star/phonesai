@@ -21,6 +21,7 @@ export type CartItem = {
   image: string | null;
   free_case: boolean;
   is_accessory?: boolean;
+  water_pack_sealed?: boolean;
 };
 
 type CartContextType = {

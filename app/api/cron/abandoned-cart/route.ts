@@ -32,7 +32,7 @@ const getAbandonedCartEmail = (name: string) => `
       <p style="color:#9ca3af;font-size:13px;margin:0;">Har verified device pe 7-din ki warranty hai. Koi risk nahi — bas asli, verified phone.</p>
     </div>
     <div style="background:#111111;border:1px solid #166534;border-radius:16px;padding:20px;text-align:center;margin-bottom:24px;">
-      <p style="color:#4ade80;font-size:13px;margin:0;">💡 Coupon code <strong>SPECIAL5</strong> use karein — 5% extra off milega!</p>
+      <p style="color:#4ade80;font-size:13px;margin:0;">💡 Hamare phones best wholesale rates pe hain — fixed price, koi hidden charges nahi.</p>
     </div>
     <div style="text-align:center;padding-top:24px;border-top:1px solid #1f2937;">
       <p style="color:#6b7280;font-size:12px;margin:0;">PhonesAI • <a href="https://phonesai.pk" style="color:#3b82f6;text-decoration:none;">phonesai.pk</a></p>

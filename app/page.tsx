@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
-import { WATER_PACK_DESCRIPTION } from "@/lib/waterPack";
+import { WATER_PACK_WARRANTY_DESCRIPTION } from "@/lib/waterPack";
 
 const openUstaadJi = () => {
   if (typeof window !== "undefined") {
@@ -25,7 +25,7 @@ type Review = {
 const categories = [
   {
     name: "iPhones",
-    description: "PTA, Non-PTA, and JV — verified. New: Water Pack (factory seal intact, never opened).",
+    description: "PTA, Non-PTA, and JV — verified. Brand New and Water Pack units listed separately.",
     link: "/shop?brand=Apple",
     color: "from-blue-500/20 to-blue-600/10",
     icon: (
@@ -191,7 +191,7 @@ export default function Home() {
         {/* Water Pack */}
         <section className="mx-auto mt-6 max-w-6xl px-4 sm:px-6">
           <p className="text-center text-xs text-white/50 leading-relaxed max-w-2xl mx-auto sm:text-sm">
-            💧 <span className="text-green-300/90">{WATER_PACK_DESCRIPTION}</span>
+            💧 <span className="text-green-300/90">{WATER_PACK_WARRANTY_DESCRIPTION}</span>
           </p>
         </section>
 
@@ -206,7 +206,7 @@ export default function Home() {
             <div className="text-center">
               <p className="text-xl sm:text-2xl" aria-hidden="true">⭐</p>
               <p className="mt-1 text-xs font-bold text-white sm:text-sm">Condition Graded</p>
-              <p className="mt-0.5 text-[10px] text-white/50 hidden sm:block">Pre-owned: Premium to Fair. New: Water Pack sealed.</p>
+              <p className="mt-0.5 text-[10px] text-white/50 hidden sm:block">Pre-owned: Premium to Fair. Water Pack badge = internal seal intact.</p>
             </div>
             <div className="text-center">
               <p className="text-xl sm:text-2xl" aria-hidden="true">🛡️</p>

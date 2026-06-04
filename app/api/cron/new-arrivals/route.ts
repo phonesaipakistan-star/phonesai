@@ -44,7 +44,7 @@ const getNewArrivalsEmail = (name: string, phones: { model: string; storage: str
       </a>
     </div>
     <div style="background:#111111;border:1px solid #166534;border-radius:16px;padding:20px;text-align:center;margin-bottom:24px;">
-      <p style="color:#4ade80;font-size:13px;margin:0;">💡 Coupon code <strong>SPECIAL5</strong> use karein — 5% extra off!</p>
+      <p style="color:#4ade80;font-size:13px;margin:0;">💡 Exclusive deals aur restock alerts — verify your email on phonesai.pk</p>
     </div>
     <div style="text-align:center;padding-top:24px;border-top:1px solid #1f2937;">
       <p style="color:#6b7280;font-size:12px;margin:0;">PhonesAI • <a href="https://phonesai.pk" style="color:#3b82f6;text-decoration:none;">phonesai.pk</a> • Wah Cantt, Pakistan</p>

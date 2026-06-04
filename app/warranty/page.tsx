@@ -1,9 +1,9 @@
-import { WATER_PACK_DESCRIPTION } from "@/lib/waterPack";
+import { WATER_PACK_WARRANTY_DESCRIPTION } from "@/lib/waterPack";
 
 export const metadata = {
   title: "Warranty Policy | PhonesAI Pakistan",
   description:
-    "PhonesAI ki complete warranty policy — Water Pack (New) aur Pre-Owned phones ke liye coverage. Ustaad Ji ka wada.",
+    "PhonesAI ki complete warranty policy — Brand New, Water Pack, Pre-Owned phones ke liye coverage. Ustaad Ji ka wada.",
 };
 
 export default function WarrantyPage() {
@@ -30,8 +30,12 @@ export default function WarrantyPage() {
             <div className="divide-y divide-white/5 px-5">
               {[
                 {
-                  grade: "New (Water Pack)",
-                  detail: `Full 7-day software warranty. ${WATER_PACK_DESCRIPTION} Free case included.`,
+                  grade: "Brand New",
+                  detail: "Full 7-day software warranty. Factory new unit. Free case included.",
+                },
+                {
+                  grade: "Water Pack",
+                  detail: `Units marked Water Pack only (new or pre-owned). ${WATER_PACK_WARRANTY_DESCRIPTION}`,
                 },
                 {
                   grade: "Premium / Excellent",
@@ -57,6 +61,9 @@ export default function WarrantyPage() {
                 All pre-owned grades include <span className="text-white font-semibold">free case + screen protector</span>. New phones include a <span className="text-white font-semibold">free case</span>.
               </p>
               <p className="mt-2 text-xs text-white/70">
+                <span className="text-white font-semibold">Brand New</span> aur <span className="text-white font-semibold">Water Pack</span> alag attributes hain — Water Pack kisi bhi phone par ho sakta hai (new ya pre-owned) jahan internal waterproofing seal abhi tak break nahi hui.
+              </p>
+              <p className="mt-2 text-xs text-white/70">
                 Unboxing video required for <span className="text-white font-semibold">all warranty claims</span> regardless of grade.
               </p>
             </div>
@@ -65,9 +72,7 @@ export default function WarrantyPage() {
           {/* Water Pack */}
           <div className="rounded-2xl border border-cyan-400/20 bg-cyan-500/5 p-6">
             <p className="text-cyan-200 font-bold text-base mb-3">💧 Water Pack</p>
-            <p className="text-xs text-white/60">
-              {WATER_PACK_DESCRIPTION} Sirf New phones ke liye — authenticity guarantee: phone kabhi khola nahi gaya, factory waterproofing seal intact.
-            </p>
+            <p className="text-xs text-white/60">{WATER_PACK_WARRANTY_DESCRIPTION}</p>
           </div>
 
           {/* Coverage summary table */}
@@ -76,20 +81,30 @@ export default function WarrantyPage() {
               <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Coverage at a Glance</p>
             </div>
             <div className="divide-y divide-white/5">
-              {/* Pin Pack */}
               <div className="grid grid-cols-3 items-center gap-4 px-5 py-4">
                 <div>
-                  <p className="text-xs font-bold text-white">Water Pack (New)</p>
-                  <p className="text-[10px] text-white/40">Factory seal intact — never opened</p>
+                  <p className="text-xs font-bold text-white">Brand New</p>
+                  <p className="text-[10px] text-white/40">Factory new unit</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-xs text-white/70">
+                    <span className="text-green-400 font-bold">7 Days</span> — PhonesAI software warranty
+                  </p>
+                  <p className="text-[10px] text-white/35 mt-0.5">PTA units may also qualify for brand warranty via official care centre.</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 items-center gap-4 px-5 py-4">
+                <div>
+                  <p className="text-xs font-bold text-white">Water Pack</p>
+                  <p className="text-[10px] text-white/40">Internal waterproofing seal intact — never tampered</p>
                 </div>
                 <div className="col-span-2">
                   <p className="text-xs text-white/70">
                     <span className="text-green-400 font-bold">1 Year</span> — Official brand warranty via company care centre
                   </p>
-                  <p className="text-[10px] text-white/35 mt-0.5">Apple/Samsung service centre directly. PhonesAI 7-day software warranty also applies.</p>
+                  <p className="text-[10px] text-white/35 mt-0.5">Apple/Samsung service centre directly. PhonesAI 7-day software warranty also applies. Check listing for Water Pack badge.</p>
                 </div>
               </div>
-              {/* Pre-Owned */}
               <div className="grid grid-cols-3 items-center gap-4 px-5 py-4">
                 <div>
                   <p className="text-xs font-bold text-white">Pre-Owned</p>
@@ -102,7 +117,6 @@ export default function WarrantyPage() {
                   <p className="text-[10px] text-white/35 mt-0.5">Software issues only. Hardware not covered.</p>
                 </div>
               </div>
-              {/* JV */}
               <div className="grid grid-cols-3 items-center gap-4 px-5 py-4">
                 <div>
                   <p className="text-xs font-bold text-white">JV iPhone</p>
@@ -118,10 +132,10 @@ export default function WarrantyPage() {
             </div>
           </div>
 
-          {/* Pin Pack detail */}
+          {/* Water Pack brand warranty */}
           <div className="rounded-2xl border border-green-400/20 bg-green-500/5 p-6">
-            <p className="text-green-200 font-bold text-base mb-3">📦 Water Pack Phones — 1 Year Brand Warranty</p>
-            <p className="mb-3">{WATER_PACK_DESCRIPTION} <span className="text-white font-semibold">1 year official warranty</span> directly through the brand&apos;s official care centre where applicable (PTA units).</p>
+            <p className="text-green-200 font-bold text-base mb-3">📦 Water Pack — 1 Year Brand Warranty (where applicable)</p>
+            <p className="mb-3">{WATER_PACK_WARRANTY_DESCRIPTION} <span className="text-white font-semibold">1 year official warranty</span> directly through the brand&apos;s official care centre where applicable (PTA units).</p>
             <div className="space-y-2 mt-3">
               <div className="flex items-start gap-2">
                 <span className="text-green-400 shrink-0 mt-0.5">✓</span>
@@ -145,44 +159,40 @@ export default function WarrantyPage() {
           {/* 7-Day software warranty — all phones */}
           <div className="rounded-2xl border border-blue-400/20 bg-blue-500/5 p-6">
             <p className="text-blue-200 font-bold text-base mb-3">🛡️ 7-Day Software Warranty — All Phones</p>
-            <p className="mb-3">Har phone pe — Water Pack (New), Pre-Owned, ya JV — PhonesAI <span className="text-white font-semibold">7-din ki software warranty</span> deta hai delivery ke baad.</p>
+            <p className="mb-3">Har phone pe — Brand New, Water Pack, Pre-Owned, ya JV — PhonesAI <span className="text-white font-semibold">7-din ki software warranty</span> deta hai delivery ke baad.</p>
             <div className="space-y-2">
               <div className="flex items-start gap-2">
                 <span className="text-green-400 shrink-0 mt-0.5">✓</span>
-                <p>iOS/Android activation issues</p>
+                <p>Software issues — lag, freeze, boot problems</p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="text-green-400 shrink-0 mt-0.5">✓</span>
-                <p>Software functionality problems</p>
+                <p>Verified before dispatch</p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="text-green-400 shrink-0 mt-0.5">✓</span>
-                <p>Setup aur configuration mein issues</p>
+                <p>Unboxing video required for all claims</p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="text-red-400 shrink-0 mt-0.5">✕</span>
-                <p>Hardware issues — screen, battery, camera, speaker, buttons, etc. <span className="text-white/50">(not covered under PhonesAI warranty for any phone)</span></p>
+                <p>Physical damage, water damage, or misuse not covered</p>
               </div>
             </div>
           </div>
 
-          {/* What's NOT covered */}
+          {/* Not covered */}
           <div>
-            <h2 className="text-white font-bold text-lg mb-3">❌ Warranty cover nahi karta</h2>
+            <h2 className="text-white font-bold text-lg mb-3">❌ Warranty Does Not Cover</h2>
             <ul className="space-y-2">
               {[
-                "Hardware issues — screen, battery, camera, speaker, charging port, buttons (not covered on any phone via PhonesAI)",
                 "Physical damage — girna, screen crack, dents after delivery",
                 "Water damage — kisi bhi tarah ka liquid contact",
-                "Battery degradation after normal use",
-                "Issues after customer visits any third-party repair shop",
-                "iCloud or Apple ID issues",
-                "Non-PTA SIM restrictions — by regulation",
-                "JV SIM lock — by design, fully disclosed at purchase",
-                "Issues reported after warranty period ends",
-                "Bina unboxing video ke koi bhi claim",
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-2.5">
+                "Misuse — jailbreak, unauthorized repairs, software tampering",
+                "Accessories — chargers, cables (unless defective on arrival)",
+                "Battery degradation beyond normal use after 7 days",
+                "SIM lock on JV phones — by design, not a defect",
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-2.5">
                   <span className="text-red-400 shrink-0 mt-0.5">✕</span>
                   <span>{item}</span>
                 </li>
@@ -197,7 +207,7 @@ export default function WarrantyPage() {
             <ul className="space-y-2">
               {[
                 "Sealed box dikhao",
-                "Slowly open karein — factory water pack / seal intact check karein",
+                "Slowly open karein — Water Pack units: internal waterproofing seal intact check karein (never tampered internally)",
                 "Camera test — front aur back",
                 "Charging test",
                 "Speaker test",
@@ -231,14 +241,9 @@ export default function WarrantyPage() {
             </ol>
           </div>
 
-          {/* CTA */}
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
-            <p className="text-white font-bold mb-2">Warranty claim ya koi sawal?</p>
-            <a href="https://wa.me/923041502560?text=Warranty claim karna hai" className="text-blue-400 hover:underline">
-              WhatsApp: 0304-1502560
-            </a>
+            <p className="text-white/50 text-xs">Questions? WhatsApp Ustaad Ji at <a href="https://wa.me/923041502560" className="text-green-400 hover:underline">0304-1502560</a></p>
           </div>
-
         </div>
       </div>
     </div>

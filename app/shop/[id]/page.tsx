@@ -30,7 +30,7 @@ import {
   PRODUCT_IMAGE_MAIN_CLASS,
   PRODUCT_IMAGE_THUMB_CLASS,
 } from "@/lib/ui";
-import { WATER_PACK_DESCRIPTION } from "@/lib/waterPack";
+import { WATER_PACK_BADGE_TOOLTIP, WATER_PACK_INFO_BOX } from "@/lib/waterPack";
 
 const SUPABASE_URL = "https://xadxdkbdwyulprfukrjb.supabase.co";
 
@@ -43,6 +43,7 @@ type Phone = {
   product_description: string | null;
   region: string | null;
   ios_version: string | null; free_case: boolean;
+  water_pack_sealed?: boolean;
 };
 
 type Accessory = {
@@ -328,6 +329,7 @@ export default function ProductPage() {
       discount_price: selectedVariant.discount_price,
       image: displayImages[0] ?? null,
       free_case: true,
+      water_pack_sealed: hasWaterPack,
     });
   };
 
@@ -348,6 +350,7 @@ export default function ProductPage() {
   const savings = originalPrice ? originalPrice - currentPrice : 0;
   const conditionTags = selectedGrade ? CONDITION_TAGS[selectedGrade] : [];
   const phoneIsNew = isNewPhone(phone.condition);
+  const hasWaterPack = !!phone.water_pack_sealed;
   const isJv = phone.category === "JV";
   const variantUnavailable = selectedVariant && !isVariantAvailable(selectedVariant);
   const sourcingLink = `https://wa.me/923041502560?text=${encodeURIComponent(
@@ -370,12 +373,12 @@ export default function ProductPage() {
         <div className="fixed bottom-20 left-3 z-40 w-56 rounded-2xl border border-blue-400/30 bg-[#0a0a0a] p-3 shadow-[0_0_30px_rgba(59,130,246,0.2)] sm:bottom-6 sm:left-6 sm:w-64 sm:p-4">
           <button onClick={() => { setShowDiscountBanner(false); localStorage.setItem("phonesai_discount_banner_dismissed", "true"); }}
             className="absolute right-2 top-2 text-white/30 transition hover:text-white text-xs">✕</button>
-          <p className="text-base mb-1">🎁</p>
-          <p className="text-xs font-bold text-white sm:text-sm">Special Discount!</p>
-          <p className="mt-1 text-[10px] text-white/50 leading-relaxed sm:text-xs">Email register karein aur pehli purchase pe discount bachayein.</p>
+          <p className="text-base mb-1">📲</p>
+          <p className="text-xs font-bold text-white sm:text-sm">Stay in the Loop</p>
+          <p className="mt-1 text-[10px] text-white/50 leading-relaxed sm:text-xs">New arrivals, restock alerts, aur exclusive deals — email se pehle pata chale.</p>
           <button onClick={() => { setShowDiscountBanner(false); localStorage.setItem("phonesai_discount_banner_dismissed", "true"); window.dispatchEvent(new CustomEvent("openEmailPopup")); }}
             className="mt-2 w-full rounded-xl bg-blue-500/20 border border-blue-400/30 py-1.5 text-[10px] font-semibold text-blue-200 transition hover:bg-blue-500/30 sm:py-2 sm:text-xs">
-            Claim Discount →
+            Get Early Access →
           </button>
         </div>
       )}
@@ -408,8 +411,8 @@ export default function ProductPage() {
                 <span className="rounded-full border border-purple-500/30 bg-purple-500/20 px-2.5 py-0.5 text-xs font-medium text-purple-300">{phone.badge}</span>
               )}
               <span className="rounded-full border border-green-500/30 bg-green-500/20 px-2.5 py-0.5 text-xs text-green-300">{freeAccessory.badge}</span>
-              {phoneIsNew && (
-                <span className="rounded-full border border-green-400/40 bg-green-500/15 px-2.5 py-0.5 text-xs font-semibold text-green-300" title={WATER_PACK_DESCRIPTION}>📦 Water Pack</span>
+              {hasWaterPack && (
+                <span className="rounded-full border border-green-400/40 bg-green-500/15 px-2.5 py-0.5 text-xs font-semibold text-green-300" title={WATER_PACK_BADGE_TOOLTIP}>📦 Water Pack</span>
               )}
             </div>
             {displayImages.length > 1 && (
@@ -435,7 +438,14 @@ export default function ProductPage() {
           <div className="flex flex-col">
             <div className="mb-3 flex flex-wrap gap-1.5">
               <span className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${categoryColors[phone.category] ?? "border-white/20 bg-white/10 text-white/60"}`}>{phone.category}</span>
-              <span className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${phone.condition === "Pre-Owned" || phone.condition === "Used" ? "border-amber-400/30 bg-amber-400/10 text-amber-300" : "border-green-400/30 bg-green-400/10 text-green-300"}`}>{phone.condition}</span>
+              {phoneIsNew ? (
+                <span className="rounded-full border border-green-400/30 bg-green-400/10 px-2.5 py-0.5 text-xs font-semibold text-green-300">Brand New</span>
+              ) : (
+                <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-0.5 text-xs font-semibold text-amber-300">{phone.condition}</span>
+              )}
+              {hasWaterPack && (
+                <span className="rounded-full border border-cyan-400/30 bg-cyan-500/15 px-2.5 py-0.5 text-xs font-semibold text-cyan-200" title={WATER_PACK_BADGE_TOOLTIP}>📦 Water Pack</span>
+              )}
               {phone.five_g && <span className="rounded-full border border-blue-400/20 bg-blue-400/10 px-2.5 py-0.5 text-xs font-semibold text-blue-300">5G Ready</span>}
             </div>
 
@@ -510,13 +520,19 @@ export default function ProductPage() {
 
             {/* 3. Condition — New badge or Pre-Owned grade selector */}
             {phoneIsNew ? (
-              <div className="mt-5">
+              <div className="mt-5 space-y-3">
                 <div className="rounded-2xl border-2 border-green-400/40 bg-gradient-to-br from-green-500/15 to-green-500/5 px-5 py-4 text-center">
-                  <p className="text-lg font-extrabold text-green-300 sm:text-xl">Brand New — Water Pack</p>
+                  <p className="text-lg font-extrabold text-green-300 sm:text-xl">Brand New</p>
                   <p className="mt-2 text-xs text-white/60 leading-relaxed sm:text-sm">
-                    📦 {WATER_PACK_DESCRIPTION}
+                    Factory new unit — select storage and color below.
                   </p>
                 </div>
+                {hasWaterPack && (
+                  <div className="rounded-2xl border border-cyan-400/30 bg-cyan-500/10 px-5 py-4">
+                    <p className="text-sm font-bold text-cyan-200">📦 Water Pack</p>
+                    <p className="mt-2 text-xs text-white/60 leading-relaxed sm:text-sm">{WATER_PACK_INFO_BOX}</p>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="mt-5">

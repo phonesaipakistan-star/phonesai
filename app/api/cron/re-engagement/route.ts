@@ -44,7 +44,7 @@ const getReEngagementEmail = (name: string) => `
       </div>
     </div>
     <div style="background:#111111;border:1px solid #166534;border-radius:16px;padding:20px;text-align:center;margin-bottom:24px;">
-      <p style="color:#4ade80;font-size:13px;margin:0;">💡 Coupon code <strong>SPECIAL5</strong> use karein — 5% extra off milega!</p>
+      <p style="color:#4ade80;font-size:13px;margin:0;">💡 New arrivals aur restock alerts ke liye email list join karein — phonesai.pk</p>
     </div>
     <div style="background:#111111;border:1px solid #1f2937;border-radius:16px;padding:24px;margin-bottom:24px;text-align:center;">
       <p style="font-size:24px;margin:0 0 8px;">🧔</p>

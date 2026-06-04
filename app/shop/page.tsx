@@ -17,13 +17,14 @@ import {
   isNewPhone,
 } from "@/lib/variants";
 import { PRODUCT_IMAGE_FRAME, PRODUCT_IMAGE_CLASS } from "@/lib/ui";
-import { WATER_PACK_DESCRIPTION } from "@/lib/waterPack";
+import { WATER_PACK_BADGE_TOOLTIP } from "@/lib/waterPack";
 
 type Phone = {
   id: string; model: string; storage: string; color: string; category: string; brand: string;
   condition: string; price: number; discount_price: number | null; battery_health: number;
   physical_condition: string; five_g: boolean; in_stock: boolean;
   featured: boolean; badge: string | null; images: string[]; free_case: boolean;
+  water_pack_sealed?: boolean;
 };
 
 type ShopPhone = Phone & {
@@ -235,7 +236,10 @@ function ShopContent() {
                         <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${categoryColors[phone.category] ?? "bg-white/10 text-white/60 border-white/20"}`}>{phone.category}</span>
                         {phone.five_g && <span className="rounded-full border border-blue-400/20 bg-blue-400/10 px-2 py-0.5 text-[10px] text-blue-300">5G</span>}
                         {isNew && (
-                          <span className="rounded-full border border-green-400/30 bg-green-500/15 px-2 py-0.5 text-[10px] font-semibold text-green-300" title={WATER_PACK_DESCRIPTION}>📦 Water Pack</span>
+                          <span className="rounded-full border border-green-400/30 bg-green-400/10 px-2 py-0.5 text-[10px] font-semibold text-green-300">Brand New</span>
+                        )}
+                        {phone.water_pack_sealed && (
+                          <span className="rounded-full border border-cyan-400/30 bg-cyan-500/15 px-2 py-0.5 text-[10px] font-semibold text-cyan-200" title={WATER_PACK_BADGE_TOOLTIP}>📦 Water Pack</span>
                         )}
                         {phone.badge && (
                           <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${badgeColors[phone.badge] ?? "bg-white/10 text-white/60 border-white/20"}`}>{phone.badge}</span>

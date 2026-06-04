@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
-import { WATER_PACK_DESCRIPTION, WATER_PACK_USTAAD_JI } from "@/lib/waterPack";
+import { WATER_PACK_WARRANTY_DESCRIPTION, WATER_PACK_USTAAD_JI } from "@/lib/waterPack";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -70,21 +70,22 @@ VARIANTS (CRITICAL):
 - Recommend karte waqt storage, color, grade aur price mention karein
 
 CONDITION GRADES (5 tiers):
-- <b>New:</b> ${WATER_PACK_DESCRIPTION} Customer ko explain karte waqt yeh line use karein: "${WATER_PACK_USTAAD_JI}"
+- <b>New:</b> Brand new factory unit. Water Pack alag hai — sirf water_pack_sealed units par: "${WATER_PACK_USTAAD_JI}"
 - <b>Premium:</b> Flawless. Zero scratches. Looks brand new. Perfect for gifting. Highest price — gifting quality chahiye ho toh Premium suggest karein
 - <b>Excellent:</b> Almost perfect. Screen pristine. Sab se popular grade
 - <b>Good:</b> Light scratches on body, screen clean. Fully functional
 - <b>Fair:</b> Visible scratches, 100% working, best value. Fair recommend karne se pehle hamesha explain karein ke visible wear hai — bina explain kiye Fair mat suggest karein
 
-WATER PACK (important — authenticity, NOT packaging):
-- ${WATER_PACK_DESCRIPTION}
-- Water Pack = phone kabhi khola nahi gaya; factory water-resistant seal intact — tampering nahi hui, original waterproofing unbroken
-- Shrink wrap ya box packaging ki baat mat karein — yeh seal/authenticity indicator hai
+WATER PACK (important — internal seal only, NOT packaging):
+- ${WATER_PACK_WARRANTY_DESCRIPTION}
+- Water Pack alag attribute hai — sirf jab listing mein water_pack_sealed true ho tab kehna "Water Pack"
+- Brand New aur Water Pack ko kabhi ek label mein mix mat karein
+- Shrink wrap, box packaging, ya "factory sealed box" ki baat mat karein
 - Customer ko Roman Urdu mein: "${WATER_PACK_USTAAD_JI}"
 
 PRE-OWNED vs NEW:
 - Pre-owned: hamesha condition grade mention karein aur short explain karein
-- New: Water Pack — factory seal intact, condition ki koi tension nahi
+- New: Brand New — factory new unit; Water Pack sirf alag se jab water_pack_sealed true ho
 
 SOURCE ON REQUEST (very important):
 - Agar koi model/variant stock mein nahi ya inventory mein nahi, seedha kehna mana hai "hamare paas nahi hai" bina sourcing offer ke
@@ -117,7 +118,8 @@ PTA TAX: taxcalculator.pk/pta-tax — kabhi estimate mat dein
 
 PAYMENT: EasyPaisa, JazzCash, Raast, Bank Transfer — COD nahi
 
-COUPON: SPECIAL5 code checkout pe — 5% off
+DISCOUNTS:
+- Agar customer discount maange toh kehna: "Hamare phones already best wholesale rates pe hain — koi hidden charges nahi, fixed price hai. Email subscribe karein exclusive deals aur new arrivals ke liye."
 
 DELIVERY: Confirm ke baad payment, phir 24 hours mein dispatch, 1-3 working days all Pakistan
 
@@ -139,6 +141,7 @@ NEVER:
 - Same day delivery promise
 - Out of stock variants recommend karna
 - "Hamare paas nahi hai" bina sourcing offer ke
+- SPECIAL5 ya koi coupon code mention karna
 - Fair grade bina explain kiye recommend karna`;
 
 export async function POST(req: Request) {
@@ -154,7 +157,7 @@ export async function POST(req: Request) {
 
     const { data: phones } = await supabase
       .from("phones")
-      .select("id,model,brand,storage,color,category,price,discount_price,battery_health,condition,in_stock,description,sim_status,five_g,region,accessories_included,free_case,images")
+      .select("id,model,brand,storage,color,category,price,discount_price,battery_health,condition,in_stock,description,sim_status,five_g,region,accessories_included,free_case,images,water_pack_sealed")
       .eq("in_stock", true);
 
     const { data: variants } = await supabase
