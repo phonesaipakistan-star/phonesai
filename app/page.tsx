@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
-import { WATER_PACK_WARRANTY_DESCRIPTION } from "@/lib/waterPack";
 
 const openUstaadJi = () => {
   if (typeof window !== "undefined") {
@@ -186,13 +185,6 @@ export default function Home() {
               Request a Phone → 0304-1502560
             </a>
           </div>
-        </section>
-
-        {/* Water Pack */}
-        <section className="mx-auto mt-6 max-w-6xl px-4 sm:px-6">
-          <p className="text-center text-xs text-white/50 leading-relaxed max-w-2xl mx-auto sm:text-sm">
-            💧 <span className="text-green-300/90">{WATER_PACK_WARRANTY_DESCRIPTION}</span>
-          </p>
         </section>
 
         {/* Trust Strip */}

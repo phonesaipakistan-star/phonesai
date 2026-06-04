@@ -10,8 +10,10 @@ import {
   type ConditionGrade,
   PRE_OWNED_GRADES,
   CONDITION_TAGS,
-  CONDITION_DESCRIPTIONS,
   CONDITION_VISUAL,
+  CONDITION_CARD_LINE,
+  GRADE_CARD_SELECTED,
+  GRADE_CARD_TAG_PILL,
   getVariantPrice,
   getVariantPillPrice,
   isVariantAvailable,
@@ -118,7 +120,6 @@ export default function ProductPage() {
   const [selectedStorage, setSelectedStorage] = useState<string>("");
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [selectedGrade, setSelectedGrade] = useState<ConditionGrade | null>(null);
-  const [expandedGrade, setExpandedGrade] = useState<ConditionGrade | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [relatedAccessories, setRelatedAccessories] = useState<Accessory[]>([]);
   const [relatedPhones, setRelatedPhones] = useState<ShopPhone[]>([]);
@@ -277,7 +278,6 @@ export default function ProductPage() {
   const handleGradeSelect = (grade: ConditionGrade) => {
     if (!phone) return;
     applySelection(variants, phone.condition, selectedStorage, selectedColor, grade);
-    setExpandedGrade(expandedGrade === grade ? null : grade);
   };
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -536,47 +536,89 @@ export default function ProductPage() {
               </div>
             ) : (
               <div className="mt-5">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-white/40">Select Condition Grade</p>
-                <div className="space-y-2">
-                  {PRE_OWNED_GRADES.map((grade) => {
-                    const variant = findVariant(variants, selectedStorage, selectedColor, grade);
-                    const available = variant ? isVariantAvailable(variant) : false;
-                    const isSelected = selectedGrade === grade;
-                    const price = variant ? getVariantPrice(variant) : null;
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-white/45">
+                  Condition
+                </p>
+                <div className="flex flex-col gap-3">
+                  {PRE_OWNED_GRADES.filter((grade) =>
+                    findVariant(variants, selectedStorage, selectedColor, grade)
+                  ).map((grade) => {
+                    const variant = findVariant(variants, selectedStorage, selectedColor, grade)!;
+                    const available = isVariantAvailable(variant);
+                    const isSelected = selectedGrade === grade && available;
+                    const price = getVariantPrice(variant);
                     const visual = CONDITION_VISUAL[grade];
+                    const soldOut = !available;
                     return (
-                      <div key={grade}>
-                        <button type="button" disabled={!variant || !available}
-                          onClick={() => { if (variant && available) handleGradeSelect(grade); }}
-                          className={`flex w-full items-center gap-2 rounded-xl border px-3 py-3 text-left transition sm:gap-3 sm:px-4 ${!variant || !available ? "border-white/5 bg-white/[0.01] opacity-40 cursor-not-allowed" : isSelected ? `${visual.selectedBorder} ${visual.selectedBg}` : "border-white/10 bg-white/[0.02] hover:border-white/25"}`}>
-                          <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${isSelected && available ? "border-blue-400 bg-blue-500" : "border-white/30"}`}>
-                            {isSelected && available && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
-                          </span>
-                          <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
-                            <div className="flex shrink-0 items-center gap-1.5">
-                              <span className="text-base">{visual.icon}</span>
-                              <span className={`text-sm font-semibold ${available ? "text-white" : "text-white/40"}`}>{grade}</span>
-                              {visual.popular && available && (
-                                <span className="rounded-full border border-blue-400/30 bg-blue-500/20 px-2 py-0.5 text-[10px] text-blue-300">Popular</span>
-                              )}
-                              {!available && variant && (
-                                <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-white/50">Sold out</span>
-                              )}
+                      <button
+                        key={grade}
+                        type="button"
+                        disabled={soldOut}
+                        onClick={() => handleGradeSelect(grade)}
+                        className={`group w-full overflow-hidden rounded-2xl border text-left transition-all duration-300 ease-out ${
+                          soldOut
+                            ? "cursor-not-allowed border-white/10 bg-white/[0.03] opacity-40"
+                            : isSelected
+                              ? GRADE_CARD_SELECTED[grade]
+                              : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-5 sm:py-4">
+                          <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                            <span
+                              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] text-2xl sm:h-12 sm:w-12 sm:text-[1.65rem]"
+                              aria-hidden="true"
+                            >
+                              {visual.icon}
+                            </span>
+                            <div className="min-w-0">
+                              <p className="text-base font-bold tracking-tight text-white sm:text-lg">
+                                {grade}
+                              </p>
+                              <p className="mt-0.5 text-xs text-white/45 sm:text-[13px]">
+                                {CONDITION_CARD_LINE[grade]}
+                              </p>
                             </div>
-                            <div className="flex min-w-0 flex-1 flex-wrap gap-1">
+                          </div>
+                          <div className="flex shrink-0 flex-col items-end gap-1">
+                            {grade === "Excellent" && available && (
+                              <span className="rounded-full border border-green-400/35 bg-green-500/15 px-2 py-0.5 text-[10px] font-semibold text-green-300">
+                                Popular
+                              </span>
+                            )}
+                            {grade === "Fair" && available && (
+                              <span className="rounded-full border border-orange-400/35 bg-orange-500/15 px-2 py-0.5 text-[10px] font-semibold text-orange-300">
+                                Best Value
+                              </span>
+                            )}
+                            {soldOut ? (
+                              <span className="text-sm font-semibold text-white/40">Sold out</span>
+                            ) : (
+                              <span className="text-lg font-extrabold tabular-nums text-white sm:text-xl">
+                                Rs. {price.toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div
+                          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${
+                            isSelected ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                          }`}
+                        >
+                          <div className="overflow-hidden">
+                            <div className="flex flex-wrap gap-1.5 border-t border-white/10 px-4 pb-4 pt-3 sm:px-5">
                               {CONDITION_TAGS[grade].map((tag) => (
-                                <span key={tag} className={`rounded-full border px-2 py-0.5 text-[9px] sm:text-[10px] ${visual.accent}`}>{tag}</span>
+                                <span
+                                  key={tag}
+                                  className={`rounded-full border px-2.5 py-0.5 text-[10px] font-medium ${GRADE_CARD_TAG_PILL[grade]}`}
+                                >
+                                  {tag}
+                                </span>
                               ))}
                             </div>
                           </div>
-                          {price != null && available && (
-                            <span className="shrink-0 text-sm font-bold text-white">Rs. {price.toLocaleString()}</span>
-                          )}
-                        </button>
-                        {(expandedGrade === grade || (isSelected && available)) && variant && available && (
-                          <p className="mt-1.5 ml-7 text-[11px] leading-relaxed text-white/45">{CONDITION_DESCRIPTIONS[grade]}</p>
-                        )}
-                      </div>
+                        </div>
+                      </button>
                     );
                   })}
                 </div>

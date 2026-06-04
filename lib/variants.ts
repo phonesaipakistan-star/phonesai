@@ -76,6 +76,30 @@ export const CONDITION_VISUAL: Record<
   },
 };
 
+/** One-line copy on product page grade cards */
+export const CONDITION_CARD_LINE: Record<(typeof PRE_OWNED_GRADES)[number], string> = {
+  Premium: "Flawless. Like brand new.",
+  Excellent: "Almost perfect. Pristine screen.",
+  Good: "Light signs of use. Fully functional.",
+  Fair: "Visible wear. 100% working.",
+};
+
+/** Selected grade card glow (product page) */
+export const GRADE_CARD_SELECTED: Record<(typeof PRE_OWNED_GRADES)[number], string> = {
+  Premium: "border-amber-400/60 bg-amber-400/[0.08] shadow-[0_0_20px_rgba(251,191,36,0.15)]",
+  Excellent: "border-blue-400/60 bg-blue-400/[0.06] shadow-[0_0_20px_rgba(96,165,250,0.15)]",
+  Good: "border-green-400/50 bg-green-400/[0.05] shadow-[0_0_16px_rgba(74,222,128,0.12)]",
+  Fair: "border-orange-400/50 bg-orange-400/[0.05] shadow-[0_0_16px_rgba(251,146,60,0.12)]",
+};
+
+/** Condition tag pills inside selected grade card */
+export const GRADE_CARD_TAG_PILL: Record<(typeof PRE_OWNED_GRADES)[number], string> = {
+  Premium: "border-amber-400/25 bg-amber-400/10 text-amber-200/90",
+  Excellent: "border-blue-400/25 bg-blue-400/10 text-blue-200/90",
+  Good: "border-green-400/25 bg-green-400/10 text-green-200/90",
+  Fair: "border-orange-400/25 bg-orange-400/10 text-orange-200/90",
+};
+
 export function getVariantPrice(v: PhoneVariant): number {
   return v.discount_price ?? v.price;
 }
