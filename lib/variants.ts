@@ -120,6 +120,33 @@ export function findVariant(
   );
 }
 
+/**
+ * Price shown on storage/color pills for the current selection context.
+ * Exact match (storage + color + grade) first; otherwise lowest in the scoped pool.
+ */
+export function getVariantPillPrice(
+  variants: PhoneVariant[],
+  phoneCondition: string,
+  opts: { storage: string; color?: string; grade?: ConditionGrade | null }
+): number | null {
+  const { storage, color } = opts;
+  const grade: ConditionGrade | null = isNewPhone(phoneCondition) ? "New" : opts.grade ?? null;
+
+  if (color && grade) {
+    const exact = findVariant(variants, storage, color, grade);
+    if (exact) return getVariantPrice(exact);
+  }
+
+  let pool = variants.filter((v) => v.storage === storage);
+  if (color) pool = pool.filter((v) => v.color === color);
+
+  if (pool.length === 0) return null;
+
+  const available = pool.filter(isVariantAvailable);
+  const usePool = available.length > 0 ? available : pool;
+  return Math.min(...usePool.map(getVariantPrice));
+}
+
 function variantsForStorageColor(
   variants: PhoneVariant[],
   storage: string,

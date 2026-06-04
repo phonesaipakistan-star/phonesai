@@ -16,7 +16,7 @@ import {
   legacyPhoneToVariant,
   isNewPhone,
 } from "@/lib/variants";
-import { PHONE_IMAGE_FRAME, PHONE_IMAGE_CLASS } from "@/lib/ui";
+import { PRODUCT_IMAGE_FRAME, PRODUCT_IMAGE_CLASS } from "@/lib/ui";
 import { WATER_PACK_DESCRIPTION } from "@/lib/waterPack";
 
 type Phone = {
@@ -220,9 +220,9 @@ function ShopContent() {
                       </div>
                     )}
                     <Link href={`/shop/${phone.id}`} className="flex flex-col">
-                      <div className={`${PHONE_IMAGE_FRAME} aspect-square w-full border-b border-white/5`}>
+                      <div className={`${PRODUCT_IMAGE_FRAME} aspect-square w-full border-b border-white/5`}>
                         {phone.cardImage ? (
-                          <Image src={phone.cardImage} alt={phone.model} fill sizes="(max-width: 640px) 50vw, 33vw" className={PHONE_IMAGE_CLASS} loading="lazy" />
+                          <Image src={phone.cardImage} alt={phone.model} fill sizes="(max-width: 640px) 50vw, 33vw" className={PRODUCT_IMAGE_CLASS} loading="lazy" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center">
                             <svg viewBox="0 0 24 24" fill="none" className="h-12 w-12 text-white/10" stroke="currentColor" strokeWidth="1" aria-hidden="true">
@@ -284,9 +284,9 @@ function ShopContent() {
                 const inCart = isInCart(acc.id);
                 return (
                   <div key={acc.id} className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition hover:border-white/20">
-                    <Link href={`/shop/accessories/${acc.id}`} className="relative flex aspect-square w-full items-center justify-center bg-white/[0.03]" aria-label={`View ${acc.name}`}>
+                    <Link href={`/shop/accessories/${acc.id}`} className={`${PRODUCT_IMAGE_FRAME} relative flex aspect-square w-full`} aria-label={`View ${acc.name}`}>
                       {acc.images?.[0] ? (
-                        <Image src={acc.images[0]} alt={acc.name} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-contain p-4" loading="lazy" />
+                        <Image src={acc.images[0]} alt={acc.name} fill sizes="(max-width: 640px) 50vw, 25vw" className={PRODUCT_IMAGE_CLASS} loading="lazy" />
                       ) : (
                         <span className="text-4xl" aria-hidden="true">
                           {acc.category === "Charger" ? "🔌" : acc.category === "Cable" ? "🔗" : acc.category === "AirPods" ? "🎧" : acc.category === "Apple Watch" ? "⌚" : "📦"}

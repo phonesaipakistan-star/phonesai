@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useCart } from "./CartContext";
+import { PRODUCT_IMAGE_FRAME, PRODUCT_IMAGE_CLASS } from "@/lib/ui";
 
 const openUstaadJi = () => {
   if (typeof window !== "undefined") {
@@ -123,9 +124,9 @@ export default function Navbar() {
           ) : (
             items.map((item) => (
               <div key={item.id} className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3.5">
-                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/5">
+                <div className={`${PRODUCT_IMAGE_FRAME} relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10`}>
                   {item.image ? (
-                    <Image src={item.image} alt={item.model} fill sizes="56px" className="object-contain p-1" loading="lazy" />
+                    <Image src={item.image} alt={item.model} fill sizes="56px" className={PRODUCT_IMAGE_CLASS} loading="lazy" />
                   ) : (
                     <span className="text-xl" aria-hidden="true">📱</span>
                   )}

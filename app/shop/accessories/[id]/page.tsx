@@ -4,6 +4,12 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useCart } from "@/app/components/CartContext";
+import {
+  PRODUCT_IMAGE_FRAME,
+  PRODUCT_IMAGE_CLASS,
+  PRODUCT_IMAGE_MAIN_CLASS,
+  PRODUCT_IMAGE_THUMB_CLASS,
+} from "@/lib/ui";
 
 const SUPABASE_URL = "https://xadxdkbdwyulprfukrjb.supabase.co";
 
@@ -163,12 +169,12 @@ export default function AccessoryPage() {
 
           {/* Image Gallery */}
           <div className="flex flex-col gap-3">
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] sm:rounded-3xl" style={{ aspectRatio: "1/1" }}>
+            <div className={`${PRODUCT_IMAGE_FRAME} aspect-square w-full rounded-2xl border border-white/10 sm:rounded-3xl`}>
               {allImages.length > 0 ? (
                 <img
                   src={allImages[activeImage]}
                   alt={accessory.name}
-                  className="absolute inset-0 h-full w-full object-contain p-6 transition duration-500"
+                  className={`absolute inset-0 h-full w-full ${PRODUCT_IMAGE_MAIN_CLASS} transition duration-500`}
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center text-6xl">
@@ -185,8 +191,8 @@ export default function AccessoryPage() {
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {allImages.map((img, i) => (
                   <button key={i} onClick={() => setActiveImage(i)}
-                    className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border transition ${activeImage === i ? "border-blue-400/60" : "border-white/10 opacity-50"}`}>
-                    <img src={img} alt="" className="absolute inset-0 h-full w-full object-contain p-1" />
+                    className={`relative aspect-square h-16 w-16 shrink-0 overflow-hidden rounded-xl border transition ${PRODUCT_IMAGE_FRAME} ${activeImage === i ? "border-blue-400/60" : "border-white/10 opacity-50"}`}>
+                    <img src={img} alt="" className={`absolute inset-0 h-full w-full ${PRODUCT_IMAGE_THUMB_CLASS}`} />
                   </button>
                 ))}
               </div>

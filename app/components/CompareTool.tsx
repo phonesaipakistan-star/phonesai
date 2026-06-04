@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PRODUCT_IMAGE_FRAME, PRODUCT_IMAGE_CLASS } from "@/lib/ui";
 
 type Phone = {
   id: string;
@@ -53,9 +54,9 @@ export default function CompareTool({ selectedPhones, onRemove, onClear }: Compa
           <div className="flex items-center gap-3 min-w-0">
             {selectedPhones.map((phone) => (
               <div key={phone.id} className="flex items-center gap-2 min-w-0">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5">
+                <div className={`${PRODUCT_IMAGE_FRAME} flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10`}>
                   {phone.images?.[0] ? (
-                    <img src={phone.images[0]} alt="" className="h-full w-full object-contain rounded-lg p-0.5" />
+                    <img src={phone.images[0]} alt="" className={`h-full w-full rounded-lg ${PRODUCT_IMAGE_CLASS}`} />
                   ) : <span className="text-xs">📱</span>}
                 </div>
                 <p className="text-xs font-semibold text-white truncate max-w-[80px]">{phone.model}</p>
@@ -95,9 +96,9 @@ export default function CompareTool({ selectedPhones, onRemove, onClear }: Compa
                 <div />
                 {[a, b].map((phone) => (
                   <div key={phone.id} className="text-center">
-                    <div className="mx-auto mb-3 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                    <div className={`${PRODUCT_IMAGE_FRAME} mx-auto mb-3 flex aspect-square h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-white/10`}>
                       {phone.images?.[0] ? (
-                        <img src={phone.images[0]} alt="" className="h-full w-full object-contain p-2" />
+                        <img src={phone.images[0]} alt="" className={`h-full w-full ${PRODUCT_IMAGE_CLASS}`} />
                       ) : <span className="text-2xl">📱</span>}
                     </div>
                     <p className="text-sm font-bold text-white leading-tight">{phone.model}</p>

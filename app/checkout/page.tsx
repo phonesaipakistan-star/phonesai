@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useCart } from "@/app/components/CartContext";
+import { PRODUCT_IMAGE_CLASS } from "@/lib/ui";
 
 type Phone = {
   id: string;
@@ -529,7 +530,7 @@ function CheckoutContent() {
                     {items.map(item => (
                       <div key={item.id} className="flex items-center gap-3">
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5">
-                          {item.image ? <img src={item.image} alt="" className="h-full w-full object-contain p-1" /> : <span className="text-lg">📱</span>}
+                          {item.image ? <img src={item.image} alt="" className={`h-full w-full ${PRODUCT_IMAGE_CLASS}`} /> : <span className="text-lg">📱</span>}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-bold text-white truncate">{item.model}</p>
@@ -553,7 +554,7 @@ function CheckoutContent() {
                 ) : phone ? (
                   <>
                     <div className="mb-4 flex h-32 items-center justify-center overflow-hidden rounded-xl border border-white/5 bg-white/[0.02]">
-                      {phone.images?.[0] ? <img src={phone.images[0]} alt={phone.model} className="h-full w-full object-contain p-3" /> : <span className="text-white/20 text-3xl">📱</span>}
+                      {phone.images?.[0] ? <img src={phone.images[0]} alt={phone.model} className={`h-full w-full ${PRODUCT_IMAGE_CLASS}`} /> : <span className="text-white/20 text-3xl">📱</span>}
                     </div>
                     <p className="font-bold text-white">{phone.model}</p>
                     <p className="text-sm text-white/50">{phone.storage} • {phone.color} • {phone.category}</p>

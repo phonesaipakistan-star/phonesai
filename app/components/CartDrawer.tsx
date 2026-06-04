@@ -1,6 +1,7 @@
 "use client";
 
 import { useCart } from "./CartContext";
+import { PRODUCT_IMAGE_FRAME, PRODUCT_IMAGE_CLASS } from "@/lib/ui";
 import { useState } from "react";
 
 export default function CartDrawer() {
@@ -72,9 +73,9 @@ export default function CartDrawer() {
             items.map((item) => (
               <div key={item.id} className="flex gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
                 {/* Image */}
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/5">
+                <div className={`${PRODUCT_IMAGE_FRAME} flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10`}>
                   {item.image ? (
-                    <img src={item.image} alt={item.model} className="h-full w-full object-contain p-1" />
+                    <img src={item.image} alt={item.model} className={`h-full w-full ${PRODUCT_IMAGE_CLASS}`} />
                   ) : (
                     <span className="text-2xl">📱</span>
                   )}

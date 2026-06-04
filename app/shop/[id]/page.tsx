@@ -13,6 +13,7 @@ import {
   CONDITION_DESCRIPTIONS,
   CONDITION_VISUAL,
   getVariantPrice,
+  getVariantPillPrice,
   isVariantAvailable,
   getUniqueStorages,
   getUniqueColors,
@@ -23,7 +24,12 @@ import {
   isNewPhone,
 } from "@/lib/variants";
 import { DELIVERY_SUMMARY, ORDER_FLOW_STEPS, ORDER_PLACED_NOTE } from "@/lib/delivery";
-import { PHONE_IMAGE_FRAME, PHONE_IMAGE_CLASS } from "@/lib/ui";
+import {
+  PRODUCT_IMAGE_FRAME,
+  PRODUCT_IMAGE_CLASS,
+  PRODUCT_IMAGE_MAIN_CLASS,
+  PRODUCT_IMAGE_THUMB_CLASS,
+} from "@/lib/ui";
 import { WATER_PACK_DESCRIPTION } from "@/lib/waterPack";
 
 const SUPABASE_URL = "https://xadxdkbdwyulprfukrjb.supabase.co";
@@ -355,13 +361,7 @@ export default function ProductPage() {
 
   const photoRequestLink = `https://wa.me/923041502560?text=${encodeURIComponent(`Assalam o Alaikum! Mujhe ${phone.model} ke exact unit ki photos chahiye please.`)}`;
 
-  const getStorageLowestPrice = (storage: string) => {
-    const vs = variants.filter((v) => v.storage === storage);
-    const available = vs.filter(isVariantAvailable);
-    const pool = available.length ? available : vs;
-    if (!pool.length) return null;
-    return Math.min(...pool.map(getVariantPrice));
-  };
+  const pillGrade = phoneIsNew ? ("New" as const) : selectedGrade;
 
   return (
     <div className="min-h-screen bg-black text-white pt-16 sm:pt-20">
@@ -389,9 +389,9 @@ export default function ProductPage() {
 
           {/* LEFT — Image Gallery + Condition Tags */}
           <div className="flex flex-col gap-3">
-            <div className={`${PHONE_IMAGE_FRAME} rounded-2xl border border-white/10 sm:rounded-3xl`} style={{ aspectRatio: "4/3" }}>
+            <div className={`${PRODUCT_IMAGE_FRAME} aspect-square w-full rounded-2xl border border-white/10 sm:max-h-[min(72vh,520px)] sm:rounded-3xl`}>
               {displayImages.length > 0 ? (
-                <Image src={displayImages[activeImage]} alt={`${phone.model} - image ${activeImage + 1}`} fill sizes="(max-width: 1024px) 100vw, 50vw" className={`${PHONE_IMAGE_CLASS} transition duration-500 cursor-zoom-in`} onClick={() => { setLightboxOpen(true); setLightboxIndex(activeImage); }} priority={activeImage === 0} />
+                <Image src={displayImages[activeImage]} alt={`${phone.model} - image ${activeImage + 1}`} fill sizes="(max-width: 1024px) 100vw, 50vw" className={`${PRODUCT_IMAGE_MAIN_CLASS} transition duration-500 cursor-zoom-in`} onClick={() => { setLightboxOpen(true); setLightboxIndex(activeImage); }} priority={activeImage === 0} />
               ) : (
                 <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-white/20">
                   <svg viewBox="0 0 24 24" fill="none" className="h-14 w-14" stroke="currentColor" strokeWidth="0.8">
@@ -416,8 +416,8 @@ export default function ProductPage() {
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {displayImages.map((img, i) => (
                   <button key={i} onClick={() => setActiveImage(i)}
-                    className={`relative aspect-square h-14 w-14 shrink-0 overflow-hidden rounded-xl border transition ${PHONE_IMAGE_FRAME} ${activeImage === i ? "border-blue-400/60" : "border-white/10 opacity-50"}`}>
-                    <Image src={img} alt={`${phone.model} thumbnail ${i + 1}`} fill sizes="56px" className="object-contain p-1.5" loading="lazy" />
+                    className={`relative aspect-square h-16 w-16 shrink-0 overflow-hidden rounded-xl border transition ${PRODUCT_IMAGE_FRAME} ${activeImage === i ? "border-blue-400/60" : "border-white/10 opacity-50"}`}>
+                    <Image src={img} alt={`${phone.model} thumbnail ${i + 1}`} fill sizes="64px" className={PRODUCT_IMAGE_THUMB_CLASS} loading="lazy" />
                   </button>
                 ))}
               </div>
@@ -455,7 +455,11 @@ export default function ProductPage() {
               <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-white/40">Select Storage</p>
               <div className="space-y-2">
                 {storages.map((storage) => {
-                  const price = getStorageLowestPrice(storage);
+                  const price = getVariantPillPrice(variants, phone.condition, {
+                    storage,
+                    color: selectedColor,
+                    grade: pillGrade,
+                  });
                   const hasStock = storageHasStock(variants, storage);
                   const isSelected = selectedStorage === storage;
                   return (
@@ -485,14 +489,11 @@ export default function ProductPage() {
                 {colors.map((color) => {
                   const hasStock = colorHasStock(variants, selectedStorage, color);
                   const isSelected = selectedColor === color;
-                  const colorVariant = resolveVariantSelection(
-                    variants,
-                    phone.condition,
-                    selectedStorage,
+                  const colorPrice = getVariantPillPrice(variants, phone.condition, {
+                    storage: selectedStorage,
                     color,
-                    phoneIsNew ? "New" : selectedGrade
-                  ).variant;
-                  const colorPrice = colorVariant ? getVariantPrice(colorVariant) : null;
+                    grade: pillGrade,
+                  });
                   return (
                     <button key={color} type="button" disabled={!hasStock}
                       onClick={() => hasStock && handleColorSelect(color)}
@@ -824,9 +825,9 @@ export default function ProductPage() {
                   const accInCart = isInCart(acc.id);
                   return (
                     <div key={acc.id} className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
-                      <div className="relative h-24 overflow-hidden bg-white/5 sm:h-32">
+                      <div className={`${PRODUCT_IMAGE_FRAME} aspect-square w-full`}>
                         {acc.images?.[0] ? (
-                          <Image src={acc.images[0]} alt={acc.name} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-contain p-2" loading="lazy" />
+                          <Image src={acc.images[0]} alt={acc.name} fill sizes="(max-width: 640px) 50vw, 25vw" className={PRODUCT_IMAGE_CLASS} loading="lazy" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center text-2xl">
                             {acc.category === "Charger" ? "🔌" : acc.category === "Cable" ? "🔗" : acc.category === "AirPods" ? "🎧" : "⌚"}
@@ -858,12 +859,12 @@ export default function ProductPage() {
                 <h2 className="text-lg font-extrabold text-white sm:text-xl">Similar Phones</h2>
                 <a href="/shop" className="text-xs font-semibold text-blue-400 hover:text-blue-300">See All →</a>
               </div>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
                 {relatedPhones.map(p => (
-                  <a key={p.id} href={`/shop/${p.id}`} className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3 transition hover:border-white/20 sm:flex-col sm:gap-0 sm:p-0">
-                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-white/5 bg-white/[0.03] sm:h-36 sm:w-full sm:rounded-none sm:rounded-t-2xl">
+                  <a key={p.id} href={`/shop/${p.id}`} className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition hover:border-white/20">
+                    <div className={`${PRODUCT_IMAGE_FRAME} aspect-square w-full`}>
                       {p.images?.[0] ? (
-                        <Image src={p.images[0]} alt={p.model} fill sizes="(max-width: 640px) 80px, 33vw" className="object-contain p-1" loading="lazy" />
+                        <Image src={p.images[0]} alt={p.model} fill sizes="(max-width: 640px) 50vw, 33vw" className={PRODUCT_IMAGE_CLASS} loading="lazy" />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center">
                           <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-white/10" stroke="currentColor" strokeWidth="1">
@@ -872,7 +873,7 @@ export default function ProductPage() {
                         </div>
                       )}
                     </div>
-                    <div className="flex flex-1 flex-col justify-center sm:p-3">
+                    <div className="flex flex-1 flex-col p-3">
                       <p className="text-xs font-bold text-white leading-tight">{p.model}</p>
                       <div className="mt-1 flex flex-wrap gap-1">
                         {(p.storageOptions ?? [p.storage]).slice(0, 3).map(s => (
@@ -1024,14 +1025,14 @@ export default function ProductPage() {
               </button>
             )}
             <div className="relative h-[70vh] w-[90vw] max-w-3xl" onClick={(e) => e.stopPropagation()}>
-              <Image src={displayImages[lightboxIndex]} alt={phone.model} fill sizes="90vw" className="object-contain select-none" style={{ touchAction: "pinch-zoom" }} />
+              <Image src={displayImages[lightboxIndex]} alt={phone.model} fill sizes="90vw" className={`${PRODUCT_IMAGE_MAIN_CLASS} select-none`} style={{ touchAction: "pinch-zoom" }} />
             </div>
             {displayImages.length > 1 && (
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 overflow-x-auto max-w-xs sm:max-w-md px-2">
                 {displayImages.map((img, i) => (
                   <button key={i} onClick={(e) => { e.stopPropagation(); setLightboxIndex(i); }}
                     className={`relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border-2 transition ${lightboxIndex === i ? "border-blue-400" : "border-white/20 opacity-50"}`}>
-                    <Image src={img} alt="" fill sizes="48px" className="object-contain p-0.5" />
+                    <Image src={img} alt="" fill sizes="48px" className={PRODUCT_IMAGE_THUMB_CLASS} />
                   </button>
                 ))}
               </div>
