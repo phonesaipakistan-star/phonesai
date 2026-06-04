@@ -193,7 +193,7 @@ export default function AIShopkeeper({ isOpen, onOpenChange }: AIShopkeeperProps
                       </button>
                     )}
                     <a
-                      href={`https://wa.me/923041502560?text=${encodeURIComponent(`Assalam o Alaikum! Ustaad Ji ne bheja hai. Mujhe ${msg.cartItem.model} ${msg.cartItem.storage} ${msg.cartItem.color}${msg.cartItem.selected_condition_grade && msg.cartItem.selected_condition_grade !== "New" ? ` ${msg.cartItem.selected_condition_grade}` : ""} (${msg.cartItem.category}) mein interest hai.`)}`}
+                      href={`https://wa.me/923200801010?text=${encodeURIComponent(`Assalam o Alaikum! Ustaad Ji ne bheja hai. Mujhe ${msg.cartItem.model} ${msg.cartItem.storage} ${msg.cartItem.color}${msg.cartItem.selected_condition_grade && msg.cartItem.selected_condition_grade !== "New" ? ` ${msg.cartItem.selected_condition_grade}` : ""} (${msg.cartItem.category}) mein interest hai.`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center justify-center gap-1.5 rounded-xl border border-green-500/30 bg-green-500/10 px-3 py-2 text-xs font-semibold text-green-300 transition hover:bg-green-500/20"
@@ -236,7 +236,7 @@ export default function AIShopkeeper({ isOpen, onOpenChange }: AIShopkeeperProps
           {limitReached && (
             <div className="mb-2 rounded-xl border border-amber-300/20 bg-amber-300/5 px-4 py-2 text-center">
               <p className="text-xs text-amber-200">Chat limit reached</p>
-              <a href="https://wa.me/923041502560?text=Ustaad%20Ji%20ne%20bheja%20hai" target="_blank" rel="noopener noreferrer"
+              <a href="https://wa.me/923200801010?text=Ustaad%20Ji%20ne%20bheja%20hai" target="_blank" rel="noopener noreferrer"
                 className="text-xs text-blue-400 hover:underline">WhatsApp Boss to continue →</a>
             </div>
           )}

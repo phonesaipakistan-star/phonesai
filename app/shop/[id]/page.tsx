@@ -353,16 +353,16 @@ export default function ProductPage() {
   const hasWaterPack = !!phone.water_pack_sealed;
   const isJv = phone.category === "JV";
   const variantUnavailable = selectedVariant && !isVariantAvailable(selectedVariant);
-  const sourcingLink = `https://wa.me/923041502560?text=${encodeURIComponent(
+  const sourcingLink = `https://wa.me/923200801010?text=${encodeURIComponent(
     `Assalam o Alaikum! Mujhe ${phone.model} ${selectedStorage} ${selectedColor}${selectedGrade ? ` ${selectedGrade}` : ""} source karwana hai.`
   )}`;
-  const nonPtaSimLink = `https://wa.me/923041502560?text=${encodeURIComponent("Assalam o Alaikum! Non-PTA phone ki SIM status confirm karni hai.")}`;
+  const nonPtaSimLink = `https://wa.me/923200801010?text=${encodeURIComponent("Assalam o Alaikum! Non-PTA phone ki SIM status confirm karni hai.")}`;
 
   const whatsappLink = selectedVariant
-    ? `https://wa.me/923041502560?text=Assalam o Alaikum! Ustaad Ji ne bheja hai. Mujhe ${phone.model} ${selectedVariant.storage} ${selectedVariant.color}${phoneIsNew ? "" : ` ${selectedVariant.condition_grade}`} (${phone.category}) mein interest hai.`
-    : `https://wa.me/923041502560`;
+    ? `https://wa.me/923200801010?text=Assalam o Alaikum! Ustaad Ji ne bheja hai. Mujhe ${phone.model} ${selectedVariant.storage} ${selectedVariant.color}${phoneIsNew ? "" : ` ${selectedVariant.condition_grade}`} (${phone.category}) mein interest hai.`
+    : `https://wa.me/923200801010`;
 
-  const photoRequestLink = `https://wa.me/923041502560?text=${encodeURIComponent(`Assalam o Alaikum! Mujhe ${phone.model} ke exact unit ki photos chahiye please.`)}`;
+  const photoRequestLink = `https://wa.me/923200801010?text=${encodeURIComponent(`Assalam o Alaikum! Mujhe ${phone.model} ke exact unit ki photos chahiye please.`)}`;
 
   const pillGrade = phoneIsNew ? ("New" as const) : selectedGrade;
 
@@ -683,7 +683,7 @@ export default function ProductPage() {
                   rel="noopener noreferrer"
                   className="mt-3 inline-flex items-center justify-center rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-2.5 text-xs font-bold text-green-300 transition hover:bg-green-500/20 sm:text-sm"
                 >
-                  Request Unit Photos → 0304-1502560
+                  Request Unit Photos → 0320-0801010
                 </a>
               </div>
             )}
@@ -699,7 +699,7 @@ export default function ProductPage() {
                   rel="noopener noreferrer"
                   className="mt-3 inline-flex items-center justify-center rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-2.5 text-xs font-bold text-green-300 transition hover:bg-green-500/20 sm:text-sm"
                 >
-                  Request Sourcing → 0304-1502560
+                  Request Sourcing → 0320-0801010
                 </a>
               </div>
             )}
@@ -785,7 +785,7 @@ export default function ProductPage() {
             <div className="mt-3 flex flex-wrap gap-3">
               <a href={nonPtaSimLink} target="_blank" rel="noopener noreferrer"
                 className="inline-flex rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-2 text-xs font-bold text-green-300 transition hover:bg-green-500/20">
-                Confirm SIM Status → 0304-1502560
+                Confirm SIM Status → 0320-0801010
               </a>
               <a href="https://taxcalculator.pk/pta-tax" target="_blank" rel="noopener noreferrer" className="inline-flex text-xs font-semibold text-blue-400 items-center">
                 Check PTA Tax → taxcalculator.pk/pta-tax
@@ -856,7 +856,7 @@ export default function ProductPage() {
               { icon: "🛡️", label: "7-Day Warranty", sub: "New & Pre-Owned", href: "/support#warranty" },
               { icon: "🔧", label: "Repair Service", sub: "Exclusive to customers", href: "/repairs" },
               { icon: "🔄", label: "Trade-In", sub: "Best rates", href: "/trade-in" },
-              { icon: "💬", label: "WhatsApp Support", sub: "0304-1502560", href: "https://wa.me/923041502560" },
+              { icon: "💬", label: "WhatsApp Support", sub: "0320-0801010", href: "https://wa.me/923200801010" },
             ].map(item => (
               <a key={item.label} href={item.href}
                 target={item.href.startsWith("https") ? "_blank" : undefined}

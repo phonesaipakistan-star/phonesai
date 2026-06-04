@@ -9,7 +9,7 @@ export default function RepairsPage() {
   const handleBook = (e: React.FormEvent) => {
     e.preventDefault();
     const msg = `Assalam o Alaikum! PhonesAI customer repair request:\n\n📱 Phone: ${bookingForm.model}\n🔧 Issue: ${bookingForm.issue}\n👤 Name: ${bookingForm.name}\n📞 WhatsApp: ${bookingForm.whatsapp}${bookingForm.orderRef ? `\n🧾 Order Reference: ${bookingForm.orderRef}` : ""}`;
-    window.open(`https://wa.me/923041502560?text=${encodeURIComponent(msg)}`, "_blank");
+    window.open(`https://wa.me/923200801010?text=${encodeURIComponent(msg)}`, "_blank");
     setSubmitted(true);
   };
 

@@ -155,7 +155,7 @@ export default function AccessoryPage() {
   const avgRating = reviews.length > 0 ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1) : null;
   const inCart = isInCart(accessory.id);
   const savings = accessory.discount_price ? accessory.price - accessory.discount_price : 0;
-  const whatsappLink = `https://wa.me/923041502560?text=Assalam o Alaikum! Mujhe ${accessory.name} mein interest hai.`;
+  const whatsappLink = `https://wa.me/923200801010?text=Assalam o Alaikum! Mujhe ${accessory.name} mein interest hai.`;
 
   return (
     <div className="min-h-screen bg-black text-white pt-16 sm:pt-20">

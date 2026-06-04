@@ -242,7 +242,7 @@ export default function WarrantyPage() {
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
-            <p className="text-white/50 text-xs">Questions? WhatsApp Ustaad Ji at <a href="https://wa.me/923041502560" className="text-green-400 hover:underline">0304-1502560</a></p>
+            <p className="text-white/50 text-xs">Questions? WhatsApp Ustaad Ji at <a href="https://wa.me/923200801010" className="text-green-400 hover:underline">0320-0801010</a></p>
           </div>
         </div>
       </div>

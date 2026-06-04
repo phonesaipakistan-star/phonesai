@@ -94,7 +94,7 @@ export default function RootLayout({
                 description:
                   "Pakistan ka trusted premium phone store — verified iPhones, Samsung flagships, iPads with 7-day warranty. Free delivery all Pakistan.",
                 url: "https://phonesai.pk",
-                telephone: "+923041502560",
+                telephone: "+923200801010",
                 address: {
                   "@type": "PostalAddress",
                   addressLocality: "Wah Cantt",

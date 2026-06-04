@@ -21,7 +21,7 @@ export default function SupportPage() {
             { icon: "🛡️", label: "Warranty Claim", href: "#warranty" },
             { icon: "🔧", label: "Repair Request", href: "/repairs" },
             { icon: "🔄", label: "Trade-In", href: "/trade-in" },
-            { icon: "💬", label: "WhatsApp Us", href: "https://wa.me/923041502560" },
+            { icon: "💬", label: "WhatsApp Us", href: "https://wa.me/923200801010" },
           ].map(a => (
             <a key={a.label} href={a.href}
               className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-center transition hover:border-white/20 hover:bg-white/[0.04]">
@@ -100,7 +100,7 @@ export default function SupportPage() {
                   </div>
                 ))}
               </div>
-              <a href="https://wa.me/923041502560?text=Unboxing video bhej raha/rahi hoon!"
+              <a href="https://wa.me/923200801010?text=Unboxing video bhej raha/rahi hoon!"
                 target="_blank" rel="noopener noreferrer"
                 className="mt-4 inline-flex rounded-xl bg-purple-500/20 border border-purple-500/30 px-4 py-2.5 text-xs font-bold text-purple-300 transition hover:bg-purple-500/30">
                 Send Us Your Video →
@@ -142,12 +142,12 @@ export default function SupportPage() {
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6">
             <h3 className="text-sm font-bold text-white mb-4">Direct Support</h3>
             <div className="space-y-3">
-              <a href="https://wa.me/923041502560" target="_blank" rel="noopener noreferrer"
+              <a href="https://wa.me/923200801010" target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-3 rounded-xl border border-green-500/20 bg-green-500/5 px-4 py-3 transition hover:border-green-500/40">
                 <span className="text-lg">💬</span>
                 <div>
                   <p className="text-xs font-bold text-white">WhatsApp Support</p>
-                  <p className="text-[10px] text-white/40">0304-1502560 • Mon–Sun 12pm–10pm</p>
+                  <p className="text-[10px] text-white/40">0320-0801010 • Mon–Sun 12pm–10pm</p>
                 </div>
                 <span className="ml-auto text-xs text-green-400">→</span>
               </a>

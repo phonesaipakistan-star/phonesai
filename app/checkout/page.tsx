@@ -50,22 +50,22 @@ const paymentDetails: Record<PaymentMethod, { title: string; detail: string; not
   bank: {
     title: "Bank Transfer",
     detail: "Bank: Meezan Bank\nAccount Title: MC Mobile Corner\nAccount Number: 53010110263169\nIBAN: PK31MEZN0053010110263169",
-    note: "Transfer the exact amount and send screenshot on WhatsApp: 0304-1502560",
+    note: "Transfer the exact amount and send screenshot on WhatsApp: 0320-0801010",
   },
   easypaisa: {
     title: "EasyPaisa",
-    detail: "Account Number: 03041502560\nAccount Title: MC Mobile Corner",
-    note: "Send payment to above number and send screenshot on WhatsApp: 0304-1502560",
+    detail: "Account Number: 03200801010\nAccount Title: MC Mobile Corner",
+    note: "Send payment to above number and send screenshot on WhatsApp: 0320-0801010",
   },
   jazzcash: {
     title: "JazzCash",
-    detail: "Mobile Account: 03041502560\nAccount Title: MC Mobile Corner",
-    note: "Send payment to above number and send screenshot on WhatsApp: 0304-1502560",
+    detail: "Mobile Account: 03200801010\nAccount Title: MC Mobile Corner",
+    note: "Send payment to above number and send screenshot on WhatsApp: 0320-0801010",
   },
   raast: {
     title: "Raast",
-    detail: "Raast ID: 03041502560\nAccount Title: MC Mobile Corner",
-    note: "Send via Raast and send confirmation on WhatsApp: 0304-1502560",
+    detail: "Raast ID: 03200801010\nAccount Title: MC Mobile Corner",
+    note: "Send via Raast and send confirmation on WhatsApp: 0320-0801010",
   },
 };
 
@@ -300,10 +300,10 @@ function CheckoutContent() {
               📧 Check karein aapki email — order confirmation bhej di gayi hai!
             </div>
             <div className="flex gap-3 flex-wrap justify-center">
-              <a href="https://wa.me/923041502560?text=Assalam o Alaikum! Maine order place kiya hai. Availability confirm kar dein please."
+              <a href="https://wa.me/923200801010?text=Assalam o Alaikum! Maine order place kiya hai. Availability confirm kar dein please."
                 target="_blank" rel="noopener noreferrer"
                 className="rounded-2xl bg-green-500 px-6 py-3 text-sm font-bold text-white hover:bg-green-400 transition">
-                Confirm on WhatsApp → 0304-1502560
+                Confirm on WhatsApp → 0320-0801010
               </a>
               <a href="/shop" className="rounded-2xl border border-white/15 px-6 py-3 text-sm font-semibold text-white/60 hover:text-white transition">Browse More</a>
             </div>
@@ -459,8 +459,8 @@ function CheckoutContent() {
                       <p className="text-sm font-semibold text-white mb-2">📸 Payment Screenshot</p>
                       <p className="text-xs text-white/40 leading-relaxed">
                         Payment complete karne ke baad screenshot WhatsApp par bhejein:{" "}
-                        <a href="https://wa.me/923041502560" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
-                          wa.me/923041502560
+                        <a href="https://wa.me/923200801010" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                          wa.me/923200801010
                         </a>
                       </p>
                     </div>

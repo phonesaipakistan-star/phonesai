@@ -11,13 +11,13 @@ export default function ContactPage() {
         <p className="text-xs font-semibold uppercase tracking-widest text-blue-400 mb-4">Contact</p>
         <h1 className="text-4xl font-extrabold text-white mb-6">Baat Karein Hamare Saath</h1>
         <div className="grid gap-4 sm:grid-cols-2">
-          <a href="https://wa.me/923041502560" target="_blank" rel="noopener noreferrer"
+          <a href="https://wa.me/923200801010" target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-4 rounded-2xl border border-green-500/20 bg-green-500/5 p-6 transition hover:border-green-500/40">
             <span className="text-3xl">💬</span>
             <div>
               <p className="font-bold text-white">WhatsApp</p>
               <p className="text-sm text-white/50 mt-1">Sabse fast — seedha boss se baat</p>
-              <p className="text-sm text-green-400 mt-1">0304-1502560</p>
+              <p className="text-sm text-green-400 mt-1">0320-0801010</p>
             </div>
           </a>
           <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-6">
@@ -36,7 +36,7 @@ export default function ContactPage() {
               <p className="text-sm text-white/50">In-store: walk in anytime</p>
             </div>
           </div>
-          <a href="https://wa.me/923041502560?text=Ustaad Ji se baat karni hai" target="_blank" rel="noopener noreferrer"
+          <a href="https://wa.me/923200801010?text=Ustaad Ji se baat karni hai" target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-4 rounded-2xl border border-blue-400/20 bg-blue-500/5 p-6 transition hover:border-blue-400/40">
             <span className="text-3xl">🤖</span>
             <div>

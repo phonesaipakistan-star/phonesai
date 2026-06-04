@@ -115,7 +115,7 @@ const getOrderConfirmationEmail = (data: OrderEmailData) => `
 
     <div style="background:#1c1917;border:2px solid #d97706;border-radius:16px;padding:24px;margin-bottom:24px;text-align:center;">
       <p style="color:#fcd34d;font-size:16px;font-weight:800;margin:0 0 8px;">⏳ What happens next</p>
-      <p style="color:#fbbf24;font-size:14px;margin:0 0 8px;line-height:1.6;">We will confirm availability within <strong>24 hours via WhatsApp (0304-1502560)</strong>.</p>
+      <p style="color:#fbbf24;font-size:14px;margin:0 0 8px;line-height:1.6;">We will confirm availability within <strong>24 hours via WhatsApp (0320-0801010)</strong>.</p>
       <p style="color:#f87171;font-size:14px;font-weight:700;margin:0;">Please do not send payment until we confirm.</p>
     </div>
 
@@ -134,9 +134,9 @@ const getOrderConfirmationEmail = (data: OrderEmailData) => `
     <div style="background:#1c1917;border:1px solid #92400e;border-radius:16px;padding:24px;margin-bottom:24px;">
       <p style="color:#fcd34d;font-size:14px;font-weight:700;margin:0 0 8px;">⚠️ After We Confirm — Payment Screenshot</p>
       <p style="color:#fbbf24;font-size:13px;margin:0 0 16px;">Jab hum availability confirm kar dein, tab payment complete karke screenshot WhatsApp par bhejein.</p>
-      <a href="https://wa.me/923041502560?text=Assalam o Alaikum! Maine order place kiya hai. Availability confirm kar dein please."
+      <a href="https://wa.me/923200801010?text=Assalam o Alaikum! Maine order place kiya hai. Availability confirm kar dein please."
         style="display:inline-block;background:#16a34a;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:12px 24px;border-radius:12px;">
-        Confirm on WhatsApp → 0304-1502560
+        Confirm on WhatsApp → 0320-0801010
       </a>
     </div>
 
@@ -205,7 +205,7 @@ const getUnboxingGuideEmail = (data: OrderEmailData) => `
     </div>
 
     <div style="text-align:center;margin-bottom:24px;">
-      <a href="https://wa.me/923041502560?text=Unboxing video bhej raha/rahi hoon!"
+      <a href="https://wa.me/923200801010?text=Unboxing video bhej raha/rahi hoon!"
         style="display:inline-block;background:#16a34a;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:14px 28px;border-radius:12px;">
         Send Us Your Unboxing Video
       </a>

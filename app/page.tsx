@@ -177,12 +177,12 @@ export default function Home() {
               Koi bhi model, storage, color — hum source kar sakte hain. WhatsApp pe bataiye kya chahiye.
             </p>
             <a
-              href="https://wa.me/923041502560?text=Assalam%20o%20Alaikum!%20Mujhe%20ek%20specific%20phone%20source%20karwana%20hai."
+              href="https://wa.me/923200801010?text=Assalam%20o%20Alaikum!%20Mujhe%20ek%20specific%20phone%20source%20karwana%20hai."
               target="_blank"
               rel="noopener noreferrer"
               className="mt-4 inline-flex items-center justify-center rounded-xl bg-green-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-green-400"
             >
-              Request a Phone → 0304-1502560
+              Request a Phone → 0320-0801010
             </a>
           </div>
         </section>

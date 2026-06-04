@@ -41,7 +41,7 @@ export default function TradeInPage() {
     e.preventDefault();
     const conditionLabel = conditionOptions.find(c => c.value === form.condition)?.label ?? form.condition;
     const msg = `Assalam o Alaikum! Trade-In inquiry:\n\n📱 Model: ${form.model}\n💾 Storage: ${form.storage}\n⭐ Condition: ${conditionLabel}\n🔋 Battery: ${form.battery}%\n👤 Name: ${form.name}\n${form.notes ? `📝 Notes: ${form.notes}` : ""}`;
-    window.open(`https://wa.me/923041502560?text=${encodeURIComponent(msg)}`, "_blank");
+    window.open(`https://wa.me/923200801010?text=${encodeURIComponent(msg)}`, "_blank");
     setSubmitted(true);
   };
 
