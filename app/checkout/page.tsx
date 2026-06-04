@@ -54,17 +54,17 @@ const paymentDetails: Record<PaymentMethod, { title: string; detail: string; not
   },
   easypaisa: {
     title: "EasyPaisa",
-    detail: "Account Number: 03200801010\nAccount Title: MC Mobile Corner",
+    detail: "Account Number: 03041502560\nAccount Title: MC Mobile Corner",
     note: "Send payment to above number and send screenshot on WhatsApp: 0320-0801010",
   },
   jazzcash: {
     title: "JazzCash",
-    detail: "Mobile Account: 03200801010\nAccount Title: MC Mobile Corner",
+    detail: "Mobile Account: 03041502560\nAccount Title: MC Mobile Corner",
     note: "Send payment to above number and send screenshot on WhatsApp: 0320-0801010",
   },
   raast: {
     title: "Raast",
-    detail: "Raast ID: 03200801010\nAccount Title: MC Mobile Corner",
+    detail: "Raast ID: 03041502560\nAccount Title: MC Mobile Corner",
     note: "Send via Raast and send confirmation on WhatsApp: 0320-0801010",
   },
 };

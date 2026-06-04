@@ -18,10 +18,11 @@ export type PhoneVariant = {
   sim_status?: string | null;
 };
 
-export const PRE_OWNED_GRADES: ConditionGrade[] = ["Premium", "Excellent", "Good", "Fair"];
+export const PRE_OWNED_GRADES = ["Premium", "Excellent", "Good", "Fair"] as const;
+export type PreOwnedGrade = (typeof PRE_OWNED_GRADES)[number];
 
 /** Pre-owned condition grades shown in selectors (excludes New) */
-export const CONDITION_GRADES: ConditionGrade[] = PRE_OWNED_GRADES;
+export const CONDITION_GRADES: ConditionGrade[] = [...PRE_OWNED_GRADES];
 
 export const CONDITION_TAGS: Record<ConditionGrade, string[]> = {
   Premium: ["Zero scratches", "Flawless screen", "Like brand new", "Perfect for gifting"],
