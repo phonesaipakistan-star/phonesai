@@ -135,7 +135,7 @@ function ShopContent() {
   const filteredPhones = useMemo(() => phones.filter((p) => {
     if (activeBrand === "Accessories") return false;
     if (activeBrand !== "All") {
-      if (activeBrand === "iPad" && (p.brand !== "Apple" || !["WiFi", "Cellular"].includes(p.category))) return false;
+      if (activeBrand === "iPad" && p.brand !== "iPad") return false;
       if (activeBrand === "Samsung" && p.brand !== "Samsung") return false;
       if (activeBrand === "Apple" && (p.brand !== "Apple" || ["WiFi", "Cellular"].includes(p.category))) return false;
     }
