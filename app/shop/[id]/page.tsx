@@ -43,6 +43,7 @@ type Phone = {
   in_stock: boolean; featured: boolean; badge: string | null; images: string[];
   condition_video: string | null;
   product_description: string | null;
+  description: string | null;
   region: string | null;
   ios_version: string | null; free_case: boolean;
   water_pack_sealed?: boolean;
@@ -823,13 +824,25 @@ export default function ProductPage() {
           </div>
         )}
 
-        {selectedVariant?.description && (
+        {(selectedVariant?.description || phone.description) && (
           <div className="mt-4 rounded-2xl border border-amber-400/15 bg-amber-400/[0.04] p-4 sm:p-6">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-base">🧔</span>
               <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-400/60">Ustaad Ji Notes</p>
             </div>
-            <p className="text-xs leading-relaxed text-white/70 sm:text-sm">{selectedVariant.description}</p>
+            <div className="space-y-2">
+              {(selectedVariant?.description || phone.description)!
+                .split(/\.\s+/)
+                .filter((s) => s.trim().length > 5)
+                .map((sentence, i) => (
+                  <div key={i} className="flex items-start gap-2.5">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400/60" />
+                    <p className="text-xs leading-relaxed text-white/70 sm:text-sm">
+                      {sentence.trim().endsWith(".") ? sentence.trim() : `${sentence.trim()}.`}
+                    </p>
+                  </div>
+                ))}
+            </div>
           </div>
         )}
 
